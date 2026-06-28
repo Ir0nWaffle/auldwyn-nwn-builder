@@ -317,25 +317,7 @@ export const CLASSES = {
     },
     prereqDescription: 'Alignment: Non-Good; Arcane spellcasting; Lore 8, Spellcraft 8 ranks',
   },
-  purpledragonknight: {
-    name: 'Purple Dragon Knight',
-    type: 'prestige',
-    description: 'Elite Cormyrean knights who inspire allies and lead through example.',
-    hitDie: 10,
-    skillsPerLevel: 2,
-    babProgression: 'full',
-    saves: { fort: 'good', ref: 'poor', will: 'poor' },
-    spellcasting: null,
-    classSkills: ['craft','crafttrap','discipline','intimidate','listen','lore','persuade','spot'],
-    alignmentRestriction: 'nonchaotic_nonevil',
-    maxLevel: 10,
-    prereqs: {
-      bab: 4,
-      skills: { persuade: 5 },
-      feats: ['inspirecompanions'],
-    },
-    prereqDescription: 'BAB +4; Persuade 5 ranks; Inspire Companions feat',
-  },
+
   shadowdancer: {
     name: 'Shadowdancer',
     type: 'prestige',
