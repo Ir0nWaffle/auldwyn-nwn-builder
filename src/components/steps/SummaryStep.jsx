@@ -1,3 +1,5 @@
+import { useState } from 'react'
+import PrintSheet from '../PrintSheet.jsx'
 import { useCharacter } from '../../store/CharacterContext.jsx'
 import { RACES } from '../../data/races.js'
 import { CLASSES } from '../../data/classes.js'
@@ -34,6 +36,7 @@ function Row({ label, value, sub }) {
 }
 
 export default function SummaryStep({ onBack, onRestart }) {
+  const [showPrint, setShowPrint] = useState(false)
   const { character } = useCharacter()
   const race = character.race ? RACES[character.race] : null
   const mods = race?.abilityMods ?? {}
@@ -94,6 +97,8 @@ export default function SummaryStep({ onBack, onRestart }) {
 
   return (
     <div>
+      {showPrint && <PrintSheet onClose={() => setShowPrint(false)} />}
+
       <div className="flex items-center justify-between mb-4">
         <div>
           <h2 className="step-title mb-0">{character.name || 'Unnamed Character'}</h2>
@@ -102,6 +107,9 @@ export default function SummaryStep({ onBack, onRestart }) {
           </p>
         </div>
         <div className="flex gap-2">
+          <button onClick={() => setShowPrint(true)} className="btn-primary text-sm py-1">
+            🖨 Print Sheet
+          </button>
           <button onClick={exportText} className="btn-secondary text-sm py-1">
             Export .txt
           </button>
