@@ -131,60 +131,66 @@ export default function AbilityStep({ onNext, onBack }) {
 
           return (
             <div key={key} className="panel">
+              {/* Header: name + modifier badge */}
               <div className="flex items-center justify-between mb-1">
                 <div>
                   <span className="font-bold text-auldwyn-gold">{abbr}</span>
                   <span className="text-auldwyn-muted text-sm ml-2">{label}</span>
                 </div>
-                <span className={`badge font-mono ${mod >= 0 ? 'badge-green' : 'badge-red'}`}>
+                <span className={`badge font-mono text-sm ${mod >= 0 ? 'badge-green' : 'badge-red'}`}>
                   {mod >= 0 ? '+' : ''}{mod}
                 </span>
               </div>
-              <p className="text-xs text-auldwyn-muted mb-3">{desc}</p>
+              <p className="text-xs text-auldwyn-muted mb-2">{desc}</p>
 
-              {/* Point-buy row */}
-              <div className="flex items-center gap-2 mb-2">
+              {/* Hero: final effective score */}
+              <div className="text-center mb-3">
+                <div className="text-4xl font-bold text-auldwyn-text">{final}</div>
+                <div className="text-xs text-auldwyn-muted mt-0.5 font-mono">
+                  {base} base
+                  {raceMod !== 0 && (
+                    <span className={raceMod > 0 ? ' text-green-400' : ' text-red-400'}>
+                      {' '}{raceMod > 0 ? '+' : ''}{raceMod} racial
+                    </span>
+                  )}
+                  {increases > 0 && (
+                    <span className="text-auldwyn-gold"> +{increases} lvl-up</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Point-buy spinner */}
+              <div className="flex items-center gap-2 mb-1">
                 <button onClick={() => changeBase(key, -1)} disabled={!canDecBase}
-                  className="w-7 h-7 rounded border border-auldwyn-border text-auldwyn-muted
+                  className="w-8 h-8 rounded border border-auldwyn-border text-auldwyn-muted
                              hover:border-auldwyn-gold hover:text-auldwyn-gold disabled:opacity-30
                              text-xl leading-none flex items-center justify-center">−</button>
                 <div className="flex-1 text-center">
-                  <div className="text-lg font-bold text-auldwyn-text">{base}</div>
-                  <div className="text-xs text-auldwyn-muted/60">buy ({cost} pts)</div>
+                  <div className="text-sm text-auldwyn-muted">Base: <span className="text-auldwyn-text font-bold">{base}</span></div>
+                  <div className="text-xs text-auldwyn-muted/60">({cost} pts)</div>
                 </div>
                 <button onClick={() => changeBase(key, 1)} disabled={!canIncBase}
-                  className="w-7 h-7 rounded border border-auldwyn-border text-auldwyn-muted
+                  className="w-8 h-8 rounded border border-auldwyn-border text-auldwyn-muted
                              hover:border-auldwyn-gold hover:text-auldwyn-gold disabled:opacity-30
                              text-xl leading-none flex items-center justify-center">+</button>
               </div>
 
               {/* Level-up increases row */}
               {increasesAvailable > 0 && (
-                <div className="flex items-center gap-2 mb-2">
+                <div className="flex items-center gap-2 mt-2 pt-2 border-t border-auldwyn-border/40">
                   <button onClick={() => changeIncrease(key, -1)} disabled={!canDecIncrease}
-                    className="w-7 h-7 rounded border border-auldwyn-gold/30 text-auldwyn-gold/50
+                    className="w-8 h-8 rounded border border-auldwyn-gold/30 text-auldwyn-gold/50
                                hover:border-auldwyn-gold hover:text-auldwyn-gold disabled:opacity-30
                                text-xl leading-none flex items-center justify-center">−</button>
                   <div className="flex-1 text-center">
-                    <div className="text-lg font-bold text-auldwyn-gold">{increases > 0 ? `+${increases}` : '0'}</div>
-                    <div className="text-xs text-auldwyn-gold/60">level-up</div>
+                    <div className="text-sm text-auldwyn-gold">Level-up: <span className="font-bold">{increases > 0 ? `+${increases}` : '0'}</span></div>
                   </div>
                   <button onClick={() => changeIncrease(key, 1)} disabled={!canIncIncrease}
-                    className="w-7 h-7 rounded border border-auldwyn-gold/30 text-auldwyn-gold/50
+                    className="w-8 h-8 rounded border border-auldwyn-gold/30 text-auldwyn-gold/50
                                hover:border-auldwyn-gold hover:text-auldwyn-gold disabled:opacity-30
                                text-xl leading-none flex items-center justify-center">+</button>
                 </div>
               )}
-
-              {/* Final score breakdown */}
-              <div className="divider" />
-              <div className="text-center text-xs text-auldwyn-muted">
-                {base}
-                {raceMod !== 0 && <span className={raceMod > 0 ? 'text-green-400' : 'text-red-400'}> {raceMod > 0 ? '+' : ''}{raceMod}</span>}
-                {increases > 0 && <span className="text-auldwyn-gold"> +{increases}</span>}
-                <span className="text-auldwyn-border mx-1">=</span>
-                <span className="text-auldwyn-text font-bold text-base">{final}</span>
-              </div>
             </div>
           )
         })}

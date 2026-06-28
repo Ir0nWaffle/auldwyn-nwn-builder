@@ -184,7 +184,7 @@ export default function SummaryStep({ onBack, onRestart }) {
             {takenSkills.length === 0 && <p className="text-auldwyn-muted text-sm">No skills allocated.</p>}
             {takenSkills.map(([k, rank]) => {
               const skill = SKILLS[k]
-              const abilScore = character.abilities[skill.ability] + (mods[skill.ability] ?? 0)
+              const abilScore = effectiveScore(skill.ability, character.abilities, mods, increases)
               const total = rank + abilityMod(abilScore)
               return (
                 <Row

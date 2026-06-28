@@ -180,7 +180,7 @@ export default function PrintSheet({ onClose }) {
             <div className="print-skills-grid">
               {takenSkills.map(([key, rank]) => {
                 const skill     = SKILLS[key]
-                const abilScore = (character.abilities[skill.ability] || 8) + (mods[skill.ability] ?? 0)
+                const abilScore = effectiveScore(skill.ability, character.abilities, mods, increases)
                 const total     = rank + abilityMod(abilScore)
                 const cs        = isClassSkill(key)
                 return (

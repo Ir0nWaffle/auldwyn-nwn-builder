@@ -101,7 +101,7 @@ export default function SkillStep({ onNext, onBack }) {
           const isCS = isClassSkillForChar(key)
           const rank = character.skills[key]
           const maxRank = maxRankForSkill(key, character.classLevels)
-          const abilScore = character.abilities[skill.ability]
+          const abilScore = effectiveScore(skill.ability, character.abilities, racialMods, character.abilityIncreases ?? {})
           const totalBonus = rank + abilityMod(abilScore)
           const canIncrease = rank < maxRank && (isCS ? remaining >= 1 : remaining >= 2)
           const canDecrease = rank > 0
