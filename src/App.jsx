@@ -6,26 +6,39 @@ export default function App() {
     <CharacterProvider>
       <div className="min-h-screen bg-auldwyn-dark">
         {/* Header */}
-        <header className="border-b border-auldwyn-border bg-auldwyn-panel">
-          <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-4">
-            <div>
-              <h1 className="text-auldwyn-gold text-2xl font-bold tracking-wide">
-                Auldwyn Character Builder
-              </h1>
-              <p className="text-auldwyn-muted text-xs">
-                Neverwinter Nights: Enhanced Edition · Persistent World
-              </p>
-            </div>
-            <div className="ml-auto">
-              <a
-                href="https://auldwyn.net/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-auldwyn-muted hover:text-auldwyn-gold transition-colors"
-              >
-                auldwyn.net ↗
-              </a>
-            </div>
+        <header className="border-b border-auldwyn-border/60 bg-auldwyn-panel relative overflow-hidden">
+          {/* Subtle vignette gradient */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background:
+                'radial-gradient(ellipse at 50% 0%, rgba(201,168,76,0.07) 0%, transparent 70%)',
+            }}
+          />
+          <div className="relative max-w-6xl mx-auto px-6 py-5 flex flex-col items-center gap-1">
+            <a
+              href="https://auldwyn.net/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block transition-opacity hover:opacity-80"
+              title="Visit Auldwyn"
+            >
+              <img
+                src="/logo-wordmark.png"
+                alt="Auldwyn"
+                className="h-16 object-contain"
+                style={{
+                  filter:
+                    'drop-shadow(0 2px 12px rgba(201,168,76,0.35)) drop-shadow(0 0 4px rgba(201,168,76,0.15))',
+                }}
+              />
+            </a>
+            <p
+              className="text-xs tracking-[0.25em] uppercase font-serif"
+              style={{ color: 'rgba(201,168,76,0.55)', letterSpacing: '0.3em' }}
+            >
+              Character Builder &nbsp;·&nbsp; Neverwinter Nights: Enhanced Edition
+            </p>
           </div>
         </header>
 
