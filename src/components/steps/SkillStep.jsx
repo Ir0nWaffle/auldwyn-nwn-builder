@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { useCharacter } from '../../store/CharacterContext.jsx'
+import { RACES } from '../../data/races.js'
 import { CLASSES } from '../../data/classes.js'
 import { SKILLS } from '../../data/skills.js'
-import { abilityMod, calcTotalSkillPoints, calcSkillPointsSpent, maxRankForSkill } from '../../utils/validation.js'
+import { abilityMod, calcTotalSkillPoints, calcSkillPointsSpent, maxRankForSkill, effectiveScore } from '../../utils/validation.js'
 
 const ABILITY_ABBR = { str: 'STR', dex: 'DEX', con: 'CON', int: 'INT', wis: 'WIS', cha: 'CHA' }
 
@@ -11,7 +12,8 @@ export default function SkillStep({ onNext, onBack }) {
   const [search, setSearch] = useState('')
   const [showClassOnly, setShowClassOnly] = useState(false)
 
-  const intMod = abilityMod(character.abilities.int)
+  const racialMods = character.race ? (RACES[character.race]?.abilityMods ?? {}) : {}
+  const intMod = abilityMod(effectiveScore('int', character.abilities, racialMods, character.abilityIncreases ?? {}))
   const isHuman = character.race === 'human'
   const totalPoints = calcTotalSkillPoints(character.classLevels, intMod, isHuman)
   const spentPoints = calcSkillPointsSpent(character.skills)
