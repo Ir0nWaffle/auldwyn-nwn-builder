@@ -55,7 +55,7 @@ export default function PrintSheet({ onClose }) {
   const avgHp = character.classLevels.reduce((sum, { classKey, levels }) => {
     const cls = CLASSES[classKey]
     if (!cls) return sum
-    return sum + Math.ceil((cls.hitDie + 1) / 2) * levels + conMod * levels
+    return sum + cls.hitDie * levels + conMod * levels
   }, 0)
 
   const takenSkills = Object.entries(character.skills).filter(([, r]) => r > 0)
@@ -118,7 +118,7 @@ export default function PrintSheet({ onClose }) {
           <Box label="Fort Save" value={`+${saves.fort + abilityMod((character.abilities.con || 8) + (mods.con || 0))}`} sub={`Base +${saves.fort}`} />
           <Box label="Ref Save"  value={`+${saves.ref  + abilityMod((character.abilities.dex || 8) + (mods.dex || 0))}`} sub={`Base +${saves.ref}`} />
           <Box label="Will Save" value={`+${saves.will + abilityMod((character.abilities.wis || 8) + (mods.wis || 0))}`} sub={`Base +${saves.will}`} />
-          <Box label="HP (avg)"  value={Math.max(1, avgHp)} />
+          <Box label="Max HP"    value={Math.max(1, avgHp)} />
           <Box label="Initiative" value={`+${abilityMod((character.abilities.dex || 8) + (mods.dex || 0))}`} />
         </div>
 

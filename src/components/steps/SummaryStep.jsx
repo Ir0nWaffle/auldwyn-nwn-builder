@@ -53,12 +53,11 @@ export default function SummaryStep({ onBack, onRestart }) {
 
   const { valid, errors, warnings } = validateCharacter(character)
 
-  // Estimate HP at max con (rough: average HD per class)
+  // HP is max per level on Auldwyn
   const avgHp = character.classLevels.reduce((sum, { classKey, levels }) => {
     const cls = CLASSES[classKey]
     if (!cls) return sum
-    const avgDie = Math.ceil((cls.hitDie + 1) / 2)
-    return sum + avgDie * levels + conMod * levels
+    return sum + cls.hitDie * levels + conMod * levels
   }, 0)
 
   const takenSkills = Object.entries(character.skills).filter(([, r]) => r > 0)
@@ -154,7 +153,7 @@ export default function SummaryStep({ onBack, onRestart }) {
             <div className="divider" />
             <Row label="Total Level" value={charLevel} />
             <Row label="Base Attack Bonus" value={`+${bab}`} />
-            <Row label="Estimated HP (avg)" value={Math.max(1, avgHp)} />
+            <Row label="Max HP" value={Math.max(1, avgHp)} />
           </Section>
 
           <Section title="Ability Scores">
