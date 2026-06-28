@@ -3,7 +3,7 @@ import { RACES } from '../data/races.js'
 import { CLASSES } from '../data/classes.js'
 import { SKILLS } from '../data/skills.js'
 import { FEATS } from '../data/feats.js'
-import { abilityMod, calcBAB, totalCharacterLevel, calcTotalSkillPoints, calcSkillPointsSpent, calcTotalFeatsAvailable } from '../utils/validation.js'
+import { abilityMod, calcBAB, totalCharacterLevel, calcTotalSkillPoints, calcSkillPointsSpent, calcTotalFeatsAvailable, effectiveScore } from '../utils/validation.js'
 
 const ABILITY_KEYS = ['str', 'dex', 'con', 'int', 'wis', 'cha']
 const ABILITY_LABELS = { str: 'Strength', dex: 'Dexterity', con: 'Constitution', int: 'Intelligence', wis: 'Wisdom', cha: 'Charisma' }
@@ -44,8 +44,9 @@ export default function PrintSheet({ onClose }) {
   const bab = calcBAB(character.classLevels)
   const saves = calcSaves(character.classLevels)
 
-  const conMod  = abilityMod((character.abilities.con  || 8) + (mods.con  || 0))
-  const intMod  = abilityMod((character.abilities.int  || 8) + (mods.int  || 0))
+  const increases = character.abilityIncreases ?? {}
+  const conMod  = abilityMod(effectiveScore('con', character.abilities, mods, increases))
+  const intMod  = abilityMod(effectiveScore('int', character.abilities, mods, increases))
   const isHuman = character.race === 'human'
 
   const skillBudget = calcTotalSkillPoints(character.classLevels, intMod, isHuman)
@@ -115,11 +116,11 @@ export default function PrintSheet({ onClose }) {
         <SectionHeader>Combat Statistics</SectionHeader>
         <div className="print-stat-row">
           <Box label="Base Attack" value={`+${bab}`} />
-          <Box label="Fort Save" value={`+${saves.fort + abilityMod((character.abilities.con || 8) + (mods.con || 0))}`} sub={`Base +${saves.fort}`} />
-          <Box label="Ref Save"  value={`+${saves.ref  + abilityMod((character.abilities.dex || 8) + (mods.dex || 0))}`} sub={`Base +${saves.ref}`} />
-          <Box label="Will Save" value={`+${saves.will + abilityMod((character.abilities.wis || 8) + (mods.wis || 0))}`} sub={`Base +${saves.will}`} />
+          <Box label="Fort Save" value={`+${saves.fort + abilityMod(effectiveScore('con', character.abilities, mods, increases))}`} sub={`Base +${saves.fort}`} />
+          <Box label="Ref Save"  value={`+${saves.ref  + abilityMod(effectiveScore('dex', character.abilities, mods, increases))}`} sub={`Base +${saves.ref}`} />
+          <Box label="Will Save" value={`+${saves.will + abilityMod(effectiveScore('wis', character.abilities, mods, increases))}`} sub={`Base +${saves.will}`} />
           <Box label="Max HP"    value={Math.max(1, avgHp)} />
-          <Box label="Initiative" value={`+${abilityMod((character.abilities.dex || 8) + (mods.dex || 0))}`} />
+          <Box label="Initiative" value={`+${abilityMod(effectiveScore('dex', character.abilities, mods, increases))}`} />
         </div>
 
         <div className="print-two-col">
@@ -128,19 +129,21 @@ export default function PrintSheet({ onClose }) {
             <SectionHeader>Ability Scores</SectionHeader>
             <table className="print-table">
               <thead>
-                <tr><th>Ability</th><th>Base</th><th>Racial</th><th>Final</th><th>Modifier</th></tr>
+                <tr><th>Ability</th><th>Base</th><th>Racial</th><th>Level-Up</th><th>Final</th><th>Modifier</th></tr>
               </thead>
               <tbody>
                 {ABILITY_KEYS.map(k => {
                   const base    = character.abilities[k] || 8
                   const raceMod = mods[k] ?? 0
-                  const final_  = base + raceMod
+                  const inc     = increases[k] ?? 0
+                  const final_  = effectiveScore(k, character.abilities, mods, increases)
                   const mod2    = abilityMod(final_)
                   return (
                     <tr key={k}>
                       <td><strong>{ABILITY_ABBR[k]}</strong> <span className="print-muted">{ABILITY_LABELS[k]}</span></td>
                       <td className="text-center">{base}</td>
                       <td className="text-center">{raceMod !== 0 ? (raceMod > 0 ? `+${raceMod}` : raceMod) : '—'}</td>
+                      <td className="text-center">{inc > 0 ? `+${inc}` : '—'}</td>
                       <td className="text-center"><strong>{final_}</strong></td>
                       <td className="text-center">{mod2 >= 0 ? `+${mod2}` : mod2}</td>
                     </tr>

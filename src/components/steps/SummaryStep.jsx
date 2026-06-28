@@ -8,7 +8,7 @@ import { FEATS } from '../../data/feats.js'
 import {
   abilityMod, calcBAB, totalCharacterLevel,
   calcTotalSkillPoints, calcSkillPointsSpent, calcTotalFeatsAvailable,
-  validateCharacter,
+  validateCharacter, effectiveScore,
 } from '../../utils/validation.js'
 
 const ABILITY_KEYS = ['str', 'dex', 'con', 'int', 'wis', 'cha']
@@ -43,8 +43,9 @@ export default function SummaryStep({ onBack, onRestart }) {
 
   const charLevel = totalCharacterLevel(character.classLevels)
   const bab = calcBAB(character.classLevels)
-  const intMod = abilityMod(character.abilities.int)
-  const conMod = abilityMod(character.abilities.con + (mods.con ?? 0))
+  const increases = character.abilityIncreases ?? {}
+  const intMod = abilityMod(effectiveScore('int', character.abilities, mods, increases))
+  const conMod = abilityMod(effectiveScore('con', character.abilities, mods, increases))
   const isHuman = character.race === 'human'
 
   const skillBudget = calcTotalSkillPoints(character.classLevels, intMod, isHuman)
@@ -158,16 +159,20 @@ export default function SummaryStep({ onBack, onRestart }) {
 
           <Section title="Ability Scores">
             {ABILITY_KEYS.map(k => {
-              const base = character.abilities[k]
+              const base    = character.abilities[k]
               const raceMod = mods[k] ?? 0
-              const eff = base + raceMod
-              const mod2 = abilityMod(eff)
+              const inc     = increases[k] ?? 0
+              const final   = effectiveScore(k, character.abilities, mods, increases)
+              const mod2    = abilityMod(final)
+              const parts   = [`${base} buy`]
+              if (raceMod !== 0) parts.push(`${raceMod > 0 ? '+' : ''}${raceMod} racial`)
+              if (inc > 0) parts.push(`+${inc} level-up`)
               return (
                 <Row
                   key={k}
                   label={ABILITY_LABELS[k]}
-                  value={`${eff}  (${mod2 >= 0 ? '+' : ''}${mod2})`}
-                  sub={raceMod !== 0 ? `${base} base ${raceMod > 0 ? '+' : ''}${raceMod} racial` : null}
+                  value={`${final}  (${mod2 >= 0 ? '+' : ''}${mod2})`}
+                  sub={final !== base ? parts.join(', ') : null}
                 />
               )
             })}

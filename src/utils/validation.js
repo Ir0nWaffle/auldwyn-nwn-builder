@@ -20,6 +20,22 @@ export function totalPointsSpent(abilities) {
   return Object.values(abilities).reduce((sum, s) => sum + pointCost(s), 0)
 }
 
+// Level-up ability increases: +1 at every 4th character level
+export function levelUpIncreasesAvailable(classLevels) {
+  return Math.floor(totalCharacterLevel(classLevels) / 4)
+}
+
+export function levelUpIncreasesSpent(abilityIncreases) {
+  return Object.values(abilityIncreases ?? {}).reduce((s, v) => s + v, 0)
+}
+
+// Final effective score: base (point-buy) + racial mod + level-up increases
+export function effectiveScore(abilityKey, abilities, racialMods, abilityIncreases) {
+  return (abilities[abilityKey] ?? 8)
+    + (racialMods[abilityKey] ?? 0)
+    + (abilityIncreases[abilityKey] ?? 0)
+}
+
 // ─── Character level helpers ──────────────────────────────────────────────────
 
 export function totalCharacterLevel(classLevels) {
