@@ -50,7 +50,7 @@ export default function PrintSheet({ onClose }) {
   const isHuman = character.race === 'human'
 
   const skillBudget = calcTotalSkillPoints(character.classLevels, intMod, isHuman)
-  const skillSpent  = calcSkillPointsSpent(character.skills)
+  const skillSpent  = calcSkillPointsSpent(character.skills, character.classLevels)
   const featBudget  = calcTotalFeatsAvailable(character.classLevels, character.race)
 
   const avgHp = character.classLevels.reduce((sum, { classKey, levels }) => {

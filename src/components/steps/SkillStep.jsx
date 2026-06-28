@@ -16,7 +16,7 @@ export default function SkillStep({ onNext, onBack }) {
   const intMod = abilityMod(effectiveScore('int', character.abilities, racialMods, character.abilityIncreases ?? {}))
   const isHuman = character.race === 'human'
   const totalPoints = calcTotalSkillPoints(character.classLevels, intMod, isHuman)
-  const spentPoints = calcSkillPointsSpent(character.skills)
+  const spentPoints = calcSkillPointsSpent(character.skills, character.classLevels)
   const remaining = totalPoints - spentPoints
 
   // Which skills are class skills for at least one taken class
@@ -26,8 +26,8 @@ export default function SkillStep({ onNext, onBack }) {
 
   function setRank(skillKey, value) {
     const max = maxRankForSkill(skillKey, character.classLevels)
+    if (max === 0) return  // classOnly skill with no qualifying class
     const clamped = Math.max(0, Math.min(value, max))
-    // Cross-class costs 2 pts per rank
     const isCS = isClassSkillForChar(skillKey)
     const currentRank = character.skills[skillKey]
     const delta = clamped - currentRank
@@ -91,9 +91,10 @@ export default function SkillStep({ onNext, onBack }) {
       </div>
 
       {/* Legend */}
-      <div className="flex gap-3 mb-3 text-xs">
+      <div className="flex gap-3 mb-3 text-xs flex-wrap">
         <span><span className="text-auldwyn-gold">●</span> Class skill (1pt/rank)</span>
         <span><span className="text-auldwyn-muted">●</span> Cross-class skill (2pt/rank)</span>
+        <span><span className="text-red-600">●</span> Requires class (unavailable)</span>
       </div>
 
       <div className="space-y-1.5 max-h-[50vh] overflow-y-auto pr-1">
@@ -101,53 +102,63 @@ export default function SkillStep({ onNext, onBack }) {
           const isCS = isClassSkillForChar(key)
           const rank = character.skills[key]
           const maxRank = maxRankForSkill(key, character.classLevels)
+          const locked = maxRank === 0 && skill.classOnly
           const abilScore = effectiveScore(skill.ability, character.abilities, racialMods, character.abilityIncreases ?? {})
           const totalBonus = rank + abilityMod(abilScore)
-          const canIncrease = rank < maxRank && (isCS ? remaining >= 1 : remaining >= 2)
+          const canIncrease = !locked && rank < maxRank && (isCS ? remaining >= 1 : remaining >= 2)
           const canDecrease = rank > 0
 
           return (
             <div
               key={key}
               className={`flex items-center gap-2 px-3 py-2 rounded border transition-all ${
-                rank > 0
-                  ? 'border-auldwyn-gold/40 bg-auldwyn-gold/5'
-                  : 'border-auldwyn-border/50'
+                locked
+                  ? 'border-red-900/40 bg-red-950/10 opacity-60'
+                  : rank > 0
+                    ? 'border-auldwyn-gold/40 bg-auldwyn-gold/5'
+                    : 'border-auldwyn-border/50'
               }`}
             >
-              <span className={`text-xs ${isCS ? 'text-auldwyn-gold' : 'text-auldwyn-muted'}`}>●</span>
+              <span className={`text-xs ${locked ? 'text-red-600' : isCS ? 'text-auldwyn-gold' : 'text-auldwyn-muted'}`}>●</span>
 
               <div className="flex-1 min-w-0">
-                <span className="text-sm font-medium">{skill.name}</span>
+                <span className={`text-sm font-medium ${locked ? 'text-auldwyn-muted' : ''}`}>{skill.name}</span>
                 <span className="text-xs text-auldwyn-muted ml-2">{ABILITY_ABBR[skill.ability]}</span>
-                {!isCS && <span className="text-xs text-auldwyn-muted ml-1">(cross-class)</span>}
+                {locked
+                  ? <span className="text-xs text-red-700 ml-1">(requires class)</span>
+                  : !isCS && <span className="text-xs text-auldwyn-muted ml-1">(cross-class)</span>
+                }
               </div>
 
-              <div className="flex items-center gap-1 shrink-0">
-                <button
-                  onClick={() => setRank(key, rank - 1)}
-                  disabled={!canDecrease}
-                  className="w-6 h-6 rounded border border-auldwyn-border text-auldwyn-muted text-sm
-                             hover:border-auldwyn-gold hover:text-auldwyn-gold disabled:opacity-30
-                             flex items-center justify-center"
-                >−</button>
-                <span className="w-8 text-center font-mono text-sm text-auldwyn-text">{rank}</span>
-                <button
-                  onClick={() => setRank(key, rank + 1)}
-                  disabled={!canIncrease}
-                  className="w-6 h-6 rounded border border-auldwyn-border text-auldwyn-muted text-sm
-                             hover:border-auldwyn-gold hover:text-auldwyn-gold disabled:opacity-30
-                             flex items-center justify-center"
-                >+</button>
-              </div>
-
-              <span className="text-xs text-auldwyn-muted w-10 text-center">/{maxRank}</span>
-
-              <span className={`w-10 text-right font-mono text-sm font-bold ${
-                totalBonus >= 0 ? 'text-green-400' : 'text-red-400'
-              }`}>
-                {totalBonus >= 0 ? '+' : ''}{totalBonus}
-              </span>
+              {locked ? (
+                <span className="text-xs text-red-800 font-mono w-32 text-right">unavailable</span>
+              ) : (
+                <>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button
+                      onClick={() => setRank(key, rank - 1)}
+                      disabled={!canDecrease}
+                      className="w-6 h-6 rounded border border-auldwyn-border text-auldwyn-muted text-sm
+                                 hover:border-auldwyn-gold hover:text-auldwyn-gold disabled:opacity-30
+                                 flex items-center justify-center"
+                    >−</button>
+                    <span className="w-8 text-center font-mono text-sm text-auldwyn-text">{rank}</span>
+                    <button
+                      onClick={() => setRank(key, rank + 1)}
+                      disabled={!canIncrease}
+                      className="w-6 h-6 rounded border border-auldwyn-border text-auldwyn-muted text-sm
+                                 hover:border-auldwyn-gold hover:text-auldwyn-gold disabled:opacity-30
+                                 flex items-center justify-center"
+                    >+</button>
+                  </div>
+                  <span className="text-xs text-auldwyn-muted w-10 text-center">/{maxRank}</span>
+                  <span className={`w-10 text-right font-mono text-sm font-bold ${
+                    totalBonus >= 0 ? 'text-green-400' : 'text-red-400'
+                  }`}>
+                    {totalBonus >= 0 ? '+' : ''}{totalBonus}
+                  </span>
+                </>
+              )}
             </div>
           )
         })}

@@ -96,8 +96,11 @@ export function calcTotalSkillPoints(classLevels, intMod, isHuman) {
   return total
 }
 
-export function calcSkillPointsSpent(skills) {
-  return Object.values(skills).reduce((sum, r) => sum + r, 0)
+export function calcSkillPointsSpent(skills, classLevels = []) {
+  return Object.entries(skills).reduce((sum, [key, rank]) => {
+    const isCS = classLevels.some(cl => CLASSES[cl.classKey]?.classSkills.includes(key))
+    return sum + (isCS || classLevels.length === 0 ? rank : rank * 2)
+  }, 0)
 }
 
 // ─── Max skill rank for a given skill given the character's class mix ─────────
@@ -106,6 +109,8 @@ export function maxRankForSkill(skillKey, classLevels) {
   const isClassSkillForAny = classLevels.some(cl =>
     CLASSES[cl.classKey]?.classSkills.includes(skillKey)
   )
+  // classOnly skills are completely unavailable if no class has it as a class skill
+  if (!isClassSkillForAny && SKILLS[skillKey]?.classOnly) return 0
   return isClassSkillForAny
     ? maxClassRanks(charLevel)
     : maxCrossClassRanks(charLevel)
@@ -280,7 +285,7 @@ export function validateCharacter(character) {
   const intMod = abilityMod(character.abilities.int)
   const isHuman = character.race === 'human'
   const skillBudget = calcTotalSkillPoints(character.classLevels, intMod, isHuman)
-  const skillSpent = calcSkillPointsSpent(character.skills)
+  const skillSpent = calcSkillPointsSpent(character.skills, character.classLevels)
   if (skillSpent > skillBudget) errors.push(`Skill points over budget (${skillSpent}/${skillBudget}).`)
 
   // Feat count
