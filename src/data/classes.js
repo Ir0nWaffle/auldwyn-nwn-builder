@@ -377,5 +377,5 @@ export const CLASSES = {
 // Auldwyn server settings — edit here when the server makes changes
 export const SERVER_SETTINGS = {
   maxLevel: 20,
-  allowedClasses: Object.keys(CLASSES),
+  allowedClasses: Object.keys(CLASSES).filter(k => !['shadowdancer','dragondisciple'].includes(k)),
 }
