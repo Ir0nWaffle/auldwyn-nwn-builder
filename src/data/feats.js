@@ -2,8 +2,54 @@
 // prereqs: { bab, str, dex, int, wis, con, cha, feats[], skills{}, spellcasting, fighterLevel, classLevels{} }
 // type: 'general' | 'fighter' | 'spellcasting' | 'metamagic' | 'skillbonus'
 // weaponFocus: if true, requires a weapon selection when taken
+// firstLevelOnly: represents a character background trait — only offered when
+// picking feats at character level 1, hidden from the feat list afterward
 
 export const FEATS = {
+  // ── 1st-Level-Only Feats ───────────────────────────────────────────────────
+  luckofheroes: {
+    name: 'Luck of Heroes',
+    type: 'general',
+    description: '+1 luck bonus to all saving throws.',
+    prereqs: {},
+    firstLevelOnly: true,
+  },
+  tavernbrawler: {
+    name: 'Tavern Brawler',
+    type: 'general',
+    description: '+1 bonus to unarmed damage and Discipline checks.',
+    prereqs: {},
+    firstLevelOnly: true,
+  },
+  silverpalm: {
+    name: 'Silver Palm',
+    type: 'general',
+    description: 'Merchants offer better prices when you sell to them.',
+    prereqs: {},
+    firstLevelOnly: true,
+  },
+  snakeblood: {
+    name: 'Snake Blood',
+    type: 'general',
+    description: '+1 bonus to saving throws against poison.',
+    prereqs: {},
+    firstLevelOnly: true,
+  },
+  militia: {
+    name: 'Militia',
+    type: 'general',
+    description: 'Proficient with simple weapons and light armor.',
+    prereqs: {},
+    firstLevelOnly: true,
+  },
+  forester: {
+    name: 'Forester',
+    type: 'general',
+    description: '+2 bonus to Discipline, Hide, and Move Silently checks in natural surroundings.',
+    prereqs: {},
+    firstLevelOnly: true,
+  },
+
   // ── General Feats ──────────────────────────────────────────────────────────
   alertness: {
     name: 'Alertness',
