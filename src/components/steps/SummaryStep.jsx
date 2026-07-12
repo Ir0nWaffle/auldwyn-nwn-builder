@@ -40,7 +40,7 @@ function Row({ label, value, sub, icon }) {
   )
 }
 
-export default function SummaryStep({ onBack, onRestart }) {
+export default function SummaryStep({ onBack }) {
   const [showPrint, setShowPrint] = useState(false)
   const [linkCopied, setLinkCopied] = useState(false)
   const { character } = useCharacter()
@@ -151,9 +151,6 @@ export default function SummaryStep({ onBack, onRestart }) {
           </button>
           <button onClick={copyShareLink} className="btn-secondary text-sm py-1">
             {linkCopied ? '✓ Link copied!' : '🔗 Copy Build Link'}
-          </button>
-          <button onClick={onRestart} className="btn-secondary text-sm py-1 border-red-800 text-red-400 hover:border-red-500">
-            New Character
           </button>
         </div>
       </div>

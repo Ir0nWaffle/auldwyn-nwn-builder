@@ -31,6 +31,7 @@ export default function CharacterBuilder() {
   }
 
   function restart() {
+    if (!window.confirm('Start a new character? This clears all progress on the current one.')) return
     dispatch({ type: 'RESET' })
     setStep(0)
     setHighestReached(0)
@@ -40,14 +41,22 @@ export default function CharacterBuilder() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-6">
-      <StepNav current={step} onGoto={goTo} completedUpTo={highestReached} />
+      <div className="flex items-start justify-between gap-3 mb-1">
+        <StepNav current={step} onGoto={goTo} completedUpTo={highestReached} />
+        <button
+          onClick={restart}
+          className="btn-secondary text-xs py-1 px-3 border-red-800 text-red-400 hover:border-red-500 shrink-0"
+        >
+          ✕ New Character
+        </button>
+      </div>
 
       <div className="panel min-h-[60vh]">
         {step === 0 && <RaceStep {...stepProps} />}
         {step === 1 && <AlignmentStep {...stepProps} />}
         {step === 2 && <AbilityStep {...stepProps} />}
         {step === 3 && <LevelPlanStep {...stepProps} />}
-        {step === 4 && <SummaryStep onBack={back} onRestart={restart} />}
+        {step === 4 && <SummaryStep onBack={back} />}
       </div>
     </div>
   )
