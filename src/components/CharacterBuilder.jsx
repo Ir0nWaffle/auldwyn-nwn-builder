@@ -12,9 +12,11 @@ import SummaryStep from './steps/SummaryStep.jsx'
 const TOTAL_STEPS = 7
 
 export default function CharacterBuilder() {
+  const { character, dispatch } = useCharacter()
+  // A restored draft or shared build unlocks every step so the user can jump around
+  const hasProgress = character.classLevels.length > 0 || character.race !== null
   const [step, setStep] = useState(0)
-  const [highestReached, setHighestReached] = useState(0)
-  const { dispatch } = useCharacter()
+  const [highestReached, setHighestReached] = useState(hasProgress ? TOTAL_STEPS - 1 : 0)
 
   function goTo(s) {
     setStep(s)

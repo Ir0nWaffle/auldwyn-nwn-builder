@@ -3,8 +3,9 @@ import { useCharacter } from '../../store/CharacterContext.jsx'
 import { CLASSES, SERVER_SETTINGS } from '../../data/classes.js'
 import { totalCharacterLevel, calcBAB, checkPrcPrereqs } from '../../utils/validation.js'
 
-const BASE_CLASSES = Object.entries(CLASSES).filter(([, c]) => c.type === 'base')
-const PRESTIGE_CLASSES = Object.entries(CLASSES).filter(([, c]) => c.type === 'prestige')
+const ALLOWED = Object.entries(CLASSES).filter(([key]) => SERVER_SETTINGS.allowedClasses.includes(key))
+const BASE_CLASSES = ALLOWED.filter(([, c]) => c.type === 'base')
+const PRESTIGE_CLASSES = ALLOWED.filter(([, c]) => c.type === 'prestige')
 
 function HitDieIcon({ die }) {
   return <span className="badge badge-gold">d{die}</span>
@@ -47,7 +48,7 @@ export default function ClassStep({ onNext, onBack }) {
       <h2 className="step-title">Class &amp; Levels</h2>
       <p className="step-sub">
         Distribute up to <span className="text-auldwyn-gold font-bold">{SERVER_SETTINGS.maxLevel}</span> levels across classes.
-        Prestige class prerequisites are checked at the Summary step.
+        Prestige classes show exactly what you're missing — skills and feats you pick in later steps count toward them.
       </p>
 
       {/* Level budget bar */}
@@ -141,13 +142,13 @@ export default function ClassStep({ onNext, onBack }) {
                 <div className={`text-xs mt-1 p-1.5 rounded border ${
                   prcCheck?.met ? 'border-green-800 text-green-400/80' : 'border-auldwyn-red/50 text-red-400/70'
                 }`}>
-                  <span className="font-bold">{prcCheck?.met ? '✓ ' : '✗ '}</span>
-                  {cls.prereqDescription}
-                  {!prcCheck?.met && levels > 0 && (
+                  <span className="font-bold">{prcCheck?.met ? '✓ Requirements met' : '✗ Missing requirements'}</span>
+                  {!prcCheck?.met && (
                     <ul className="mt-1 space-y-0.5">
                       {prcCheck.reasons.map(r => <li key={r}>• {r}</li>)}
                     </ul>
                   )}
+                  <div className="mt-1 text-auldwyn-muted/70">{cls.prereqDescription}</div>
                 </div>
               )}
             </div>

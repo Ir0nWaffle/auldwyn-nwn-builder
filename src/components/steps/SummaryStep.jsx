@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import PrintSheet from '../PrintSheet.jsx'
-import { useCharacter } from '../../store/CharacterContext.jsx'
+import { useCharacter, buildShareLink } from '../../store/CharacterContext.jsx'
 import { RACES } from '../../data/races.js'
 import { CLASSES } from '../../data/classes.js'
 import { SKILLS } from '../../data/skills.js'
@@ -37,6 +37,7 @@ function Row({ label, value, sub }) {
 
 export default function SummaryStep({ onBack, onRestart }) {
   const [showPrint, setShowPrint] = useState(false)
+  const [linkCopied, setLinkCopied] = useState(false)
   const { character } = useCharacter()
   const race = character.race ? RACES[character.race] : null
   const mods = race?.abilityMods ?? {}
@@ -95,6 +96,18 @@ export default function SummaryStep({ onBack, onRestart }) {
     URL.revokeObjectURL(url)
   }
 
+  async function copyShareLink() {
+    const link = buildShareLink(character)
+    try {
+      await navigator.clipboard.writeText(link)
+    } catch {
+      // Clipboard API blocked — fall back to a prompt the user can copy from
+      window.prompt('Copy this build link:', link)
+    }
+    setLinkCopied(true)
+    setTimeout(() => setLinkCopied(false), 2000)
+  }
+
   return (
     <div>
       {showPrint && <PrintSheet onClose={() => setShowPrint(false)} />}
@@ -112,6 +125,9 @@ export default function SummaryStep({ onBack, onRestart }) {
           </button>
           <button onClick={exportText} className="btn-secondary text-sm py-1">
             Export .txt
+          </button>
+          <button onClick={copyShareLink} className="btn-secondary text-sm py-1">
+            {linkCopied ? '✓ Link copied!' : '🔗 Copy Build Link'}
           </button>
           <button onClick={onRestart} className="btn-secondary text-sm py-1 border-red-800 text-red-400 hover:border-red-500">
             New Character

@@ -1,6 +1,7 @@
 import { CLASSES, SERVER_SETTINGS } from '../data/classes.js'
 import { FEATS } from '../data/feats.js'
 import { SKILLS, maxClassRanks, maxCrossClassRanks } from '../data/skills.js'
+import { RACES } from '../data/races.js'
 
 // ─── Ability helpers ──────────────────────────────────────────────────────────
 
@@ -128,13 +129,17 @@ export function checkFeatPrereqs(featKey, character) {
   const takenFeatKeys = selectedFeats.map(f => f.featKey)
   const bab = calcBAB(classLevels)
 
+  // Prereqs check against final scores: point-buy + racial mods + level-up increases
+  const racialMods = RACES[race]?.abilityMods ?? {}
+  const increases = character.abilityIncreases ?? {}
+  const eff = k => effectiveScore(k, abilities, racialMods, increases)
+
   if (prereqs.bab && bab < prereqs.bab) reasons.push(`BAB +${prereqs.bab} required (have +${bab})`)
-  if (prereqs.str && abilities.str < prereqs.str) reasons.push(`STR ${prereqs.str} required`)
-  if (prereqs.dex && abilities.dex < prereqs.dex) reasons.push(`DEX ${prereqs.dex} required`)
-  if (prereqs.int && abilities.int < prereqs.int) reasons.push(`INT ${prereqs.int} required`)
-  if (prereqs.wis && abilities.wis < prereqs.wis) reasons.push(`WIS ${prereqs.wis} required`)
-  if (prereqs.con && abilities.con < prereqs.con) reasons.push(`CON ${prereqs.con} required`)
-  if (prereqs.cha && abilities.cha < prereqs.cha) reasons.push(`CHA ${prereqs.cha} required`)
+  for (const k of ['str', 'dex', 'con', 'int', 'wis', 'cha']) {
+    if (prereqs[k] && eff(k) < prereqs[k]) {
+      reasons.push(`${k.toUpperCase()} ${prereqs[k]} required (have ${eff(k)})`)
+    }
+  }
 
   if (prereqs.spellcasting && !hasSpellcasting(classLevels))
     reasons.push('Requires spellcasting levels')
@@ -189,6 +194,38 @@ export function calcTotalFeatsAvailable(classLevels, race) {
   return total
 }
 
+// ─── Alignment requirement matching ──────────────────────────────────────────
+// Alignment values are keys like 'lawfulgood', 'neutralevil', 'trueneutral'.
+// Requirements can be a category ('evil', 'nongood') or an exact alignment.
+
+const ALIGNMENT_REQ_LABELS = {
+  evil: 'Evil',
+  good: 'Good',
+  nongood: 'Non-Good',
+  nonevil: 'Non-Evil',
+  lawful: 'Lawful',
+  nonlawful: 'Non-Lawful',
+  lawfulgood: 'Lawful Good',
+  neutral: 'Neutral (at least one axis)',
+  nonchaotic_nonevil: 'Non-Chaotic and Non-Evil',
+}
+
+export function alignmentMatches(alignment, req) {
+  if (!alignment) return false
+  switch (req) {
+    case 'evil':      return alignment.endsWith('evil')
+    case 'good':      return alignment.endsWith('good')
+    case 'nongood':   return !alignment.endsWith('good')
+    case 'nonevil':   return !alignment.endsWith('evil')
+    case 'lawful':    return alignment.startsWith('lawful')
+    case 'nonlawful': return !alignment.startsWith('lawful')
+    case 'neutral':   return alignment.includes('neutral')
+    case 'nonchaotic_nonevil':
+      return !alignment.startsWith('chaotic') && !alignment.endsWith('evil')
+    default:          return alignment === req
+  }
+}
+
 // ─── Prestige class prerequisite check ───────────────────────────────────────
 
 export function checkPrcPrereqs(classKey, character) {
@@ -240,10 +277,8 @@ export function checkPrcPrereqs(classKey, character) {
     }
   }
 
-  if (prereqs.alignment) {
-    if (alignment !== prereqs.alignment) {
-      reasons.push(`Alignment must be ${prereqs.alignment}`)
-    }
+  if (prereqs.alignment && !alignmentMatches(alignment, prereqs.alignment)) {
+    reasons.push(`Alignment must be ${ALIGNMENT_REQ_LABELS[prereqs.alignment] ?? prereqs.alignment}`)
   }
 
   return { met: reasons.length === 0, reasons }
