@@ -65,7 +65,9 @@ export const FEAT_ICONS = {
   silverpalm: '🪙',
   strongsoul: '💫',
   courteousmagocracy: '🎩',
-  educated: '🎓',
+  artist: '🎨',
+  blooded: '🩸',
+  bullheaded: '🐂',
 
   // General
   alertness: '👀',
