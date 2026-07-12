@@ -8,7 +8,10 @@ import {
   planLevelEconomics, featSlotsAtLevel, characterAtLevel, deriveFeats,
   maxRankAtLevel, ranksThroughLevel, checkClassEligibility, checkFeatPrereqs,
   abilityMod, effectiveScore, deriveIncreases, calcBAB, deriveClassLevels,
+  freeFeatsGrantedAtLevel,
 } from '../../utils/validation.js'
+import { CLASS_ICONS, SKILL_ICONS } from '../../data/icons.js'
+import IconSlot from '../IconSlot.jsx'
 
 const ABILITY_LABELS = {
   str: 'Strength', dex: 'Dexterity', con: 'Constitution',
@@ -136,15 +139,20 @@ export default function LevelPlanStep({ onNext, onBack }) {
             <div className="panel !p-0 divide-y divide-auldwyn-border/30">
               {levels.map((lv, idx) => {
                 const classNum = levels.slice(0, idx + 1).filter(l => l.classKey === lv.classKey).length
-                const featList = (lv.feats ?? []).map(f => FEATS[f]?.name ?? f).join(', ')
+                const freeFeats = freeFeatsGrantedAtLevel(levels, idx)
+                const featList = [
+                  ...freeFeats.map(f => FEATS[f]?.name ?? f),
+                  ...(lv.feats ?? []).map(f => FEATS[f]?.name ?? f),
+                ].join(', ')
                 const skillPts = econ[idx].spent
                 return (
                   <div key={idx} className="flex items-center gap-3 px-3 py-2">
                     <span className="w-7 h-7 rounded-sm border border-auldwyn-gold/40 text-auldwyn-gold
-                                     flex items-center justify-center font-bold text-xs shrink-0"
+                                     flex items-center justify-center font-bold text-[10px] shrink-0"
                           style={{ background: 'linear-gradient(160deg,#33250F,#241B0E)' }}>
                       {idx + 1}
                     </span>
+                    <IconSlot icon={CLASS_ICONS[lv.classKey]} size="md" />
                     <span className="font-bold text-auldwyn-text w-40 shrink-0">
                       {CLASSES[lv.classKey]?.name} {classNum}
                     </span>
@@ -220,10 +228,11 @@ export default function LevelPlanStep({ onNext, onBack }) {
               return (
                 <button key={key}
                   onClick={() => setSelClass(key)}
-                  className={`nwn-list-item ${selClass === key ? 'nwn-list-item-active' : ''} ${ok ? '' : 'nwn-list-item-disabled'}`}>
-                  {ok ? '' : '🔒 '}{cls.name}
+                  className={`nwn-list-item flex items-center gap-2 ${selClass === key ? 'nwn-list-item-active' : ''} ${ok ? '' : 'nwn-list-item-disabled'}`}>
+                  <IconSlot icon={CLASS_ICONS[key]} size="sm" />
+                  <span className="flex-1 truncate">{ok ? '' : '🔒 '}{cls.name}</span>
                   {levels.some(l => l.classKey === key) && (
-                    <span className="text-auldwyn-gold/70 text-xs ml-2">
+                    <span className="text-auldwyn-gold/70 text-xs">
                       ({levels.filter(l => l.classKey === key).length})
                     </span>
                   )}
@@ -236,10 +245,11 @@ export default function LevelPlanStep({ onNext, onBack }) {
               return (
                 <button key={key}
                   onClick={() => setSelClass(key)}
-                  className={`nwn-list-item ${selClass === key ? 'nwn-list-item-active' : ''} ${ok ? '' : 'nwn-list-item-disabled'}`}>
-                  {ok ? '' : '🔒 '}{cls.name}
+                  className={`nwn-list-item flex items-center gap-2 ${selClass === key ? 'nwn-list-item-active' : ''} ${ok ? '' : 'nwn-list-item-disabled'}`}>
+                  <IconSlot icon={CLASS_ICONS[key]} size="sm" />
+                  <span className="flex-1 truncate">{ok ? '' : '🔒 '}{cls.name}</span>
                   {levels.some(l => l.classKey === key) && (
-                    <span className="text-auldwyn-gold/70 text-xs ml-2">
+                    <span className="text-auldwyn-gold/70 text-xs">
                       ({levels.filter(l => l.classKey === key).length})
                     </span>
                   )}
@@ -254,10 +264,13 @@ export default function LevelPlanStep({ onNext, onBack }) {
               <p className="text-auldwyn-muted text-sm m-auto">Select a class to see its description.</p>
             ) : (
               <>
-                <h3 className="text-auldwyn-gold font-bold text-lg uppercase tracking-widest mb-2"
-                    style={{ textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>
-                  {details.name}
-                </h3>
+                <div className="flex items-center gap-3 mb-2">
+                  <IconSlot icon={CLASS_ICONS[selClass]} size="lg" />
+                  <h3 className="text-auldwyn-gold font-bold text-lg uppercase tracking-widest"
+                      style={{ textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>
+                    {details.name}
+                  </h3>
+                </div>
                 <p className="text-sm text-auldwyn-text/90 leading-relaxed mb-3">{details.description}</p>
                 <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm mb-3">
                   <div><span className="text-auldwyn-muted">Hit Die:</span> <span className="text-auldwyn-text font-mono">d{details.hitDie}</span></div>
@@ -273,10 +286,23 @@ export default function LevelPlanStep({ onNext, onBack }) {
                     <div><span className="text-auldwyn-muted">Max Level:</span> <span className="text-auldwyn-text font-mono">{details.maxLevel}</span></div>
                   )}
                 </div>
-                <div className="text-xs text-auldwyn-muted mb-3">
-                  <span className="font-bold text-auldwyn-gold/80">Class Skills: </span>
-                  {details.classSkills.map(k => SKILLS[k]?.name).filter(Boolean).join(', ')}
+                <div className="text-xs text-auldwyn-muted mb-2">
+                  <span className="font-bold text-auldwyn-gold/80 block mb-1">Class Skills</span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {details.classSkills.map(k => SKILLS[k] && (
+                      <span key={k} className="inline-flex items-center gap-1 bg-black/20 rounded-sm px-1.5 py-0.5">
+                        <IconSlot icon={SKILL_ICONS[k]} size="sm" />
+                        {SKILLS[k].name}
+                      </span>
+                    ))}
+                  </div>
                 </div>
+                {(details.freeFeats?.length > 0) && !levels.some(l => l.classKey === selClass) && (
+                  <div className="text-xs text-auldwyn-muted mb-3">
+                    <span className="font-bold text-auldwyn-gold/80">Granted Free at Level 1: </span>
+                    {details.freeFeats.map(f => FEATS[f]?.name ?? f).join(', ')}
+                  </div>
+                )}
                 {(details.type === 'prestige' || details.alignmentRestriction || !check?.met) && (
                   <div className={`text-xs p-2 rounded-sm border mt-auto ${
                     check?.met && !maxed ? 'border-green-800/60 text-green-400/90' : 'border-red-800/60 text-red-400/90'
@@ -317,8 +343,11 @@ export default function LevelPlanStep({ onNext, onBack }) {
   const stepLabels = { ability: 'Ability Increase', skills: 'Skills', feats: 'Feats', confirm: 'Confirm' }
 
   const header = (
-    <div className="nwn-bar mb-3 flex items-center justify-between">
-      <span>Level {charLevel} — {cls?.name} {classNum}</span>
+    <div className="nwn-bar mb-3 flex items-center justify-between gap-3">
+      <span className="flex items-center gap-2">
+        <IconSlot icon={CLASS_ICONS[lv.classKey]} size="sm" />
+        Level {charLevel} — {cls?.name} {classNum}
+      </span>
       <span className="text-xs normal-case tracking-normal text-auldwyn-gold/70 font-normal">
         {steps.map((s, n) => (
           <span key={s} className={s === mode ? 'text-auldwyn-gold font-bold' : ''}>
@@ -408,6 +437,7 @@ export default function LevelPlanStep({ onNext, onBack }) {
             const cap = maxRankAtLevel(key, levels, i)
             return (
               <div key={key} className={`flex items-center gap-3 px-3 py-1.5 text-sm ${added > 0 ? 'bg-auldwyn-gold/5' : ''}`}>
+                <IconSlot icon={SKILL_ICONS[key]} size="sm" />
                 <span className={`w-2 ${isCS ? 'text-auldwyn-gold' : 'text-auldwyn-muted/50'}`}>●</span>
                 <span className={`flex-1 ${isCS ? 'text-auldwyn-text' : 'text-auldwyn-muted'}`}>
                   {skill.name}
@@ -449,9 +479,16 @@ export default function LevelPlanStep({ onNext, onBack }) {
       return checkFeatPrereqs(key, snapshot).met
     })
 
+    const freeFeats = freeFeatsGrantedAtLevel(levels, i)
+
     return (
       <div>
         {header}
+        {freeFeats.length > 0 && (
+          <p className="text-xs text-auldwyn-gold/80 mb-2">
+            ✓ Granted free by {cls?.name}: {freeFeats.map(f => FEATS[f]?.name ?? f).join(', ')}
+          </p>
+        )}
         <div className="flex items-center justify-between mb-3">
           <p className="text-sm text-auldwyn-muted">Choose your feat{slots > 1 ? 's' : ''} for this level.</p>
           <p className="text-sm font-mono">
@@ -522,6 +559,7 @@ export default function LevelPlanStep({ onNext, onBack }) {
       .filter(([, r]) => r > 0)
       .map(([k, r]) => `${SKILLS[k]?.name} +${r}`)
     const featList = (lv.feats ?? []).map(f => FEATS[f]?.name ?? f)
+    const freeFeats = freeFeatsGrantedAtLevel(levels, i).map(f => FEATS[f]?.name ?? f)
     const conMod = abilityMod(effectiveScore('con', character.abilities,
       RACES[character.race]?.abilityMods ?? {}, deriveIncreases(levels)))
     const hpGain = (cls?.hitDie ?? 0) + conMod
@@ -532,9 +570,12 @@ export default function LevelPlanStep({ onNext, onBack }) {
         {header}
         <p className="step-sub">Review your choices for this level.</p>
         <div className="panel max-w-xl space-y-2 text-sm">
-          <div className="flex justify-between border-b border-auldwyn-border/30 pb-2">
+          <div className="flex justify-between items-center border-b border-auldwyn-border/30 pb-2">
             <span className="text-auldwyn-muted">Class</span>
-            <span className="text-auldwyn-gold font-bold">{cls?.name} {classNum}</span>
+            <span className="text-auldwyn-gold font-bold flex items-center gap-2">
+              <IconSlot icon={CLASS_ICONS[lv.classKey]} size="sm" />
+              {cls?.name} {classNum}
+            </span>
           </div>
           <div className="flex justify-between">
             <span className="text-auldwyn-muted">Hit Points gained (max)</span>
@@ -548,6 +589,12 @@ export default function LevelPlanStep({ onNext, onBack }) {
             <div className="flex justify-between">
               <span className="text-auldwyn-muted">Ability Increase</span>
               <span className="text-auldwyn-gold font-bold">+1 {ABILITY_LABELS[lv.abilityIncrease]}</span>
+            </div>
+          )}
+          {freeFeats.length > 0 && (
+            <div className="flex justify-between">
+              <span className="text-auldwyn-muted">Free Class Feats</span>
+              <span className="text-auldwyn-gold text-right">{freeFeats.join(', ')}</span>
             </div>
           )}
           <div className="flex justify-between">

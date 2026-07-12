@@ -8,8 +8,10 @@ import { FEATS } from '../../data/feats.js'
 import {
   abilityMod, calcBAB, totalCharacterLevel,
   calcTotalSkillPoints, calcSkillPointsSpent, calcTotalFeatsAvailable,
-  validateCharacter, effectiveScore,
+  validateCharacter, effectiveScore, freeFeatsGrantedAtLevel,
 } from '../../utils/validation.js'
+import { CLASS_ICONS, SKILL_ICONS } from '../../data/icons.js'
+import IconSlot from '../IconSlot.jsx'
 
 const ABILITY_KEYS = ['str', 'dex', 'con', 'int', 'wis', 'cha']
 const ABILITY_LABELS = { str: 'STR', dex: 'DEX', con: 'CON', int: 'INT', wis: 'WIS', cha: 'CHA' }
@@ -23,10 +25,13 @@ function Section({ title, children }) {
   )
 }
 
-function Row({ label, value, sub }) {
+function Row({ label, value, sub, icon }) {
   return (
     <div className="flex justify-between items-baseline py-0.5 text-sm">
-      <span className="text-auldwyn-muted">{label}</span>
+      <span className="text-auldwyn-muted flex items-center gap-1.5">
+        {icon && <IconSlot icon={icon} size="sm" />}
+        {label}
+      </span>
       <span className="text-auldwyn-text font-medium">
         {value}
         {sub && <span className="text-auldwyn-muted text-xs ml-1">({sub})</span>}
@@ -52,6 +57,9 @@ export default function SummaryStep({ onBack, onRestart }) {
   const skillBudget = calcTotalSkillPoints(character.classLevels, intMod, isHuman)
   const skillSpent = calcSkillPointsSpent(character.skills, character.classLevels)
   const featBudget = calcTotalFeatsAvailable(character.classLevels, character.race)
+  // Free class feats (proficiencies, Scribe Scroll, etc.) don't consume a slot
+  const freeFeatKeys = new Set(character.classLevels.flatMap(cl => CLASSES[cl.classKey]?.freeFeats ?? []))
+  const chosenFeatCount = character.selectedFeats.filter(f => !freeFeatKeys.has(f.featKey)).length
 
   const { valid, errors, warnings } = validateCharacter(character)
 
@@ -85,13 +93,15 @@ export default function SummaryStep({ onBack, onRestart }) {
       ...takenSkills.map(([k, r]) => `  ${SKILLS[k]?.name}: ${r}`),
       '',
       'Feats:',
-      ...character.selectedFeats.map(({ featKey }) => `  ${FEATS[featKey]?.name}`),
+      ...character.selectedFeats.map(({ featKey }) => `  ${FEATS[featKey]?.name}${freeFeatKeys.has(featKey) ? ' (class)' : ''}`),
       '',
       'Leveling Guide:',
       ...(character.levels ?? []).map((lv, i) => {
         const classNum = character.levels.slice(0, i + 1).filter(l => l.classKey === lv.classKey).length
         const parts = []
         if (lv.abilityIncrease) parts.push(`+1 ${lv.abilityIncrease.toUpperCase()}`)
+        const free = freeFeatsGrantedAtLevel(character.levels, i).map(f => FEATS[f]?.name ?? f).join(', ')
+        if (free) parts.push(`Free: ${free}`)
         const fl = (lv.feats ?? []).map(f => FEATS[f]?.name ?? f).join(', ')
         if (fl) parts.push(`Feats: ${fl}`)
         const sl = Object.entries(lv.skills ?? {}).filter(([, r]) => r > 0)
@@ -178,7 +188,7 @@ export default function SummaryStep({ onBack, onRestart }) {
         <div>
           <Section title="Classes">
             {character.classLevels.map(({ classKey, levels }) => (
-              <Row key={classKey} label={CLASSES[classKey]?.name} value={`Level ${levels}`} />
+              <Row key={classKey} icon={CLASS_ICONS[classKey]} label={CLASSES[classKey]?.name} value={`Level ${levels}`} />
             ))}
             <div className="divider" />
             <Row label="Total Level" value={charLevel} />
@@ -218,6 +228,7 @@ export default function SummaryStep({ onBack, onRestart }) {
               return (
                 <Row
                   key={k}
+                  icon={SKILL_ICONS[k]}
                   label={skill.name}
                   value={`${total >= 0 ? '+' : ''}${total}`}
                   sub={`${rank} ranks`}
@@ -226,16 +237,20 @@ export default function SummaryStep({ onBack, onRestart }) {
             })}
           </Section>
 
-          <Section title={`Feats (${character.selectedFeats.length}/${featBudget})`}>
+          <Section title={`Feats (${chosenFeatCount}/${featBudget})`}>
             {character.selectedFeats.length === 0 && (
               <p className="text-auldwyn-muted text-sm">No feats selected.</p>
             )}
-            {character.selectedFeats.map(({ featKey }) => (
-              <div key={featKey} className="text-sm py-0.5">
-                <span className="text-auldwyn-gold">•</span>{' '}
-                <span>{FEATS[featKey]?.name ?? featKey}</span>
-              </div>
-            ))}
+            {character.selectedFeats.map(({ featKey }, idx) => {
+              const isFree = freeFeatKeys.has(featKey)
+              return (
+                <div key={`${featKey}-${idx}`} className="text-sm py-0.5">
+                  <span className="text-auldwyn-gold">•</span>{' '}
+                  <span>{FEATS[featKey]?.name ?? featKey}</span>
+                  {isFree && <span className="text-auldwyn-muted text-xs ml-1">(class)</span>}
+                </div>
+              )
+            })}
           </Section>
         </div>
       </div>
@@ -251,15 +266,18 @@ export default function SummaryStep({ onBack, onRestart }) {
                 .map(([k, r]) => `${SKILLS[k]?.name} +${r}`)
                 .join(', ')
               const featList = (lv.feats ?? []).map(f => FEATS[f]?.name ?? f).join(', ')
+              const freeList = freeFeatsGrantedAtLevel(character.levels, i).map(f => FEATS[f]?.name ?? f).join(', ')
               return (
                 <div key={i} className="flex gap-3 text-sm py-1 border-b border-auldwyn-border/30 last:border-0">
                   <span className="text-auldwyn-gold font-bold w-8 shrink-0">{i + 1}</span>
+                  <IconSlot icon={CLASS_ICONS[lv.classKey]} size="sm" />
                   <span className="text-auldwyn-text w-36 shrink-0">{CLASSES[lv.classKey]?.name} {classNum}</span>
                   <span className="text-auldwyn-muted text-xs leading-relaxed">
                     {lv.abilityIncrease && <span className="text-auldwyn-gold">+1 {lv.abilityIncrease.toUpperCase()}. </span>}
+                    {freeList && <span>Free: {freeList}. </span>}
                     {featList && <span>Feats: {featList}. </span>}
                     {skillList && <span>Skills: {skillList}.</span>}
-                    {!lv.abilityIncrease && !featList && !skillList && '—'}
+                    {!lv.abilityIncrease && !featList && !freeList && !skillList && '—'}
                   </span>
                 </div>
               )

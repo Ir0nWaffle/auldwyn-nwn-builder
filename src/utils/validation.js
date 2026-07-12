@@ -350,8 +350,41 @@ export function deriveSkills(levels) {
   return totals
 }
 
+// Proficiency/class feats granted automatically the first time a class is
+// taken (e.g. Fighter's weapon & armor proficiencies, Wizard's Scribe Scroll).
+// These don't consume a feat slot and can't be removed by the player.
+export function getFreeClassFeats(classKey) {
+  return CLASSES[classKey]?.freeFeats ?? []
+}
+
+// Free class feats granted specifically at level index i (only on the level
+// a class is first taken), for per-level display in the level-up wizard.
+// Excludes any feat already granted by an earlier class the character has.
+export function freeFeatsGrantedAtLevel(levels, i) {
+  const lv = levels[i]
+  if (!lv) return []
+  const firstTaken = levels.findIndex(l => l.classKey === lv.classKey)
+  if (firstTaken !== i) return []
+  const already = new Set(deriveFeats(levels.slice(0, i)))
+  return getFreeClassFeats(lv.classKey).filter(f => !already.has(f))
+}
+
 export function deriveFeats(levels) {
-  return levels.flatMap(lv => lv.feats ?? [])
+  const seenClass = new Set()
+  const seenFeat = new Set()
+  const auto = []
+  for (const lv of levels) {
+    if (seenClass.has(lv.classKey)) continue
+    seenClass.add(lv.classKey)
+    // Dedupe: two classes may both grant the same proficiency (e.g. Simple
+    // Weapon Proficiency) — a character only has it once regardless of source.
+    for (const f of getFreeClassFeats(lv.classKey)) {
+      if (seenFeat.has(f)) continue
+      seenFeat.add(f)
+      auto.push(f)
+    }
+  }
+  return [...auto, ...levels.flatMap(lv => lv.feats ?? [])]
 }
 
 export function deriveIncreases(levels) {

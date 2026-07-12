@@ -180,6 +180,12 @@ export const FEATS = {
     description: 'Reload a crossbow as a free action.',
     prereqs: {},
   },
+  scribescroll: {
+    name: 'Scribe Scroll',
+    type: 'classfeat',
+    description: 'Inscribe arcane spells onto scrolls.',
+    prereqs: {},
+  },
   rapidshot: {
     name: 'Rapid Shot',
     type: 'general',

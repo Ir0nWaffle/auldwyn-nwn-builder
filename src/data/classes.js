@@ -20,6 +20,7 @@ export const CLASSES = {
     classSkills: ['craft','crafttrap','discipline','heal','intimidate','listen','lore','parry','taunt'],
     alignmentRestriction: 'nonlawful',
     bonusFeats: [],
+    freeFeats: ['simplewpnprof','martialweaponprof','armorproflight','armorprofmedium','shieldprof'],
     prereqs: {},
   },
   bard: {
@@ -34,6 +35,7 @@ export const CLASSES = {
     classSkills: ['appraise','bluff','concentration','craft','crafttrap','heal','hide','listen','lore','movesilently','parry','perform','persuade','spellcraft','tumble','usemagicdevice'],
     alignmentRestriction: 'nonchaotic',
     bonusFeats: [],
+    freeFeats: ['simplewpnprof','armorproflight'],
     prereqs: {},
   },
   cleric: {
@@ -48,6 +50,7 @@ export const CLASSES = {
     classSkills: ['concentration','craft','crafttrap','heal','lore','parry','persuade','spellcraft'],
     alignmentRestriction: null,
     bonusFeats: [],
+    freeFeats: ['simplewpnprof','armorproflight','armorprofmedium','armorprofheavy','shieldprof'],
     prereqs: {},
   },
   druid: {
@@ -62,6 +65,7 @@ export const CLASSES = {
     classSkills: ['animalempathy','concentration','craft','crafttrap','heal','listen','lore','parry','spellcraft','spot'],
     alignmentRestriction: 'neutral',
     bonusFeats: [],
+    freeFeats: ['simplewpnprof','armorproflight','armorprofmedium','shieldprof'],
     prereqs: {},
   },
   fighter: {
@@ -76,6 +80,7 @@ export const CLASSES = {
     classSkills: ['craft','crafttrap','discipline','heal','lore','parry','taunt'],
     alignmentRestriction: null,
     bonusFeats: ['fighter'],
+    freeFeats: ['simplewpnprof','martialweaponprof','armorproflight','armorprofmedium','armorprofheavy','shieldprof'],
     prereqs: {},
   },
   monk: {
@@ -90,6 +95,7 @@ export const CLASSES = {
     classSkills: ['concentration','craft','crafttrap','discipline','heal','hide','listen','lore','movesilently','parry','persuade','spot','tumble'],
     alignmentRestriction: 'lawful',
     bonusFeats: [],
+    freeFeats: ['improvedunarmedstrike','simplewpnprof'],
     prereqs: {},
   },
   paladin: {
@@ -104,6 +110,7 @@ export const CLASSES = {
     classSkills: ['concentration','craft','crafttrap','discipline','heal','lore','parry','persuade','taunt'],
     alignmentRestriction: 'lawfulgood',
     bonusFeats: [],
+    freeFeats: ['simplewpnprof','martialweaponprof','armorproflight','armorprofmedium','armorprofheavy','shieldprof'],
     prereqs: {},
   },
   ranger: {
@@ -118,6 +125,7 @@ export const CLASSES = {
     classSkills: ['animalempathy','concentration','craft','crafttrap','discipline','heal','hide','listen','lore','movesilently','parry','search','spot'],
     alignmentRestriction: null,
     bonusFeats: [],
+    freeFeats: ['simplewpnprof','martialweaponprof','armorproflight'],
     prereqs: {},
   },
   rogue: {
@@ -132,6 +140,7 @@ export const CLASSES = {
     classSkills: ['appraise','bluff','craft','crafttrap','disable','heal','hide','listen','lore','movesilently','openlocks','parry','persuade','pickpocket','search','settrap','spot','taunt','tumble','usemagicdevice'],
     alignmentRestriction: null,
     bonusFeats: [],
+    freeFeats: ['simplewpnprof'],
     prereqs: {},
   },
   sorcerer: {
@@ -146,6 +155,7 @@ export const CLASSES = {
     classSkills: ['concentration','craft','crafttrap','heal','lore','parry','spellcraft'],
     alignmentRestriction: null,
     bonusFeats: [],
+    freeFeats: ['simplewpnprof'],
     prereqs: {},
   },
   wizard: {
@@ -160,6 +170,7 @@ export const CLASSES = {
     classSkills: ['concentration','craft','crafttrap','heal','lore','parry','spellcraft'],
     alignmentRestriction: null,
     bonusFeats: ['wizard'],
+    freeFeats: ['simplewpnprof','scribescroll'],
     prereqs: {},
   },
 

@@ -3,7 +3,8 @@ import { RACES } from '../data/races.js'
 import { CLASSES } from '../data/classes.js'
 import { SKILLS } from '../data/skills.js'
 import { FEATS } from '../data/feats.js'
-import { abilityMod, calcBAB, totalCharacterLevel, calcTotalSkillPoints, calcSkillPointsSpent, calcTotalFeatsAvailable, effectiveScore } from '../utils/validation.js'
+import { abilityMod, calcBAB, totalCharacterLevel, calcTotalSkillPoints, calcSkillPointsSpent, calcTotalFeatsAvailable, effectiveScore, freeFeatsGrantedAtLevel } from '../utils/validation.js'
+import { CLASS_ICONS, SKILL_ICONS } from '../data/icons.js'
 
 const ABILITY_KEYS = ['str', 'dex', 'con', 'int', 'wis', 'cha']
 const ABILITY_LABELS = { str: 'Strength', dex: 'Dexterity', con: 'Constitution', int: 'Intelligence', wis: 'Wisdom', cha: 'Charisma' }
@@ -52,6 +53,8 @@ export default function PrintSheet({ onClose }) {
   const skillBudget = calcTotalSkillPoints(character.classLevels, intMod, isHuman)
   const skillSpent  = calcSkillPointsSpent(character.skills, character.classLevels)
   const featBudget  = calcTotalFeatsAvailable(character.classLevels, character.race)
+  const freeFeatKeys = new Set(character.classLevels.flatMap(cl => CLASSES[cl.classKey]?.freeFeats ?? []))
+  const chosenFeatCount = character.selectedFeats.filter(f => !freeFeatKeys.has(f.featKey)).length
 
   const avgHp = character.classLevels.reduce((sum, { classKey, levels }) => {
     const cls = CLASSES[classKey]
@@ -105,7 +108,7 @@ export default function PrintSheet({ onClose }) {
         <div className="print-classes">
           {character.classLevels.map(({ classKey, levels }) => (
             <div key={classKey} className="print-class-row">
-              <span className="print-class-name">{CLASSES[classKey]?.name}</span>
+              <span className="print-class-name">{CLASS_ICONS[classKey]} {CLASSES[classKey]?.name}</span>
               <span className="print-class-level">Level {levels}</span>
               <span className="print-class-hd">HD: d{CLASSES[classKey]?.hitDie}</span>
             </div>
@@ -155,17 +158,21 @@ export default function PrintSheet({ onClose }) {
 
           {/* Feats */}
           <div>
-            <SectionHeader>Feats ({character.selectedFeats.length}/{featBudget})</SectionHeader>
+            <SectionHeader>Feats ({chosenFeatCount}/{featBudget})</SectionHeader>
             {character.selectedFeats.length === 0
               ? <p className="print-muted">None selected.</p>
               : (
                 <ul className="print-feat-list">
-                  {character.selectedFeats.map(({ featKey }) => (
-                    <li key={featKey}>
-                      <strong>{FEATS[featKey]?.name ?? featKey}</strong>
-                      <span className="print-muted"> — {FEATS[featKey]?.description}</span>
-                    </li>
-                  ))}
+                  {character.selectedFeats.map(({ featKey }, idx) => {
+                    const isFree = freeFeatKeys.has(featKey)
+                    return (
+                      <li key={`${featKey}-${idx}`}>
+                        <strong>{FEATS[featKey]?.name ?? featKey}</strong>
+                        {isFree && <span className="print-muted"> (class)</span>}
+                        <span className="print-muted"> — {FEATS[featKey]?.description}</span>
+                      </li>
+                    )
+                  })}
                 </ul>
               )
             }
@@ -185,7 +192,7 @@ export default function PrintSheet({ onClose }) {
                 const cs        = isClassSkill(key)
                 return (
                   <div key={key} className="print-skill-row">
-                    <span className="print-skill-name">{skill.name}{cs ? '' : ' *'}</span>
+                    <span className="print-skill-name">{SKILL_ICONS[key]} {skill.name}{cs ? '' : ' *'}</span>
                     <span className="print-skill-rank">{rank} ranks</span>
                     <span className="print-skill-total">{total >= 0 ? `+${total}` : total}</span>
                   </div>
@@ -211,6 +218,8 @@ export default function PrintSheet({ onClose }) {
                   const classNum = character.levels.slice(0, i + 1).filter(l => l.classKey === lv.classKey).length
                   const parts = []
                   if (lv.abilityIncrease) parts.push(`+1 ${lv.abilityIncrease.toUpperCase()}`)
+                  const free = freeFeatsGrantedAtLevel(character.levels, i).map(f => FEATS[f]?.name ?? f).join(', ')
+                  if (free) parts.push(`Free: ${free}`)
                   const fl = (lv.feats ?? []).map(f => FEATS[f]?.name ?? f).join(', ')
                   if (fl) parts.push(`Feats: ${fl}`)
                   const sl = Object.entries(lv.skills ?? {}).filter(([, r]) => r > 0)
