@@ -14,38 +14,38 @@ export const FEATS = {
     prereqs: {},
     firstLevelOnly: true,
   },
-  tavernbrawler: {
-    name: 'Tavern Brawler',
+  snakeblood: {
+    name: 'Snake Blood',
     type: 'general',
-    description: '+1 bonus to unarmed damage and Discipline checks.',
+    description: '+1 bonus to Reflex saving throws.',
     prereqs: {},
     firstLevelOnly: true,
   },
   silverpalm: {
     name: 'Silver Palm',
     type: 'general',
-    description: 'Merchants offer better prices when you sell to them.',
+    description: '+2 bonus on Appraise and Persuade checks.',
     prereqs: {},
     firstLevelOnly: true,
   },
-  snakeblood: {
-    name: 'Snake Blood',
+  strongsoul: {
+    name: 'Strong Soul',
     type: 'general',
-    description: '+1 bonus to saving throws against poison.',
+    description: '+1 bonus to Fortitude, Reflex, and Will saving throws against spells.',
     prereqs: {},
     firstLevelOnly: true,
   },
-  militia: {
-    name: 'Militia',
+  courteousmagocracy: {
+    name: 'Courteous Magocracy',
     type: 'general',
-    description: 'Proficient with simple weapons and light armor.',
+    description: '+2 bonus on Spellcraft and Persuade checks.',
     prereqs: {},
     firstLevelOnly: true,
   },
-  forester: {
-    name: 'Forester',
+  educated: {
+    name: 'Educated',
     type: 'general',
-    description: '+2 bonus to Discipline, Hide, and Move Silently checks in natural surroundings.',
+    description: '+2 competence bonus on Lore checks.',
     prereqs: {},
     firstLevelOnly: true,
   },

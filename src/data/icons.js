@@ -61,11 +61,11 @@ export const SKILL_ICONS = {
 export const FEAT_ICONS = {
   // 1st-Level-Only
   luckofheroes: '🍀',
-  tavernbrawler: '🍺',
-  silverpalm: '🤑',
   snakeblood: '🐍',
-  militia: '🪖',
-  forester: '🌲',
+  silverpalm: '🪙',
+  strongsoul: '💫',
+  courteousmagocracy: '🎩',
+  educated: '🎓',
 
   // General
   alertness: '👀',
