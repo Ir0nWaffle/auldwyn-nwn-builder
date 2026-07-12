@@ -1,5 +1,6 @@
-// NWN:EE class definitions — class skills sourced from game data (all three Craft
-// skills appear as one `craft` key + `crafttrap`; every class has both).
+// NWN:EE class definitions — class skills sourced from game data. The three
+// Craft skills (Armor, Weapon, Trap) are each their own separate skill; every
+// class has all three as class skills.
 // skillsPerLevel: base skill points per level (add INT modifier; minimum 1)
 // prereqs: requirements to enter this class (prestige classes only)
 // babProgression: 'full' (1/lvl), 'medium' (3/4), 'half' (1/2)
@@ -17,7 +18,7 @@ export const CLASSES = {
     babProgression: 'full',
     saves: { fort: 'good', ref: 'poor', will: 'poor' },
     spellcasting: null,
-    classSkills: ['craft','crafttrap','discipline','heal','intimidate','listen','lore','parry','taunt'],
+    classSkills: ['craftarmor','craftweapon','crafttrap','discipline','heal','intimidate','listen','lore','parry','taunt'],
     alignmentRestriction: 'nonlawful',
     bonusFeats: [],
     freeFeats: ['simplewpnprof','martialweaponprof','armorproflight','armorprofmedium','shieldprof'],
@@ -32,7 +33,7 @@ export const CLASSES = {
     babProgression: 'medium',
     saves: { fort: 'poor', ref: 'good', will: 'good' },
     spellcasting: 'arcane',
-    classSkills: ['appraise','bluff','concentration','craft','crafttrap','heal','hide','listen','lore','movesilently','parry','perform','persuade','spellcraft','tumble','usemagicdevice'],
+    classSkills: ['appraise','bluff','concentration','craftarmor','craftweapon','crafttrap','heal','hide','listen','lore','movesilently','parry','perform','persuade','spellcraft','tumble','usemagicdevice'],
     alignmentRestriction: 'nonchaotic',
     bonusFeats: [],
     freeFeats: ['simplewpnprof','armorproflight'],
@@ -47,7 +48,7 @@ export const CLASSES = {
     babProgression: 'medium',
     saves: { fort: 'good', ref: 'poor', will: 'good' },
     spellcasting: 'divine',
-    classSkills: ['concentration','craft','crafttrap','heal','lore','parry','persuade','spellcraft'],
+    classSkills: ['concentration','craftarmor','craftweapon','crafttrap','heal','lore','parry','persuade','spellcraft'],
     alignmentRestriction: null,
     bonusFeats: [],
     freeFeats: ['simplewpnprof','armorproflight','armorprofmedium','armorprofheavy','shieldprof'],
@@ -62,7 +63,7 @@ export const CLASSES = {
     babProgression: 'medium',
     saves: { fort: 'good', ref: 'poor', will: 'good' },
     spellcasting: 'divine',
-    classSkills: ['animalempathy','concentration','craft','crafttrap','heal','listen','lore','parry','spellcraft','spot'],
+    classSkills: ['animalempathy','concentration','craftarmor','craftweapon','crafttrap','heal','listen','lore','parry','spellcraft','spot'],
     alignmentRestriction: 'neutral',
     bonusFeats: [],
     freeFeats: ['simplewpnprof','armorproflight','armorprofmedium','shieldprof'],
@@ -77,7 +78,7 @@ export const CLASSES = {
     babProgression: 'full',
     saves: { fort: 'good', ref: 'poor', will: 'poor' },
     spellcasting: null,
-    classSkills: ['craft','crafttrap','discipline','heal','lore','parry','taunt'],
+    classSkills: ['craftarmor','craftweapon','crafttrap','discipline','heal','lore','parry','taunt'],
     alignmentRestriction: null,
     bonusFeats: ['fighter'],
     freeFeats: ['simplewpnprof','martialweaponprof','armorproflight','armorprofmedium','armorprofheavy','shieldprof'],
@@ -92,7 +93,7 @@ export const CLASSES = {
     babProgression: 'medium',
     saves: { fort: 'good', ref: 'good', will: 'good' },
     spellcasting: null,
-    classSkills: ['concentration','craft','crafttrap','discipline','heal','hide','listen','lore','movesilently','parry','persuade','spot','tumble'],
+    classSkills: ['concentration','craftarmor','craftweapon','crafttrap','discipline','heal','hide','listen','lore','movesilently','parry','persuade','spot','tumble'],
     alignmentRestriction: 'lawful',
     bonusFeats: [],
     freeFeats: ['improvedunarmedstrike','simplewpnprof'],
@@ -107,7 +108,7 @@ export const CLASSES = {
     babProgression: 'full',
     saves: { fort: 'good', ref: 'poor', will: 'poor' },
     spellcasting: 'divine',
-    classSkills: ['concentration','craft','crafttrap','discipline','heal','lore','parry','persuade','taunt'],
+    classSkills: ['concentration','craftarmor','craftweapon','crafttrap','discipline','heal','lore','parry','persuade','taunt'],
     alignmentRestriction: 'lawfulgood',
     bonusFeats: [],
     freeFeats: ['simplewpnprof','martialweaponprof','armorproflight','armorprofmedium','armorprofheavy','shieldprof'],
@@ -122,7 +123,7 @@ export const CLASSES = {
     babProgression: 'full',
     saves: { fort: 'good', ref: 'good', will: 'poor' },
     spellcasting: 'divine',
-    classSkills: ['animalempathy','concentration','craft','crafttrap','discipline','heal','hide','listen','lore','movesilently','parry','search','spot'],
+    classSkills: ['animalempathy','concentration','craftarmor','craftweapon','crafttrap','discipline','heal','hide','listen','lore','movesilently','parry','search','spot'],
     alignmentRestriction: null,
     bonusFeats: [],
     freeFeats: ['simplewpnprof','martialweaponprof','armorproflight'],
@@ -137,7 +138,7 @@ export const CLASSES = {
     babProgression: 'medium',
     saves: { fort: 'poor', ref: 'good', will: 'poor' },
     spellcasting: null,
-    classSkills: ['appraise','bluff','craft','crafttrap','disable','heal','hide','listen','lore','movesilently','openlocks','parry','persuade','pickpocket','search','settrap','spot','taunt','tumble','usemagicdevice'],
+    classSkills: ['appraise','bluff','craftarmor','craftweapon','crafttrap','disable','heal','hide','listen','lore','movesilently','openlocks','parry','persuade','pickpocket','search','settrap','spot','taunt','tumble','usemagicdevice'],
     alignmentRestriction: null,
     bonusFeats: [],
     freeFeats: ['simplewpnprof'],
@@ -152,7 +153,7 @@ export const CLASSES = {
     babProgression: 'half',
     saves: { fort: 'poor', ref: 'poor', will: 'good' },
     spellcasting: 'arcane',
-    classSkills: ['concentration','craft','crafttrap','heal','lore','parry','spellcraft'],
+    classSkills: ['concentration','craftarmor','craftweapon','crafttrap','heal','lore','parry','spellcraft'],
     alignmentRestriction: null,
     bonusFeats: [],
     freeFeats: ['simplewpnprof'],
@@ -167,7 +168,7 @@ export const CLASSES = {
     babProgression: 'half',
     saves: { fort: 'poor', ref: 'poor', will: 'good' },
     spellcasting: 'arcane',
-    classSkills: ['concentration','craft','crafttrap','heal','lore','parry','spellcraft'],
+    classSkills: ['concentration','craftarmor','craftweapon','crafttrap','heal','lore','parry','spellcraft'],
     alignmentRestriction: null,
     bonusFeats: ['wizard'],
     freeFeats: ['simplewpnprof','scribescroll'],
@@ -184,7 +185,7 @@ export const CLASSES = {
     babProgression: 'full',
     saves: { fort: 'good', ref: 'good', will: 'poor' },
     spellcasting: null,
-    classSkills: ['craft','crafttrap','heal','hide','listen','lore','movesilently','parry','spot'],
+    classSkills: ['craftarmor','craftweapon','crafttrap','heal','hide','listen','lore','movesilently','parry','spot'],
     alignmentRestriction: null,
     bonusFeats: [],
     maxLevel: 10,
@@ -204,7 +205,7 @@ export const CLASSES = {
     babProgression: 'medium',
     saves: { fort: 'poor', ref: 'good', will: 'poor' },
     spellcasting: null,
-    classSkills: ['bluff','craft','crafttrap','disable','heal','hide','listen','lore','movesilently','openlocks','parry','persuade','search','settrap','spot','tumble'],
+    classSkills: ['bluff','craftarmor','craftweapon','crafttrap','disable','heal','hide','listen','lore','movesilently','openlocks','parry','persuade','search','settrap','spot','tumble'],
     alignmentRestriction: 'evil',
     maxLevel: 10,
     prereqs: {
@@ -222,7 +223,7 @@ export const CLASSES = {
     babProgression: 'full',
     saves: { fort: 'good', ref: 'poor', will: 'poor' },
     spellcasting: 'divine',
-    classSkills: ['craft','crafttrap','discipline','heal','hide','intimidate','lore','parry','taunt'],
+    classSkills: ['craftarmor','craftweapon','crafttrap','discipline','heal','hide','intimidate','lore','parry','taunt'],
     alignmentRestriction: 'evil',
     maxLevel: 10,
     prereqs: {
@@ -242,7 +243,7 @@ export const CLASSES = {
     babProgression: 'full',
     saves: { fort: 'good', ref: 'poor', will: 'good' },
     spellcasting: null,
-    classSkills: ['craft','crafttrap','discipline','heal','lore','parry','taunt'],
+    classSkills: ['craftarmor','craftweapon','crafttrap','discipline','heal','lore','parry','taunt'],
     alignmentRestriction: 'good',
     maxLevel: 10,
     prereqs: {
@@ -262,7 +263,7 @@ export const CLASSES = {
     babProgression: 'medium',
     saves: { fort: 'good', ref: 'poor', will: 'good' },
     spellcasting: null,
-    classSkills: ['concentration','craft','crafttrap','heal','listen','lore','parry','search','spot'],
+    classSkills: ['concentration','craftarmor','craftweapon','crafttrap','heal','listen','lore','parry','search','spot'],
     alignmentRestriction: null,
     maxLevel: 10,
     prereqs: {
@@ -280,7 +281,7 @@ export const CLASSES = {
     babProgression: 'full',
     saves: { fort: 'good', ref: 'poor', will: 'good' },
     spellcasting: null,
-    classSkills: ['craft','crafttrap','discipline','heal','listen','lore','parry','spot'],
+    classSkills: ['craftarmor','craftweapon','crafttrap','discipline','heal','listen','lore','parry','spot'],
     alignmentRestriction: null,
     maxLevel: 10,
     prereqs: {
@@ -299,7 +300,7 @@ export const CLASSES = {
     babProgression: 'medium',
     saves: { fort: 'poor', ref: 'good', will: 'good' },
     spellcasting: null,
-    classSkills: ['appraise','bluff','craft','crafttrap','heal','hide','listen','lore','movesilently','parry','persuade','search','spot','tumble'],
+    classSkills: ['appraise','bluff','craftarmor','craftweapon','crafttrap','heal','hide','listen','lore','movesilently','parry','persuade','search','spot','tumble'],
     alignmentRestriction: 'nonchaotic_nonevil',
     maxLevel: 5,
     prereqs: {
@@ -318,7 +319,7 @@ export const CLASSES = {
     babProgression: 'half',
     saves: { fort: 'poor', ref: 'poor', will: 'good' },
     spellcasting: 'arcane',
-    classSkills: ['concentration','craft','crafttrap','heal','hide','listen','lore','movesilently','parry','spellcraft'],
+    classSkills: ['concentration','craftarmor','craftweapon','crafttrap','heal','hide','listen','lore','movesilently','parry','spellcraft'],
     alignmentRestriction: 'nongood',
     maxLevel: 10,
     prereqs: {
@@ -338,7 +339,7 @@ export const CLASSES = {
     babProgression: 'medium',
     saves: { fort: 'poor', ref: 'good', will: 'poor' },
     spellcasting: null,
-    classSkills: ['bluff','craft','crafttrap','heal','hide','listen','lore','movesilently','parry','search','spot','tumble'],
+    classSkills: ['bluff','craftarmor','craftweapon','crafttrap','heal','hide','listen','lore','movesilently','parry','search','spot','tumble'],
     alignmentRestriction: null,
     maxLevel: 10,
     prereqs: {
@@ -356,7 +357,7 @@ export const CLASSES = {
     babProgression: 'medium',
     saves: { fort: 'good', ref: 'poor', will: 'good' },
     spellcasting: null,
-    classSkills: ['animalempathy','concentration','craft','crafttrap','heal','listen','lore','parry','spot'],
+    classSkills: ['animalempathy','concentration','craftarmor','craftweapon','crafttrap','heal','listen','lore','parry','spot'],
     alignmentRestriction: null,
     maxLevel: 10,
     prereqs: {
@@ -374,7 +375,7 @@ export const CLASSES = {
     babProgression: 'full',
     saves: { fort: 'poor', ref: 'good', will: 'poor' },
     spellcasting: null,
-    classSkills: ['craft','crafttrap','discipline','heal','intimidate','lore','parry'],
+    classSkills: ['craftarmor','craftweapon','crafttrap','discipline','heal','intimidate','lore','parry'],
     alignmentRestriction: null,
     maxLevel: 10,
     prereqs: {
