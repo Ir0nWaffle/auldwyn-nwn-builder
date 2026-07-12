@@ -1,11 +1,9 @@
 const STEPS = [
   { id: 0, label: 'Name & Race' },
   { id: 1, label: 'Alignment' },
-  { id: 2, label: 'Class & Levels' },
-  { id: 3, label: 'Abilities' },
-  { id: 4, label: 'Skills' },
-  { id: 5, label: 'Feats' },
-  { id: 6, label: 'Summary' },
+  { id: 2, label: 'Abilities' },
+  { id: 3, label: 'Level Plan' },
+  { id: 4, label: 'Summary' },
 ]
 
 export default function StepNav({ current, onGoto, completedUpTo }) {

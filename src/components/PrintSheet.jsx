@@ -198,6 +198,37 @@ export default function PrintSheet({ onClose }) {
           <p className="print-muted print-footnote">* Cross-class skill</p>
         )}
 
+        {/* Leveling guide */}
+        {character.levels?.length > 0 && (
+          <>
+            <SectionHeader>Leveling Guide</SectionHeader>
+            <table className="print-table">
+              <thead>
+                <tr><th>Lv</th><th>Class</th><th>Picks</th></tr>
+              </thead>
+              <tbody>
+                {character.levels.map((lv, i) => {
+                  const classNum = character.levels.slice(0, i + 1).filter(l => l.classKey === lv.classKey).length
+                  const parts = []
+                  if (lv.abilityIncrease) parts.push(`+1 ${lv.abilityIncrease.toUpperCase()}`)
+                  const fl = (lv.feats ?? []).map(f => FEATS[f]?.name ?? f).join(', ')
+                  if (fl) parts.push(`Feats: ${fl}`)
+                  const sl = Object.entries(lv.skills ?? {}).filter(([, r]) => r > 0)
+                    .map(([k, r]) => `${SKILLS[k]?.name} +${r}`).join(', ')
+                  if (sl) parts.push(`Skills: ${sl}`)
+                  return (
+                    <tr key={i}>
+                      <td className="text-center"><strong>{i + 1}</strong></td>
+                      <td>{CLASSES[lv.classKey]?.name} {classNum}</td>
+                      <td>{parts.length ? parts.join(' · ') : '—'}</td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </>
+        )}
+
         {/* Racial traits */}
         <SectionHeader>Racial Traits — {race?.name}</SectionHeader>
         <div className="print-traits">

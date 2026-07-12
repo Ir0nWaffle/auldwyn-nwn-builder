@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react'
 import { SKILLS } from '../data/skills.js'
+import { deriveClassLevels, deriveSkills, deriveFeats, deriveIncreases, featSlotsAtLevel } from '../utils/validation.js'
 
 const CharacterContext = createContext(null)
 
@@ -9,13 +10,17 @@ const initialAbilities  = { str: 8, dex: 8, con: 8, int: 8, wis: 8, cha: 8 }
 const initialIncreases  = { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 }
 const initialSkills     = Object.fromEntries(Object.keys(SKILLS).map(k => [k, 0]))
 
+// `levels` is the source of truth for the build plan: one entry per character
+// level — { classKey, skills: {skillKey: ranksAdded}, feats: [featKey], abilityIncrease }.
+// classLevels / skills / selectedFeats / abilityIncreases are derived from it
+// after every plan change so summary, print, export, and validation keep working.
 const initialState = {
   name: '',
   race: null,
   alignment: null,
+  levels: [],
   classLevels: [],
   abilities:  { ...initialAbilities },
-  // Level-up ability increases: +1 to any stat at levels 4, 8, 12, 16, 20
   abilityIncreases: { ...initialIncreases },
   skills: { ...initialSkills },
   selectedFeats: [],
@@ -24,9 +29,21 @@ const initialState = {
 function freshState() {
   return {
     ...initialState,
+    levels: [],
     abilities:        { ...initialAbilities },
     abilityIncreases: { ...initialIncreases },
     skills:           { ...initialSkills },
+    selectedFeats: [],
+  }
+}
+
+function withDerived(state) {
+  return {
+    ...state,
+    classLevels: deriveClassLevels(state.levels),
+    skills: { ...initialSkills, ...deriveSkills(state.levels) },
+    selectedFeats: deriveFeats(state.levels).map(featKey => ({ featKey })),
+    abilityIncreases: deriveIncreases(state.levels),
   }
 }
 
@@ -35,24 +52,33 @@ function freshState() {
 function hydrate(saved) {
   const fresh = freshState()
   if (!saved || typeof saved !== 'object') return fresh
-  return {
+  const base = {
     ...fresh,
     name: typeof saved.name === 'string' ? saved.name : '',
     race: saved.race ?? null,
     alignment: saved.alignment ?? null,
-    classLevels: Array.isArray(saved.classLevels) ? saved.classLevels : [],
-    abilities:        { ...fresh.abilities,        ...(saved.abilities ?? {}) },
-    abilityIncreases: { ...fresh.abilityIncreases, ...(saved.abilityIncreases ?? {}) },
-    skills:           { ...fresh.skills,           ...(saved.skills ?? {}) },
-    selectedFeats: Array.isArray(saved.selectedFeats) ? saved.selectedFeats : [],
+    abilities: { ...fresh.abilities, ...(saved.abilities ?? {}) },
+    levels: Array.isArray(saved.levels)
+      ? saved.levels.map(lv => ({
+          classKey: lv.classKey,
+          skills: { ...(lv.skills ?? {}) },
+          feats: Array.isArray(lv.feats) ? lv.feats : [],
+          abilityIncrease: lv.abilityIncrease ?? null,
+        }))
+      : [],
   }
+  // Pre-plan saves (classLevels/skills as totals) can't be split into levels;
+  // keep identity + abilities and let the user rebuild the plan.
+  return withDerived(base)
 }
 
 // ─── Build permalink encoding ────────────────────────────────────────────────
 
 export function encodeCharacter(character) {
-  // JSON → UTF-8-safe base64, URL-friendly
-  return btoa(encodeURIComponent(JSON.stringify(character)))
+  // Only persist source-of-truth fields; derived ones are recomputed on load
+  const { name, race, alignment, abilities, levels } = character
+  const payload = { name, race, alignment, abilities, levels }
+  return btoa(encodeURIComponent(JSON.stringify(payload)))
     .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
 }
 
@@ -97,21 +123,6 @@ function loadInitialState() {
   return freshState()
 }
 
-function clampIncreases(increases, available) {
-  // If levels were removed and we now have fewer points than allocated, trim from each stat
-  let total = Object.values(increases).reduce((s, v) => s + v, 0)
-  if (total <= available) return increases
-  const clamped = { ...increases }
-  const keys = Object.keys(clamped)
-  for (const k of [...keys].reverse()) {
-    while (clamped[k] > 0 && total > available) {
-      clamped[k]--
-      total--
-    }
-  }
-  return clamped
-}
-
 function reducer(state, action) {
   switch (action.type) {
     case 'SET_NAME':
@@ -120,27 +131,53 @@ function reducer(state, action) {
       return { ...state, race: action.payload }
     case 'SET_ALIGNMENT':
       return { ...state, alignment: action.payload }
-    case 'SET_CLASS_LEVELS': {
-      const newLevels = action.payload
-      const charLevel = newLevels.reduce((s, cl) => s + cl.levels, 0)
-      const available = Math.floor(charLevel / 4)
-      const abilityIncreases = clampIncreases(state.abilityIncreases, available)
-      return { ...state, classLevels: newLevels, abilityIncreases }
-    }
     case 'SET_ABILITY':
       return { ...state, abilities: { ...state.abilities, [action.ability]: action.value } }
     case 'SET_ABILITIES':
       return { ...state, abilities: action.payload }
-    case 'SET_ABILITY_INCREASE':
-      return { ...state, abilityIncreases: { ...state.abilityIncreases, [action.ability]: action.value } }
-    case 'SET_SKILL':
-      return { ...state, skills: { ...state.skills, [action.skill]: action.value } }
-    case 'SET_SKILLS':
-      return { ...state, skills: action.payload }
-    case 'ADD_FEAT':
-      return { ...state, selectedFeats: [...state.selectedFeats, action.payload] }
-    case 'REMOVE_FEAT':
-      return { ...state, selectedFeats: state.selectedFeats.filter((_, i) => i !== action.index) }
+
+    // ── Level plan actions ──
+    case 'ADD_LEVEL':
+      return withDerived({
+        ...state,
+        levels: [...state.levels, { classKey: action.classKey, skills: {}, feats: [], abilityIncrease: null }],
+      })
+    case 'TRUNCATE_LEVELS':
+      // Remove level at `index` and everything after it
+      return withDerived({ ...state, levels: state.levels.slice(0, action.index) })
+    case 'SET_LEVEL_SKILL': {
+      const levels = state.levels.map((lv, i) => {
+        if (i !== action.index) return lv
+        const skills = { ...lv.skills }
+        if (action.value <= 0) delete skills[action.skill]
+        else skills[action.skill] = action.value
+        return { ...lv, skills }
+      })
+      return withDerived({ ...state, levels })
+    }
+    case 'ADD_LEVEL_FEAT': {
+      // Guard against double-dispatch: no duplicates anywhere, no slot overflow
+      if (deriveFeats(state.levels).includes(action.featKey)) return state
+      const lv = state.levels[action.index]
+      if (!lv || lv.feats.length >= featSlotsAtLevel(state, action.index)) return state
+      const levels = state.levels.map((l, i) =>
+        i === action.index ? { ...l, feats: [...l.feats, action.featKey] } : l
+      )
+      return withDerived({ ...state, levels })
+    }
+    case 'REMOVE_LEVEL_FEAT': {
+      const levels = state.levels.map((lv, i) =>
+        i === action.index ? { ...lv, feats: lv.feats.filter(f => f !== action.featKey) } : lv
+      )
+      return withDerived({ ...state, levels })
+    }
+    case 'SET_LEVEL_INCREASE': {
+      const levels = state.levels.map((lv, i) =>
+        i === action.index ? { ...lv, abilityIncrease: action.ability } : lv
+      )
+      return withDerived({ ...state, levels })
+    }
+
     case 'RESET':
       return freshState()
     default:

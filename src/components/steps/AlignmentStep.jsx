@@ -1,4 +1,4 @@
-import { useCharacter } from '../../store/CharacterContext.jsx'
+﻿import { useCharacter } from '../../store/CharacterContext.jsx'
 
 const ALIGNMENTS = [
   { key: 'lawfulgood',    label: 'Lawful Good',    abbr: 'LG', desc: 'The Crusader' },
@@ -48,7 +48,7 @@ export default function AlignmentStep({ onNext, onBack }) {
       {restrictions.length > 0 && (
         <div className="panel mb-4 border-auldwyn-gold/30">
           <p className="text-xs text-auldwyn-gold mb-1 font-bold">Class Alignment Requirements:</p>
-          {restrictions.map(r => <p key={r} className="text-xs text-auldwyn-muted">• {r}</p>)}
+          {restrictions.map(r => <p key={r} className="text-xs text-auldwyn-muted">â€¢ {r}</p>)}
         </div>
       )}
 
@@ -89,9 +89,9 @@ export default function AlignmentStep({ onNext, onBack }) {
       </div>
 
       <div className="mt-6 flex justify-between">
-        <button className="btn-secondary" onClick={onBack}>← Back</button>
+        <button className="btn-secondary" onClick={onBack}>â† Back</button>
         <button className="btn-primary" disabled={!character.alignment} onClick={onNext}>
-          Next: Class &amp; Levels →
+          Next: Abilities â†’
         </button>
       </div>
     </div>

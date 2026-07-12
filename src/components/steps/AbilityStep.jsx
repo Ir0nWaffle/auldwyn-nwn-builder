@@ -1,8 +1,7 @@
 import { useCharacter } from '../../store/CharacterContext.jsx'
 import { RACES } from '../../data/races.js'
 import {
-  abilityMod, pointCost, totalPointsSpent, ABILITY_POINT_BUDGET,
-  levelUpIncreasesAvailable, levelUpIncreasesSpent, effectiveScore,
+  abilityMod, pointCost, totalPointsSpent, ABILITY_POINT_BUDGET, effectiveScore,
 } from '../../utils/validation.js'
 
 const ABILITIES = [
@@ -21,14 +20,11 @@ export default function AbilityStep({ onNext, onBack }) {
   const { character, dispatch } = useCharacter()
   const race = character.race ? RACES[character.race] : null
   const racialMods = race?.abilityMods ?? {}
+  const increases = character.abilityIncreases ?? {}
 
   const spent = totalPointsSpent(character.abilities)
   const remaining = ABILITY_POINT_BUDGET - spent
   const overBudget = remaining < 0
-
-  const increasesAvailable = levelUpIncreasesAvailable(character.classLevels)
-  const increasesSpent     = levelUpIncreasesSpent(character.abilityIncreases)
-  const increasesRemaining = increasesAvailable - increasesSpent
 
   function changeBase(key, delta) {
     const current = character.abilities[key]
@@ -39,23 +35,8 @@ export default function AbilityStep({ onNext, onBack }) {
     dispatch({ type: 'SET_ABILITY', ability: key, value: next })
   }
 
-  function changeIncrease(key, delta) {
-    const current = character.abilityIncreases[key] ?? 0
-    const next = current + delta
-    if (next < 0) return
-    if (delta > 0 && increasesRemaining <= 0) return
-    dispatch({ type: 'SET_ABILITY_INCREASE', ability: key, value: next })
-  }
-
   function resetBase() {
     dispatch({ type: 'SET_ABILITIES', payload: { str: 8, dex: 8, con: 8, int: 8, wis: 8, cha: 8 } })
-  }
-
-  function resetIncreases() {
-    dispatch({ type: 'SET_ABILITIES', payload: character.abilities }) // no-op trick — use dedicated reset
-    ;['str','dex','con','int','wis','cha'].forEach(k =>
-      dispatch({ type: 'SET_ABILITY_INCREASE', ability: k, value: 0 })
-    )
   }
 
   return (
@@ -63,7 +44,7 @@ export default function AbilityStep({ onNext, onBack }) {
       <h2 className="step-title">Ability Scores</h2>
       <p className="step-sub">
         Distribute <span className="text-auldwyn-gold font-bold">{ABILITY_POINT_BUDGET} points</span> using NWN's point-buy system.
-        At every 4th character level you gain +1 to any ability score.
+        The +1 ability increases at levels 4, 8, 12, 16, and 20 are chosen in the Level Plan step.
       </p>
 
       {/* Point-buy budget */}
@@ -77,29 +58,6 @@ export default function AbilityStep({ onNext, onBack }) {
         </div>
         <button className="btn-secondary text-sm py-1" onClick={resetBase}>Reset buy</button>
       </div>
-
-      {/* Level-up increases budget */}
-      {increasesAvailable > 0 && (
-        <div className="panel mb-3 flex items-center justify-between border-auldwyn-gold/40">
-          <div>
-            <span className="text-auldwyn-muted text-sm">Level-up increases remaining: </span>
-            <span className={`text-xl font-bold ${increasesRemaining < 0 ? 'text-red-400' : 'text-auldwyn-gold'}`}>
-              {increasesRemaining}
-            </span>
-            <span className="text-auldwyn-muted text-sm"> / {increasesAvailable}</span>
-            <span className="text-auldwyn-muted text-xs ml-2">(+1 at levels 4, 8, 12, 16, 20)</span>
-          </div>
-          <button className="btn-secondary text-sm py-1" onClick={resetIncreases}>Reset increases</button>
-        </div>
-      )}
-
-      {increasesAvailable === 0 && (
-        <div className="panel mb-3 border-auldwyn-border/40">
-          <p className="text-auldwyn-muted text-xs">
-            Level-up ability increases (+1 at levels 4, 8, 12, 16, 20) will appear here once you reach level 4 in the Class step.
-          </p>
-        </div>
-      )}
 
       {/* Point cost reference */}
       <div className="panel mb-4">
@@ -119,15 +77,13 @@ export default function AbilityStep({ onNext, onBack }) {
         {ABILITIES.map(({ key, label, abbr, desc }) => {
           const base      = character.abilities[key]
           const raceMod   = racialMods[key] ?? 0
-          const increases = character.abilityIncreases[key] ?? 0
-          const final     = effectiveScore(key, character.abilities, racialMods, character.abilityIncreases)
+          const levelUps  = increases[key] ?? 0
+          const final     = effectiveScore(key, character.abilities, racialMods, increases)
           const mod       = abilityMod(final)
           const cost      = pointCost(base)
 
           const canIncBase = base < MAX_BASE && spent - cost + pointCost(base + 1) <= ABILITY_POINT_BUDGET
           const canDecBase = base > MIN_BASE
-          const canIncIncrease = increasesRemaining > 0
-          const canDecIncrease = increases > 0
 
           return (
             <div key={key} className="panel">
@@ -153,8 +109,8 @@ export default function AbilityStep({ onNext, onBack }) {
                       {' '}{raceMod > 0 ? '+' : ''}{raceMod} racial
                     </span>
                   )}
-                  {increases > 0 && (
-                    <span className="text-auldwyn-gold"> +{increases} lvl-up</span>
+                  {levelUps > 0 && (
+                    <span className="text-auldwyn-gold"> +{levelUps} lvl-up</span>
                   )}
                 </div>
               </div>
@@ -174,23 +130,6 @@ export default function AbilityStep({ onNext, onBack }) {
                              hover:border-auldwyn-gold hover:text-auldwyn-gold disabled:opacity-30
                              text-xl leading-none flex items-center justify-center">+</button>
               </div>
-
-              {/* Level-up increases row */}
-              {increasesAvailable > 0 && (
-                <div className="flex items-center gap-2 mt-2 pt-2 border-t border-auldwyn-border/40">
-                  <button onClick={() => changeIncrease(key, -1)} disabled={!canDecIncrease}
-                    className="w-8 h-8 rounded border border-auldwyn-gold/30 text-auldwyn-gold/50
-                               hover:border-auldwyn-gold hover:text-auldwyn-gold disabled:opacity-30
-                               text-xl leading-none flex items-center justify-center">−</button>
-                  <div className="flex-1 text-center">
-                    <div className="text-sm text-auldwyn-gold">Level-up: <span className="font-bold">{increases > 0 ? `+${increases}` : '0'}</span></div>
-                  </div>
-                  <button onClick={() => changeIncrease(key, 1)} disabled={!canIncIncrease}
-                    className="w-8 h-8 rounded border border-auldwyn-gold/30 text-auldwyn-gold/50
-                               hover:border-auldwyn-gold hover:text-auldwyn-gold disabled:opacity-30
-                               text-xl leading-none flex items-center justify-center">+</button>
-                </div>
-              )}
             </div>
           )
         })}
@@ -199,7 +138,7 @@ export default function AbilityStep({ onNext, onBack }) {
       <div className="mt-6 flex justify-between">
         <button className="btn-secondary" onClick={onBack}>← Back</button>
         <button className="btn-primary" disabled={overBudget} onClick={onNext}>
-          Next: Skills →
+          Next: Level Plan →
         </button>
       </div>
     </div>

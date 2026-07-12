@@ -284,6 +284,170 @@ export function checkPrcPrereqs(classKey, character) {
   return { met: reasons.length === 0, reasons }
 }
 
+// ─── Level-by-level plan ──────────────────────────────────────────────────────
+// character.levels is the source of truth: one entry per character level.
+// { classKey, skills: {skillKey: ranksAddedThisLevel}, feats: [featKey], abilityIncrease: 'str'|null }
+// Skill points may be pooled: unspent points carry forward (Auldwyn rule).
+
+export function deriveClassLevels(levels) {
+  // Aggregated [{classKey, levels}] in order of first appearance
+  const order = []
+  const counts = {}
+  for (const lv of levels) {
+    if (!(lv.classKey in counts)) { counts[lv.classKey] = 0; order.push(lv.classKey) }
+    counts[lv.classKey]++
+  }
+  return order.map(k => ({ classKey: k, levels: counts[k] }))
+}
+
+export function deriveSkills(levels) {
+  const totals = Object.fromEntries(Object.keys(SKILLS).map(k => [k, 0]))
+  for (const lv of levels) {
+    for (const [k, r] of Object.entries(lv.skills ?? {})) totals[k] = (totals[k] ?? 0) + r
+  }
+  return totals
+}
+
+export function deriveFeats(levels) {
+  return levels.flatMap(lv => lv.feats ?? [])
+}
+
+export function deriveIncreases(levels) {
+  const inc = { str: 0, dex: 0, con: 0, int: 0, wis: 0, cha: 0 }
+  for (const lv of levels) {
+    if (lv.abilityIncrease) inc[lv.abilityIncrease]++
+  }
+  return inc
+}
+
+// Skill point cost of one level's allocations (cross-class ×2, judged by that level's class)
+export function levelSkillCost(lv) {
+  const cls = CLASSES[lv.classKey]
+  return Object.entries(lv.skills ?? {}).reduce((sum, [k, r]) => {
+    const isCS = cls?.classSkills.includes(k)
+    return sum + (isCS ? r : r * 2)
+  }, 0)
+}
+
+// Per-level skill point economy: earned, spent, and running pool.
+// INT increases taken at or before a level count toward that level's points.
+export function planLevelEconomics(character) {
+  const levels = character.levels ?? []
+  const racialMods = RACES[character.race]?.abilityMods ?? {}
+  const isHuman = character.race === 'human'
+  const baseInt = (character.abilities.int ?? 8) + (racialMods.int ?? 0)
+  let pool = 0
+  let intIncreases = 0
+  return levels.map((lv, i) => {
+    if (lv.abilityIncrease === 'int') intIncreases++
+    const intMod = abilityMod(baseInt + intIncreases)
+    const cls = CLASSES[lv.classKey]
+    const perLevel = Math.max(1, (cls?.skillsPerLevel ?? 0) + intMod)
+    const earned = i === 0
+      ? perLevel * 4 + (isHuman ? 4 : 0)
+      : perLevel + (isHuman ? 1 : 0)
+    const spent = levelSkillCost(lv)
+    pool += earned - spent
+    return { earned, spent, pool }
+  })
+}
+
+// Max total ranks a skill may have as of level index i (0-based),
+// based on the class taken at that level. classOnly skills require
+// the level's class to grant them at all.
+export function maxRankAtLevel(skillKey, levels, i) {
+  const lv = levels[i]
+  const cls = CLASSES[lv?.classKey]
+  const charLevel = i + 1
+  const isCS = cls?.classSkills.includes(skillKey) ?? false
+  if (!isCS && SKILLS[skillKey]?.classOnly) return 0
+  return isCS ? charLevel + 3 : Math.floor((charLevel + 3) / 2)
+}
+
+// Cumulative ranks in a skill through level index i (inclusive)
+export function ranksThroughLevel(skillKey, levels, i) {
+  let total = 0
+  for (let j = 0; j <= i && j < levels.length; j++) {
+    total += levels[j].skills?.[skillKey] ?? 0
+  }
+  return total
+}
+
+// Feat slots granted at level index i
+const GENERAL_FEAT_LEVELS = [1, 3, 6, 9, 12, 15, 18]
+const FIGHTER_BONUS_LEVELS = [1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20]
+const WIZARD_BONUS_LEVELS = [5, 10, 15, 20]
+
+export function featSlotsAtLevel(character, i) {
+  const levels = character.levels ?? []
+  const lv = levels[i]
+  if (!lv) return 0
+  const charLevel = i + 1
+  let slots = 0
+  if (GENERAL_FEAT_LEVELS.includes(charLevel)) slots++
+  if (charLevel === 1 && character.race === 'human') slots++
+  const classCount = levels.slice(0, i + 1).filter(l => l.classKey === lv.classKey).length
+  if (lv.classKey === 'fighter' && FIGHTER_BONUS_LEVELS.includes(classCount)) slots++
+  if (lv.classKey === 'wizard' && WIZARD_BONUS_LEVELS.includes(classCount)) slots++
+  return slots
+}
+
+// Snapshot of the character as it exists through level index i (inclusive),
+// shaped like a regular character so checkFeatPrereqs / checkPrcPrereqs work on it.
+export function characterAtLevel(character, i) {
+  const levels = (character.levels ?? []).slice(0, i + 1)
+  return {
+    ...character,
+    classLevels: deriveClassLevels(levels),
+    skills: deriveSkills(levels),
+    selectedFeats: deriveFeats(levels).map(featKey => ({ featKey })),
+    abilityIncreases: deriveIncreases(levels),
+  }
+}
+
+// Validate the whole plan: pools never negative, rank caps respected at every
+// level, feat slots not exceeded, PrC prereqs met at the level taken.
+export function validatePlan(character) {
+  const errors = []
+  const levels = character.levels ?? []
+  if (levels.length === 0) return errors
+
+  const econ = planLevelEconomics(character)
+  econ.forEach((e, i) => {
+    if (e.pool < 0) errors.push(`Level ${i + 1}: skill points overspent (pool is ${e.pool}).`)
+  })
+
+  levels.forEach((lv, i) => {
+    for (const [k, r] of Object.entries(lv.skills ?? {})) {
+      if (r <= 0) continue
+      const cum = ranksThroughLevel(k, levels, i)
+      const cap = maxRankAtLevel(k, levels, i)
+      if (cum > cap) errors.push(`Level ${i + 1}: ${SKILLS[k]?.name ?? k} exceeds max rank ${cap} (${cum}).`)
+    }
+    const slots = featSlotsAtLevel(character, i)
+    const chosen = (lv.feats ?? []).length
+    if (chosen > slots) errors.push(`Level ${i + 1}: ${chosen} feats chosen but only ${slots} slot(s).`)
+    if (lv.abilityIncrease && (i + 1) % 4 !== 0) {
+      errors.push(`Level ${i + 1}: ability increase not allowed at this level.`)
+    }
+    // PrC entry check against the character as it was before this level
+    if (CLASSES[lv.classKey]?.type === 'prestige') {
+      const firstTaken = levels.findIndex(l => l.classKey === lv.classKey)
+      if (firstTaken === i) {
+        const snapshot = i === 0
+          ? { ...character, classLevels: [], skills: deriveSkills([]), selectedFeats: [], abilityIncreases: deriveIncreases([]) }
+          : characterAtLevel(character, i - 1)
+        const check = checkPrcPrereqs(lv.classKey, snapshot)
+        if (!check.met) {
+          check.reasons.forEach(r => errors.push(`Level ${i + 1} (${CLASSES[lv.classKey].name}): ${r}`))
+        }
+      }
+    }
+  })
+
+  return errors
+}
+
 // ─── Full character validation ────────────────────────────────────────────────
 
 export function validateCharacter(character) {
@@ -310,31 +474,37 @@ export function validateCharacter(character) {
     if (val > 18) errors.push(`${key.toUpperCase()} cannot exceed 18 before racial modifiers.`)
   }
 
-  // Skill rank caps
-  for (const [sk, rank] of Object.entries(character.skills)) {
-    const max = maxRankForSkill(sk, character.classLevels)
-    if (rank > max) errors.push(`${SKILLS[sk]?.name ?? sk}: rank ${rank} exceeds max of ${max}.`)
+  // Totals-based skill/feat budget checks — superseded by validatePlan
+  // when a level plan exists (the plan accounting is more precise)
+  if (!(character.levels?.length > 0)) {
+    for (const [sk, rank] of Object.entries(character.skills)) {
+      const max = maxRankForSkill(sk, character.classLevels)
+      if (rank > max) errors.push(`${SKILLS[sk]?.name ?? sk}: rank ${rank} exceeds max of ${max}.`)
+    }
+
+    const intMod = abilityMod(character.abilities.int)
+    const isHuman = character.race === 'human'
+    const skillBudget = calcTotalSkillPoints(character.classLevels, intMod, isHuman)
+    const skillSpent = calcSkillPointsSpent(character.skills, character.classLevels)
+    if (skillSpent > skillBudget) errors.push(`Skill points over budget (${skillSpent}/${skillBudget}).`)
+
+    const featBudget = calcTotalFeatsAvailable(character.classLevels, character.race)
+    if (character.selectedFeats.length > featBudget) {
+      errors.push(`Too many feats selected (${character.selectedFeats.length}/${featBudget}).`)
+    }
   }
 
-  // Skill points budget
-  const intMod = abilityMod(character.abilities.int)
-  const isHuman = character.race === 'human'
-  const skillBudget = calcTotalSkillPoints(character.classLevels, intMod, isHuman)
-  const skillSpent = calcSkillPointsSpent(character.skills, character.classLevels)
-  if (skillSpent > skillBudget) errors.push(`Skill points over budget (${skillSpent}/${skillBudget}).`)
-
-  // Feat count
-  const featBudget = calcTotalFeatsAvailable(character.classLevels, character.race)
-  if (character.selectedFeats.length > featBudget) {
-    errors.push(`Too many feats selected (${character.selectedFeats.length}/${featBudget}).`)
-  }
-
-  // Prestige class prereqs for any PrC taken
-  for (const { classKey } of character.classLevels) {
-    if (CLASSES[classKey]?.type === 'prestige') {
-      const result = checkPrcPrereqs(classKey, character)
-      if (!result.met) {
-        result.reasons.forEach(r => errors.push(`${CLASSES[classKey].name}: ${r}`))
+  // Level plan checks (pools, rank caps, feat slots, PrC entry timing)
+  if (character.levels?.length > 0) {
+    validatePlan(character).forEach(e => errors.push(e))
+  } else {
+    // Legacy totals-based PrC check for characters without a plan
+    for (const { classKey } of character.classLevels) {
+      if (CLASSES[classKey]?.type === 'prestige') {
+        const result = checkPrcPrereqs(classKey, character)
+        if (!result.met) {
+          result.reasons.forEach(r => errors.push(`${CLASSES[classKey].name}: ${r}`))
+        }
       }
     }
   }

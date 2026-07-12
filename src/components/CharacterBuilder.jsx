@@ -3,18 +3,16 @@ import { useCharacter } from '../store/CharacterContext.jsx'
 import StepNav from './StepNav.jsx'
 import RaceStep from './steps/RaceStep.jsx'
 import AlignmentStep from './steps/AlignmentStep.jsx'
-import ClassStep from './steps/ClassStep.jsx'
 import AbilityStep from './steps/AbilityStep.jsx'
-import SkillStep from './steps/SkillStep.jsx'
-import FeatStep from './steps/FeatStep.jsx'
+import LevelPlanStep from './steps/LevelPlanStep.jsx'
 import SummaryStep from './steps/SummaryStep.jsx'
 
-const TOTAL_STEPS = 7
+const TOTAL_STEPS = 5
 
 export default function CharacterBuilder() {
   const { character, dispatch } = useCharacter()
   // A restored draft or shared build unlocks every step so the user can jump around
-  const hasProgress = character.classLevels.length > 0 || character.race !== null
+  const hasProgress = character.levels.length > 0 || character.race !== null
   const [step, setStep] = useState(0)
   const [highestReached, setHighestReached] = useState(hasProgress ? TOTAL_STEPS - 1 : 0)
 
@@ -47,11 +45,9 @@ export default function CharacterBuilder() {
       <div className="panel min-h-[60vh]">
         {step === 0 && <RaceStep {...stepProps} />}
         {step === 1 && <AlignmentStep {...stepProps} />}
-        {step === 2 && <ClassStep {...stepProps} />}
-        {step === 3 && <AbilityStep {...stepProps} />}
-        {step === 4 && <SkillStep {...stepProps} />}
-        {step === 5 && <FeatStep {...stepProps} />}
-        {step === 6 && <SummaryStep onBack={back} onRestart={restart} />}
+        {step === 2 && <AbilityStep {...stepProps} />}
+        {step === 3 && <LevelPlanStep {...stepProps} />}
+        {step === 4 && <SummaryStep onBack={back} onRestart={restart} />}
       </div>
     </div>
   )

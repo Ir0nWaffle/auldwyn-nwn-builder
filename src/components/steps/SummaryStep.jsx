@@ -86,6 +86,19 @@ export default function SummaryStep({ onBack, onRestart }) {
       '',
       'Feats:',
       ...character.selectedFeats.map(({ featKey }) => `  ${FEATS[featKey]?.name}`),
+      '',
+      'Leveling Guide:',
+      ...(character.levels ?? []).map((lv, i) => {
+        const classNum = character.levels.slice(0, i + 1).filter(l => l.classKey === lv.classKey).length
+        const parts = []
+        if (lv.abilityIncrease) parts.push(`+1 ${lv.abilityIncrease.toUpperCase()}`)
+        const fl = (lv.feats ?? []).map(f => FEATS[f]?.name ?? f).join(', ')
+        if (fl) parts.push(`Feats: ${fl}`)
+        const sl = Object.entries(lv.skills ?? {}).filter(([, r]) => r > 0)
+          .map(([k, r]) => `${SKILLS[k]?.name} +${r}`).join(', ')
+        if (sl) parts.push(`Skills: ${sl}`)
+        return `  Lv ${String(i + 1).padStart(2)}: ${CLASSES[lv.classKey]?.name} ${classNum}${parts.length ? ' — ' + parts.join('; ') : ''}`
+      }),
     ]
     const blob = new Blob([lines.join('\n')], { type: 'text/plain' })
     const url = URL.createObjectURL(blob)
@@ -227,8 +240,36 @@ export default function SummaryStep({ onBack, onRestart }) {
         </div>
       </div>
 
+      {/* Leveling guide */}
+      {character.levels?.length > 0 && (
+        <Section title="Leveling Guide">
+          <div className="space-y-1">
+            {character.levels.map((lv, i) => {
+              const classNum = character.levels.slice(0, i + 1).filter(l => l.classKey === lv.classKey).length
+              const skillList = Object.entries(lv.skills ?? {})
+                .filter(([, r]) => r > 0)
+                .map(([k, r]) => `${SKILLS[k]?.name} +${r}`)
+                .join(', ')
+              const featList = (lv.feats ?? []).map(f => FEATS[f]?.name ?? f).join(', ')
+              return (
+                <div key={i} className="flex gap-3 text-sm py-1 border-b border-auldwyn-border/30 last:border-0">
+                  <span className="text-auldwyn-gold font-bold w-8 shrink-0">{i + 1}</span>
+                  <span className="text-auldwyn-text w-36 shrink-0">{CLASSES[lv.classKey]?.name} {classNum}</span>
+                  <span className="text-auldwyn-muted text-xs leading-relaxed">
+                    {lv.abilityIncrease && <span className="text-auldwyn-gold">+1 {lv.abilityIncrease.toUpperCase()}. </span>}
+                    {featList && <span>Feats: {featList}. </span>}
+                    {skillList && <span>Skills: {skillList}.</span>}
+                    {!lv.abilityIncrease && !featList && !skillList && '—'}
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+        </Section>
+      )}
+
       <div className="mt-4 flex justify-start">
-        <button className="btn-secondary" onClick={onBack}>← Back to Feats</button>
+        <button className="btn-secondary" onClick={onBack}>← Back to Level Plan</button>
       </div>
     </div>
   )
