@@ -184,7 +184,7 @@ export const FEATS = {
     name: 'Scribe Scroll',
     type: 'classfeat',
     description: 'Inscribe arcane spells onto scrolls.',
-    prereqs: {},
+    prereqs: { spellcasting: true },
   },
   rapidshot: {
     name: 'Rapid Shot',

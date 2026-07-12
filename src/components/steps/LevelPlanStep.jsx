@@ -10,7 +10,7 @@ import {
   abilityMod, effectiveScore, deriveIncreases, calcBAB, deriveClassLevels,
   freeFeatsGrantedAtLevel,
 } from '../../utils/validation.js'
-import { CLASS_ICONS, SKILL_ICONS } from '../../data/icons.js'
+import { CLASS_ICONS, SKILL_ICONS, FEAT_ICONS } from '../../data/icons.js'
 import IconSlot from '../IconSlot.jsx'
 
 const ABILITY_LABELS = {
@@ -299,8 +299,15 @@ export default function LevelPlanStep({ onNext, onBack }) {
                 </div>
                 {(details.freeFeats?.length > 0) && !levels.some(l => l.classKey === selClass) && (
                   <div className="text-xs text-auldwyn-muted mb-3">
-                    <span className="font-bold text-auldwyn-gold/80">Granted Free at Level 1: </span>
-                    {details.freeFeats.map(f => FEATS[f]?.name ?? f).join(', ')}
+                    <span className="font-bold text-auldwyn-gold/80 block mb-1">Granted Free at Level 1</span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {details.freeFeats.map(f => (
+                        <span key={f} className="inline-flex items-center gap-1 bg-black/20 rounded-sm px-1.5 py-0.5">
+                          <IconSlot icon={FEAT_ICONS[f]} size="sm" />
+                          {FEATS[f]?.name ?? f}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 )}
                 {(details.type === 'prestige' || details.alignmentRestriction || !check?.met) && (
@@ -513,9 +520,12 @@ export default function LevelPlanStep({ onNext, onBack }) {
                 <button key={key}
                   onClick={() => slotsLeft > 0 && dispatch({ type: 'ADD_LEVEL_FEAT', index: i, featKey: key })}
                   disabled={slotsLeft <= 0}
-                  className="nwn-list-item disabled:opacity-40">
-                  <span className="font-bold">{feat.name}</span>
-                  <span className="block text-xs text-auldwyn-muted mt-0.5">{feat.description}</span>
+                  className="nwn-list-item disabled:opacity-40 flex items-start gap-2">
+                  <IconSlot icon={FEAT_ICONS[key]} size="sm" className="mt-0.5" />
+                  <span className="flex-1">
+                    <span className="font-bold">{feat.name}</span>
+                    <span className="block text-xs text-auldwyn-muted mt-0.5">{feat.description}</span>
+                  </span>
                 </button>
               ))}
               {available.length === 0 && (
@@ -531,10 +541,13 @@ export default function LevelPlanStep({ onNext, onBack }) {
               {chosen.map(f => (
                 <button key={f}
                   onClick={() => dispatch({ type: 'REMOVE_LEVEL_FEAT', index: i, featKey: f })}
-                  className="nwn-list-item hover:!bg-red-950/30" title="Click to remove">
-                  <span className="font-bold text-auldwyn-gold">{FEATS[f]?.name}</span>
-                  <span className="text-xs text-red-400/70 float-right">remove ✕</span>
-                  <span className="block text-xs text-auldwyn-muted mt-0.5">{FEATS[f]?.description}</span>
+                  className="nwn-list-item hover:!bg-red-950/30 flex items-start gap-2" title="Click to remove">
+                  <IconSlot icon={FEAT_ICONS[f]} size="sm" className="mt-0.5" />
+                  <span className="flex-1">
+                    <span className="font-bold text-auldwyn-gold">{FEATS[f]?.name}</span>
+                    <span className="text-xs text-red-400/70 float-right">remove ✕</span>
+                    <span className="block text-xs text-auldwyn-muted mt-0.5">{FEATS[f]?.description}</span>
+                  </span>
                 </button>
               ))}
               {chosen.length === 0 && (

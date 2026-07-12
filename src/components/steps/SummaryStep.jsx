@@ -10,7 +10,7 @@ import {
   calcTotalSkillPoints, calcSkillPointsSpent, calcTotalFeatsAvailable,
   validateCharacter, effectiveScore, freeFeatsGrantedAtLevel,
 } from '../../utils/validation.js'
-import { CLASS_ICONS, SKILL_ICONS } from '../../data/icons.js'
+import { CLASS_ICONS, SKILL_ICONS, FEAT_ICONS } from '../../data/icons.js'
 import IconSlot from '../IconSlot.jsx'
 
 const ABILITY_KEYS = ['str', 'dex', 'con', 'int', 'wis', 'cha']
@@ -244,8 +244,8 @@ export default function SummaryStep({ onBack, onRestart }) {
             {character.selectedFeats.map(({ featKey }, idx) => {
               const isFree = freeFeatKeys.has(featKey)
               return (
-                <div key={`${featKey}-${idx}`} className="text-sm py-0.5">
-                  <span className="text-auldwyn-gold">•</span>{' '}
+                <div key={`${featKey}-${idx}`} className="flex items-center gap-1.5 text-sm py-0.5">
+                  <IconSlot icon={FEAT_ICONS[featKey]} size="sm" />
                   <span>{FEATS[featKey]?.name ?? featKey}</span>
                   {isFree && <span className="text-auldwyn-muted text-xs ml-1">(class)</span>}
                 </div>

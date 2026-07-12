@@ -4,7 +4,7 @@ import { CLASSES } from '../data/classes.js'
 import { SKILLS } from '../data/skills.js'
 import { FEATS } from '../data/feats.js'
 import { abilityMod, calcBAB, totalCharacterLevel, calcTotalSkillPoints, calcSkillPointsSpent, calcTotalFeatsAvailable, effectiveScore, freeFeatsGrantedAtLevel } from '../utils/validation.js'
-import { CLASS_ICONS, SKILL_ICONS } from '../data/icons.js'
+import { CLASS_ICONS, SKILL_ICONS, FEAT_ICONS } from '../data/icons.js'
 
 const ABILITY_KEYS = ['str', 'dex', 'con', 'int', 'wis', 'cha']
 const ABILITY_LABELS = { str: 'Strength', dex: 'Dexterity', con: 'Constitution', int: 'Intelligence', wis: 'Wisdom', cha: 'Charisma' }
@@ -167,7 +167,7 @@ export default function PrintSheet({ onClose }) {
                     const isFree = freeFeatKeys.has(featKey)
                     return (
                       <li key={`${featKey}-${idx}`}>
-                        <strong>{FEATS[featKey]?.name ?? featKey}</strong>
+                        {FEAT_ICONS[featKey]} <strong>{FEATS[featKey]?.name ?? featKey}</strong>
                         {isFree && <span className="print-muted"> (class)</span>}
                         <span className="print-muted"> — {FEATS[featKey]?.description}</span>
                       </li>
