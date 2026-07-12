@@ -6,7 +6,7 @@ import { FEATS } from '../../data/feats.js'
 import { RACES } from '../../data/races.js'
 import {
   planLevelEconomics, featSlotsAtLevel, characterAtLevel, deriveFeats,
-  maxRankAtLevel, ranksThroughLevel, checkPrcPrereqs, checkFeatPrereqs,
+  maxRankAtLevel, ranksThroughLevel, checkClassEligibility, checkFeatPrereqs,
   abilityMod, effectiveScore, deriveIncreases, calcBAB, deriveClassLevels,
 } from '../../utils/validation.js'
 
@@ -87,9 +87,7 @@ export default function LevelPlanStep({ onNext, onBack }) {
     : characterAtLevel(character, charLevel - 1)
 
   function classCheck(key) {
-    const cls = CLASSES[key]
-    if (cls.type !== 'prestige') return { met: true, reasons: [] }
-    return checkPrcPrereqs(key, snapshotNow)
+    return checkClassEligibility(key, snapshotNow)
   }
   function classMaxed(key) {
     const cls = CLASSES[key]
@@ -217,18 +215,21 @@ export default function LevelPlanStep({ onNext, onBack }) {
           {/* Class list (left pane, like NWN) */}
           <div className="panel !p-0 max-h-[420px] overflow-y-auto">
             <div className="px-3 py-1 text-xs uppercase tracking-widest text-auldwyn-muted/70 border-b border-auldwyn-border/40">Classes</div>
-            {BASE.map(([key, cls]) => (
-              <button key={key}
-                onClick={() => setSelClass(key)}
-                className={`nwn-list-item ${selClass === key ? 'nwn-list-item-active' : ''}`}>
-                {cls.name}
-                {levels.some(l => l.classKey === key) && (
-                  <span className="text-auldwyn-gold/70 text-xs ml-2">
-                    ({levels.filter(l => l.classKey === key).length})
-                  </span>
-                )}
-              </button>
-            ))}
+            {BASE.map(([key, cls]) => {
+              const ok = classCheck(key).met
+              return (
+                <button key={key}
+                  onClick={() => setSelClass(key)}
+                  className={`nwn-list-item ${selClass === key ? 'nwn-list-item-active' : ''} ${ok ? '' : 'nwn-list-item-disabled'}`}>
+                  {ok ? '' : '🔒 '}{cls.name}
+                  {levels.some(l => l.classKey === key) && (
+                    <span className="text-auldwyn-gold/70 text-xs ml-2">
+                      ({levels.filter(l => l.classKey === key).length})
+                    </span>
+                  )}
+                </button>
+              )
+            })}
             <div className="px-3 py-1 text-xs uppercase tracking-widest text-auldwyn-muted/70 border-y border-auldwyn-border/40">Prestige Classes</div>
             {PRESTIGE.map(([key, cls]) => {
               const ok = classCheck(key).met && !classMaxed(key)
@@ -276,7 +277,7 @@ export default function LevelPlanStep({ onNext, onBack }) {
                   <span className="font-bold text-auldwyn-gold/80">Class Skills: </span>
                   {details.classSkills.map(k => SKILLS[k]?.name).filter(Boolean).join(', ')}
                 </div>
-                {details.type === 'prestige' && (
+                {(details.type === 'prestige' || details.alignmentRestriction || !check?.met) && (
                   <div className={`text-xs p-2 rounded-sm border mt-auto ${
                     check?.met && !maxed ? 'border-green-800/60 text-green-400/90' : 'border-red-800/60 text-red-400/90'
                   }`}>

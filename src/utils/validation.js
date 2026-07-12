@@ -284,6 +284,48 @@ export function checkPrcPrereqs(classKey, character) {
   return { met: reasons.length === 0, reasons }
 }
 
+// ─── Base-class alignment restriction (e.g. Paladin must be Lawful Good) ─────
+
+export function checkClassAlignment(classKey, alignment) {
+  const cls = CLASSES[classKey]
+  if (!cls?.alignmentRestriction) return { met: true, reasons: [] }
+  if (alignmentMatches(alignment, cls.alignmentRestriction)) return { met: true, reasons: [] }
+  const label = ALIGNMENT_REQ_LABELS[cls.alignmentRestriction] ?? cls.alignmentRestriction
+  return { met: false, reasons: [`Alignment must be ${label}`] }
+}
+
+// ─── Auldwyn's 3-class limit ──────────────────────────────────────────────────
+// classLevels here is the aggregated [{classKey, levels}] form, so its length
+// is the number of distinct classes already taken.
+
+export function checkClassSlot(classKey, classLevels) {
+  if (classLevels.some(cl => cl.classKey === classKey)) return { met: true, reasons: [] }
+  if (classLevels.length >= SERVER_SETTINGS.maxDistinctClasses) {
+    return { met: false, reasons: [`Auldwyn allows a maximum of ${SERVER_SETTINGS.maxDistinctClasses} classes per character`] }
+  }
+  return { met: true, reasons: [] }
+}
+
+// ─── Combined eligibility check for taking a level in a class ───────────────
+// Used both by the Level Plan wizard (to gate/explain class choices) and by
+// validatePlan (to catch a plan that became invalid after edits elsewhere).
+
+export function checkClassEligibility(classKey, character) {
+  const reasons = []
+  const slot = checkClassSlot(classKey, character.classLevels)
+  reasons.push(...slot.reasons)
+  // Prestige classes already carry their alignment requirement in prereqs.alignment
+  // (checked below) — only apply the standalone check to base classes, so the
+  // same restriction isn't reported twice.
+  if (CLASSES[classKey]?.type !== 'prestige') {
+    const align = checkClassAlignment(classKey, character.alignment)
+    reasons.push(...align.reasons)
+  }
+  const prc = checkPrcPrereqs(classKey, character)
+  reasons.push(...prc.reasons)
+  return { met: reasons.length === 0, reasons }
+}
+
 // ─── Level-by-level plan ──────────────────────────────────────────────────────
 // character.levels is the source of truth: one entry per character level.
 // { classKey, skills: {skillKey: ranksAddedThisLevel}, feats: [featKey], abilityIncrease: 'str'|null }
@@ -430,17 +472,16 @@ export function validatePlan(character) {
     if (lv.abilityIncrease && (i + 1) % 4 !== 0) {
       errors.push(`Level ${i + 1}: ability increase not allowed at this level.`)
     }
-    // PrC entry check against the character as it was before this level
-    if (CLASSES[lv.classKey]?.type === 'prestige') {
-      const firstTaken = levels.findIndex(l => l.classKey === lv.classKey)
-      if (firstTaken === i) {
-        const snapshot = i === 0
-          ? { ...character, classLevels: [], skills: deriveSkills([]), selectedFeats: [], abilityIncreases: deriveIncreases([]) }
-          : characterAtLevel(character, i - 1)
-        const check = checkPrcPrereqs(lv.classKey, snapshot)
-        if (!check.met) {
-          check.reasons.forEach(r => errors.push(`Level ${i + 1} (${CLASSES[lv.classKey].name}): ${r}`))
-        }
+    // Class entry check (alignment restriction, 3-class limit, PrC prereqs)
+    // against the character as it was before this level
+    const firstTaken = levels.findIndex(l => l.classKey === lv.classKey)
+    if (firstTaken === i) {
+      const snapshot = i === 0
+        ? { ...character, classLevels: [], skills: deriveSkills([]), selectedFeats: [], abilityIncreases: deriveIncreases([]) }
+        : characterAtLevel(character, i - 1)
+      const check = checkClassEligibility(lv.classKey, snapshot)
+      if (!check.met) {
+        check.reasons.forEach(r => errors.push(`Level ${i + 1} (${CLASSES[lv.classKey].name}): ${r}`))
       }
     }
   })
