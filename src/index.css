@@ -5,141 +5,168 @@
 @layer base {
   body {
     @apply text-auldwyn-text font-serif;
-    background-color: #14100A;
+    /* NWN menu backdrop: black with faint blue smoke */
+    background-color: #000;
     background-image:
-      radial-gradient(ellipse at 50% -10%, rgba(201,168,76,0.06) 0%, transparent 55%),
-      linear-gradient(180deg, #171208 0%, #100C06 100%);
+      radial-gradient(ellipse 60% 45% at 18% 25%, rgba(70, 95, 130, 0.16) 0%, transparent 70%),
+      radial-gradient(ellipse 55% 40% at 82% 70%, rgba(55, 80, 115, 0.13) 0%, transparent 70%),
+      radial-gradient(ellipse 45% 35% at 55% 45%, rgba(80, 100, 130, 0.08) 0%, transparent 70%);
     background-attachment: fixed;
   }
 
   ::-webkit-scrollbar {
-    width: 8px;
+    width: 10px;
   }
   ::-webkit-scrollbar-track {
-    background: #14100A;
-    border-left: 1px solid #2A1F0D;
+    background: #000;
+    border: 1px solid #6E421C;
+    border-radius: 5px;
   }
   ::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, #5A4526, #3A2B14);
-    border: 1px solid #6B5630;
-    border-radius: 2px;
+    background: #0A0805;
+    border: 1px solid #B4713A;
+    border-radius: 5px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    border-color: #E8DCC0;
   }
 }
 
 @layer components {
-  /* NWN-style beveled stone panel */
+  /* NWN dialog panel: flat black with a double copper wire frame, rounded corners */
   .panel {
-    @apply rounded-sm p-4;
-    background: linear-gradient(160deg, #2E2414 0%, #241B0E 55%, #1D150A 100%);
-    border: 1px solid #4A3520;
-    border-top-color: #6B5630;
-    border-left-color: #5A4526;
+    @apply p-4;
+    background: #050505;
+    border: 1px solid #B4713A;
+    border-radius: 9px;
     box-shadow:
-      inset 0 1px 0 rgba(201,168,76,0.08),
-      inset 0 0 18px rgba(0,0,0,0.45),
-      0 2px 6px rgba(0,0,0,0.5);
+      inset 0 0 0 2px #000,
+      inset 0 0 0 3px #6E421C,
+      0 0 12px rgba(0, 0, 0, 0.9);
   }
 
-  /* NWN-style engraved stone button, gold lettering */
+  /* NWN button: black rounded rect, copper frame, cream lettering */
   .btn-primary {
-    @apply font-bold px-5 py-2 rounded-sm transition-all
-           disabled:opacity-40 disabled:cursor-not-allowed;
-    color: #F0DFA8;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.85);
-    letter-spacing: 0.03em;
-    background: linear-gradient(180deg, #6B5630 0%, #4A3520 45%, #33250F 100%);
-    border: 1px solid #8C7440;
-    border-bottom-color: #241B0E;
-    border-right-color: #33250F;
+    @apply px-6 py-2 transition-all disabled:opacity-40 disabled:cursor-not-allowed;
+    color: #F0E6C8;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+    letter-spacing: 0.04em;
+    background: #0A0805;
+    border: 1px solid #C87F41;
+    border-radius: 8px;
     box-shadow:
-      inset 0 1px 0 rgba(240,223,168,0.3),
-      0 2px 4px rgba(0,0,0,0.6);
+      inset 0 0 0 2px #000,
+      inset 0 0 0 3px #7A4A22;
   }
   .btn-primary:hover:not(:disabled) {
-    filter: brightness(1.2);
+    border-color: #F5EFDA;
+    color: #FFFFFF;
+    box-shadow:
+      inset 0 0 0 2px #000,
+      inset 0 0 0 3px #A5906B,
+      0 0 8px rgba(232, 220, 192, 0.25);
   }
   .btn-primary:active:not(:disabled) {
-    box-shadow: inset 0 2px 6px rgba(0,0,0,0.6);
-    transform: translateY(1px);
+    background: #14100A;
   }
 
   .btn-secondary {
-    @apply px-5 py-2 rounded-sm transition-all
-           disabled:opacity-40 disabled:cursor-not-allowed;
-    color: #C9B683;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.85);
-    background: linear-gradient(180deg, #3A2C16 0%, #2A1F0D 60%, #1F170A 100%);
-    border: 1px solid #5A4526;
-    border-bottom-color: #1A1209;
+    @apply px-5 py-2 transition-all disabled:opacity-40 disabled:cursor-not-allowed;
+    color: #D8CCA8;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+    background: #070604;
+    border: 1px solid #8F5A2B;
+    border-radius: 8px;
     box-shadow:
-      inset 0 1px 0 rgba(201,168,76,0.12),
-      0 2px 4px rgba(0,0,0,0.5);
+      inset 0 0 0 2px #000,
+      inset 0 0 0 3px #59371A;
   }
   .btn-secondary:hover:not(:disabled) {
-    filter: brightness(1.2);
-    color: #F0DFA8;
+    border-color: #E8DCC0;
+    color: #FFFFFF;
   }
 
   .step-title {
-    @apply text-auldwyn-gold text-xl font-bold mb-1 uppercase;
-    letter-spacing: 0.12em;
-    text-shadow: 0 1px 3px rgba(0,0,0,0.8), 0 0 14px rgba(201,168,76,0.25);
+    @apply text-auldwyn-text text-lg font-bold mb-1;
+    letter-spacing: 0.08em;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
   }
 
   .step-sub {
     @apply text-auldwyn-muted text-sm mb-4;
   }
 
+  /* Selectable card (alignment grid, etc.) — copper-framed black tile */
   .card {
-    @apply rounded-sm p-3 cursor-pointer transition-all;
-    background: linear-gradient(160deg, #281E10 0%, #1F170A 100%);
-    border: 1px solid #4A3520;
-    border-top-color: #5A4526;
-    box-shadow: inset 0 0 12px rgba(0,0,0,0.35);
+    @apply p-3 cursor-pointer transition-all;
+    background: #050505;
+    border: 1px solid #8F5A2B;
+    border-radius: 8px;
+    box-shadow:
+      inset 0 0 0 2px #000,
+      inset 0 0 0 3px #59371A;
   }
   .card:hover {
-    border-color: #C9A84C;
+    border-color: #D89043;
   }
 
   .card-selected {
-    border-color: #C9A84C !important;
-    background: linear-gradient(160deg, #3A2E15 0%, #2A2010 100%);
+    border-color: #F5EFDA !important;
     box-shadow:
-      inset 0 0 14px rgba(201,168,76,0.12),
-      0 0 8px rgba(201,168,76,0.2);
+      inset 0 0 0 2px #000,
+      inset 0 0 0 3px #A5906B,
+      0 0 10px rgba(232, 220, 192, 0.25);
+  }
+  .card-selected, .card-selected * {
+    color: #FFFFFF !important;
   }
 
-  /* NWN-style selection list (class picker, feat lists) */
+  /* NWN list entry: each row is its own copper-framed rounded button,
+     the selected one framed and lettered in bright cream-white */
   .nwn-list-item {
-    @apply w-full text-left px-3 py-2 cursor-pointer transition-all text-sm;
-    border: 1px solid transparent;
-    border-bottom: 1px solid rgba(74,53,32,0.4);
-    color: #C9B683;
+    @apply text-left cursor-pointer transition-all text-sm;
+    display: block;
+    width: calc(100% - 12px);
+    margin: 5px 6px;
+    padding: 8px 12px;
+    color: #E8DCC0;
+    background: #050505;
+    border: 1px solid #9C6230 !important;
+    border-radius: 8px;
+    box-shadow:
+      inset 0 0 0 2px #000,
+      inset 0 0 0 3px #59371A;
   }
   .nwn-list-item:hover {
-    background: rgba(201,168,76,0.08);
-    color: #F0DFA8;
+    border-color: #D89043 !important;
+    color: #F5EFDA;
   }
   .nwn-list-item-active {
-    background: linear-gradient(90deg, rgba(201,168,76,0.28) 0%, rgba(201,168,76,0.08) 100%);
-    border: 1px solid rgba(201,168,76,0.5);
-    color: #F0DFA8;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.7);
+    border-color: #F5EFDA !important;
+    color: #FFFFFF;
+    text-shadow: 0 0 6px rgba(255, 255, 255, 0.35);
+    box-shadow:
+      inset 0 0 0 2px #000,
+      inset 0 0 0 3px #A5906B,
+      0 0 10px rgba(232, 220, 192, 0.3);
   }
   .nwn-list-item-disabled {
     opacity: 0.45;
   }
 
-  /* Gold engraved section header bar, like NWN dialog titles */
+  /* Title bar: full-width copper frame with centered cream text */
   .nwn-bar {
-    @apply px-3 py-1.5 text-sm font-bold uppercase;
-    letter-spacing: 0.14em;
-    color: #F0DFA8;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.9);
-    background: linear-gradient(180deg, #4A3821 0%, #33250F 100%);
-    border: 1px solid #6B5630;
-    border-bottom-color: #241B0E;
-    box-shadow: inset 0 1px 0 rgba(240,223,168,0.2);
+    @apply px-4 py-2 text-sm font-bold;
+    letter-spacing: 0.1em;
+    text-align: center;
+    color: #F0E6C8;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+    background: #050505;
+    border: 1px solid #B4713A;
+    border-radius: 8px;
+    box-shadow:
+      inset 0 0 0 2px #000,
+      inset 0 0 0 3px #6E421C;
   }
 
   .input-num {

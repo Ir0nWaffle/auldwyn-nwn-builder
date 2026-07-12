@@ -4,9 +4,9 @@ import CharacterBuilder from './components/CharacterBuilder.jsx'
 export default function App() {
   return (
     <CharacterProvider>
-      <div className="min-h-screen bg-auldwyn-dark">
-        {/* Header */}
-        <header style={{ background: 'linear-gradient(180deg, #2A1F0D 0%, #1A1209 100%)' }}>
+      <div className="min-h-screen">
+        {/* Header — transparent so the smoky black backdrop shows through */}
+        <header>
           <div className="max-w-6xl mx-auto px-6 py-6 flex flex-col items-center">
             <a
               href="https://auldwyn.net/"
@@ -21,7 +21,7 @@ export default function App() {
                 style={{
                   height: '80px',
                   objectFit: 'contain',
-                  filter: 'invert(1) hue-rotate(180deg) drop-shadow(0 0 14px rgba(201,168,76,0.5))',
+                  filter: 'invert(1) hue-rotate(180deg) drop-shadow(0 0 14px rgba(216,144,67,0.45))',
                 }}
               />
             </a>

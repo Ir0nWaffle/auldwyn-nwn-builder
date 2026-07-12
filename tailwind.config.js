@@ -4,13 +4,15 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Palette matched to NWN's original UI: flat black panels,
+        // copper wire borders, cream labels, amber accents
         auldwyn: {
-          gold:   '#C9A84C',
-          dark:   '#1A1209',
-          panel:  '#2A1F0D',
-          border: '#4A3520',
-          text:   '#E8D5A3',
-          muted:  '#9A8060',
+          gold:   '#E39A44',
+          dark:   '#000000',
+          panel:  '#050505',
+          border: '#8F5A2B',
+          text:   '#E8DCC0',
+          muted:  '#A5906B',
           red:    '#8B2020',
           green:  '#2A6040',
         },

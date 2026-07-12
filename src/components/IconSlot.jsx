@@ -11,11 +11,10 @@ export default function IconSlot({ icon, size = 'md', className = '' }) {
     <span
       className={`inline-flex items-center justify-center rounded-sm shrink-0 ${SIZES[size]} ${className}`}
       style={{
-        background: 'linear-gradient(160deg, #2E2414 0%, #1D150A 100%)',
-        border: '1px solid #4A3520',
-        borderTopColor: '#6B5630',
-        borderLeftColor: '#5A4526',
-        boxShadow: 'inset 0 0 6px rgba(0,0,0,0.5), inset 0 1px 0 rgba(201,168,76,0.15)',
+        background: '#050505',
+        border: '1px solid #8F5A2B',
+        borderRadius: '5px',
+        boxShadow: 'inset 0 0 0 1px #000, inset 0 0 4px rgba(0,0,0,0.8)',
       }}
     >
       {icon}
