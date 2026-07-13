@@ -34,7 +34,7 @@ export const CLASSES = {
     saves: { fort: 'poor', ref: 'good', will: 'good' },
     spellcasting: 'arcane',
     classSkills: ['appraise','bluff','concentration','craftarmor','craftweapon','crafttrap','heal','hide','listen','lore','movesilently','parry','perform','persuade','spellcraft','tumble','usemagicdevice'],
-    alignmentRestriction: 'nonchaotic',
+    alignmentRestriction: 'nonlawful',
     bonusFeats: [],
     freeFeats: ['simplewpnprof','armorproflight'],
     prereqs: {},
