@@ -2,8 +2,13 @@
 // key: internal identifier
 // ability: governing ability score
 // armorCheckPenalty: applies armor check penalty when true
-// classOnly: if true, skill cannot be invested in at all unless it appears on
-//            at least one of the character's chosen class skill lists (NWN:EE restriction)
+// classOnly: if true, the skill is "exclusive" in NWN:EE terms — it cannot be
+//            put ranks into cross-class at all, only if it's a class skill
+//            for one of the character's chosen classes. Only Animal Empathy,
+//            Perform, and Use Magic Device are actually exclusive; everything
+//            else (including Disable Trap, Open Lock, Pick Pocket, Set Trap)
+//            is a normal cross-class skill, just costing 2pts/rank with half
+//            the rank cap like any other cross-class skill.
 
 export const SKILLS = {
   animalempathy:  { name: 'Animal Empathy',  ability: 'cha', armorCheckPenalty: false, classOnly: true  },
@@ -14,7 +19,7 @@ export const SKILLS = {
   craftweapon:    { name: 'Craft Weapon',    ability: 'int', armorCheckPenalty: false },
   crafttrap:      { name: 'Craft Trap',      ability: 'int', armorCheckPenalty: false },
   diplomacy:      { name: 'Diplomacy',       ability: 'cha', armorCheckPenalty: false },
-  disable:        { name: 'Disable Trap',    ability: 'int', armorCheckPenalty: false, classOnly: true  },
+  disable:        { name: 'Disable Trap',    ability: 'int', armorCheckPenalty: false },
   discipline:     { name: 'Discipline',      ability: 'str', armorCheckPenalty: false },
   heal:           { name: 'Heal',            ability: 'wis', armorCheckPenalty: false },
   hide:           { name: 'Hide',            ability: 'dex', armorCheckPenalty: true  },
@@ -22,13 +27,13 @@ export const SKILLS = {
   listen:         { name: 'Listen',          ability: 'wis', armorCheckPenalty: false },
   lore:           { name: 'Lore',            ability: 'int', armorCheckPenalty: false },
   movesilently:   { name: 'Move Silently',   ability: 'dex', armorCheckPenalty: true  },
-  openlocks:      { name: 'Open Lock',       ability: 'dex', armorCheckPenalty: false, classOnly: true  },
+  openlocks:      { name: 'Open Lock',       ability: 'dex', armorCheckPenalty: false },
   parry:          { name: 'Parry',           ability: 'dex', armorCheckPenalty: false },
   perform:        { name: 'Perform',         ability: 'cha', armorCheckPenalty: false, classOnly: true  },
   persuade:       { name: 'Persuade',        ability: 'cha', armorCheckPenalty: false },
-  pickpocket:     { name: 'Pick Pocket',     ability: 'dex', armorCheckPenalty: true,  classOnly: true  },
+  pickpocket:     { name: 'Pick Pocket',     ability: 'dex', armorCheckPenalty: true  },
   search:         { name: 'Search',          ability: 'int', armorCheckPenalty: false },
-  settrap:        { name: 'Set Trap',        ability: 'dex', armorCheckPenalty: false, classOnly: true  },
+  settrap:        { name: 'Set Trap',        ability: 'dex', armorCheckPenalty: false },
   spellcraft:     { name: 'Spellcraft',      ability: 'int', armorCheckPenalty: false },
   spot:           { name: 'Spot',            ability: 'wis', armorCheckPenalty: false },
   taunt:          { name: 'Taunt',           ability: 'cha', armorCheckPenalty: false },
