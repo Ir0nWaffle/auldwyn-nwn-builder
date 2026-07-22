@@ -299,6 +299,14 @@ export function checkPrcPrereqs(classKey, character) {
     }
   }
 
+  if (prereqs.anyClassLevels) {
+    const has = prereqs.anyClassLevels.some(c => classLevelFor(classLevels, c) > 0)
+    if (!has) {
+      const names = prereqs.anyClassLevels.map(c => CLASSES[c]?.name ?? c).join(' or ')
+      reasons.push(`Requires at least one level of: ${names}`)
+    }
+  }
+
   if (prereqs.alignment && !alignmentMatches(alignment, prereqs.alignment)) {
     reasons.push(`Alignment must be ${ALIGNMENT_REQ_LABELS[prereqs.alignment] ?? prereqs.alignment}`)
   }
