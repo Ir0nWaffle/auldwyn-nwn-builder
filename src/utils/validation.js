@@ -55,6 +55,15 @@ export function hasDivineSpellcasting(classLevels) {
   return classLevels.some(cl => CLASSES[cl.classKey]?.spellcasting === 'divine' && cl.levels > 0)
 }
 
+// Summed levels across all classes matching a given spellcasting type —
+// used for prereqs like "arcane spellcasting level 3+" (e.g. Pale Master).
+export function spellcastingLevel(classLevels, type) {
+  return classLevels.reduce((sum, cl) => {
+    const cls = CLASSES[cl.classKey]
+    return cls?.spellcasting === type ? sum + cl.levels : sum
+  }, 0)
+}
+
 export function hasSpellcasting(classLevels) {
   return hasArcaneSpellcasting(classLevels) || hasDivineSpellcasting(classLevels)
 }
@@ -268,6 +277,19 @@ export function checkPrcPrereqs(classKey, character) {
   }
   if (prereqs.spellcasting === 'divine' && !hasDivineSpellcasting(classLevels)) {
     reasons.push('Requires divine spellcasting levels')
+  }
+
+  if (prereqs.arcaneLevel) {
+    const have = spellcastingLevel(classLevels, 'arcane')
+    if (have < prereqs.arcaneLevel) {
+      reasons.push(`Arcane spellcasting level ${prereqs.arcaneLevel} required (have ${have})`)
+    }
+  }
+  if (prereqs.divineLevel) {
+    const have = spellcastingLevel(classLevels, 'divine')
+    if (have < prereqs.divineLevel) {
+      reasons.push(`Divine spellcasting level ${prereqs.divineLevel} required (have ${have})`)
+    }
   }
 
   if (prereqs.classLevels) {

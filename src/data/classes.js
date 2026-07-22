@@ -78,7 +78,7 @@ export const CLASSES = {
     babProgression: 'full',
     saves: { fort: 'good', ref: 'poor', will: 'poor' },
     spellcasting: null,
-    classSkills: ['craftarmor','craftweapon','crafttrap','discipline','heal','lore','parry','taunt'],
+    classSkills: ['concentration','craftarmor','craftweapon','crafttrap','discipline','heal','lore','parry','taunt'],
     alignmentRestriction: null,
     bonusFeats: ['fighter'],
     freeFeats: ['simplewpnprof','martialweaponprof','armorproflight','armorprofmedium','armorprofheavy','shieldprof'],
@@ -319,15 +319,14 @@ export const CLASSES = {
     babProgression: 'half',
     saves: { fort: 'poor', ref: 'poor', will: 'good' },
     spellcasting: 'arcane',
-    classSkills: ['concentration','craftarmor','craftweapon','crafttrap','heal','hide','listen','lore','movesilently','parry','spellcraft'],
+    classSkills: ['concentration','craftarmor','craftweapon','crafttrap','heal','hide','listen','lore','movesilently','persuade','spellcraft'],
     alignmentRestriction: 'nongood',
     maxLevel: 10,
     prereqs: {
-      spellcasting: 'arcane',
       alignment: 'nongood',
-      skills: { lore: 8, spellcraft: 8 },
+      arcaneLevel: 3,
     },
-    prereqDescription: 'Alignment: Non-Good; Arcane spellcasting; Lore 8, Spellcraft 8 ranks',
+    prereqDescription: 'Alignment: Non-Good; Arcane spellcasting level 3+',
   },
 
   shadowdancer: {
