@@ -193,8 +193,9 @@ export const CLASSES = {
       race: ['elf','halfelf'],
       bab: 6,
       feats: ['pointblankshot','weaponfocuslongbow'],
+      anyClassLevels: ['bard','sorcerer','wizard'],
     },
-    prereqDescription: 'Race: Elf or Half-Elf; BAB +6; Point Blank Shot; Weapon Focus (Longbow)',
+    prereqDescription: 'Race: Elf or Half-Elf; BAB +6; Point Blank Shot; Weapon Focus (Longbow); able to cast 1st-level arcane spells (Bard, Sorcerer, or Wizard)',
   },
   assassin: {
     name: 'Assassin',

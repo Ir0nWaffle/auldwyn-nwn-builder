@@ -12,7 +12,10 @@
       "Bash(git remote *)",
       "Bash(git commit *)",
       "Bash(git push *)",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "Bash(gh api *)",
+      "Bash(python -m py_compile \"C:/Dev/Auldwyn Dropbox/dropbox_to_workshop.py\")",
+      "Bash(python \"C:\\\\Users\\\\pdele\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Dev-Auldwyn-NWN-Builder\\\\26597c62-f0d0-4e24-8936-dc1fbc69916d\\\\scratchpad\\\\run_publish.py\")"
     ]
   }
 }
