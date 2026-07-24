@@ -1,26 +1,33 @@
 import { useState } from 'react'
 import { useCharacter } from '../../store/CharacterContext.jsx'
+import { ALIGNMENT_LABELS } from '../../data/alignments.js'
 
-const ALIGNMENTS = {
-  lawfulgood:     { label: 'Lawful Good',     abbr: 'LG', title: 'The Crusader',
+// Per-alignment flavor (abbr/title/desc) — label comes from the shared
+// ALIGNMENT_LABELS so every screen stays in sync.
+const ALIGNMENT_FLAVOR = {
+  lawfulgood:     { abbr: 'LG', title: 'The Crusader',
     desc: 'A lawful good character acts as a good person is expected or required to act. She combines a commitment to oppose evil with the discipline to fight relentlessly.' },
-  neutralgood:    { label: 'Neutral Good',    abbr: 'NG', title: 'The Benefactor',
+  neutralgood:    { abbr: 'NG', title: 'The Benefactor',
     desc: 'A neutral good character does the best that a good person can do. He is devoted to helping others, and works with rulers but does not feel beholden to them.' },
-  chaoticgood:    { label: 'Chaotic Good',    abbr: 'CG', title: 'The Rebel',
+  chaoticgood:    { abbr: 'CG', title: 'The Rebel',
     desc: 'A chaotic good character acts as his conscience directs him with little regard for what others expect. He follows his own moral compass, which points toward good.' },
-  lawfulneutral:  { label: 'Lawful Neutral',  abbr: 'LN', title: 'The Judge',
+  lawfulneutral:  { abbr: 'LN', title: 'The Judge',
     desc: 'A lawful neutral character acts as law, tradition, or a personal code directs her. Order and organization are paramount to her.' },
-  trueneutral:    { label: 'True Neutral',    abbr: 'TN', title: 'The Undecided',
+  trueneutral:    { abbr: 'TN', title: 'The Undecided',
     desc: 'A neutral character does what seems to be a good idea. She thinks of good as better than evil, but is not personally committed to upholding it in any abstract way.' },
-  chaoticneutral: { label: 'Chaotic Neutral', abbr: 'CN', title: 'The Free Spirit',
+  chaoticneutral: { abbr: 'CN', title: 'The Free Spirit',
     desc: 'A chaotic neutral character follows his whims. He is an individualist first and last — he values his own liberty but does not strive to protect the freedom of others.' },
-  lawfulevil:     { label: 'Lawful Evil',     abbr: 'LE', title: 'The Dominator',
+  lawfulevil:     { abbr: 'LE', title: 'The Dominator',
     desc: 'A lawful evil villain methodically takes what he wants within the limits of his code of conduct. He cares about tradition, loyalty, and order — but not about freedom or life.' },
-  neutralevil:    { label: 'Neutral Evil',    abbr: 'NE', title: 'The Malefactor',
+  neutralevil:    { abbr: 'NE', title: 'The Malefactor',
     desc: 'A neutral evil villain does whatever she can get away with. She is out for herself, pure and simple, shedding no tears for those she kills.' },
-  chaoticevil:    { label: 'Chaotic Evil',    abbr: 'CE', title: 'The Destroyer',
+  chaoticevil:    { abbr: 'CE', title: 'The Destroyer',
     desc: 'A chaotic evil character does whatever his greed, hatred, and lust for destruction drive him to do. He is vicious, arbitrarily violent, and unpredictable.' },
 }
+
+const ALIGNMENTS = Object.fromEntries(
+  Object.keys(ALIGNMENT_FLAVOR).map(key => [key, { label: ALIGNMENT_LABELS[key], ...ALIGNMENT_FLAVOR[key] }])
+)
 
 // Returns alignment restriction warnings for selected classes
 function getRestrictions(classLevels) {

@@ -5,6 +5,7 @@ import { SKILLS } from '../data/skills.js'
 import { FEATS } from '../data/feats.js'
 import { abilityMod, calcBAB, totalCharacterLevel, calcTotalSkillPoints, calcSkillPointsSpent, calcTotalFeatsAvailable, effectiveScore, freeFeatsGrantedAtLevel } from '../utils/validation.js'
 import { CLASS_ICONS, SKILL_ICONS, FEAT_ICONS } from '../data/icons.js'
+import { alignmentLabel } from '../data/alignments.js'
 
 const ABILITY_KEYS = ['str', 'dex', 'con', 'int', 'wis', 'cha']
 const ABILITY_LABELS = { str: 'Strength', dex: 'Dexterity', con: 'Constitution', int: 'Intelligence', wis: 'Wisdom', cha: 'Charisma' }
@@ -72,12 +73,6 @@ export default function PrintSheet({ onClose }) {
     window.print()
   }
 
-  const alignmentDisplay = {
-    lawfulgood: 'Lawful Good', neutralgood: 'Neutral Good', chaoticgood: 'Chaotic Good',
-    lawfulneutral: 'Lawful Neutral', trueneutral: 'True Neutral', chaoticneutral: 'Chaotic Neutral',
-    lawfulevil: 'Lawful Evil', neutralevil: 'Neutral Evil', chaoticevil: 'Chaotic Evil',
-  }
-
   return (
     <div className="print-overlay">
       {/* Screen-only controls */}
@@ -97,7 +92,7 @@ export default function PrintSheet({ onClose }) {
           </div>
           <div className="print-header-meta">
             <span><strong>Race:</strong> {race?.name ?? '—'}</span>
-            <span><strong>Alignment:</strong> {alignmentDisplay[character.alignment] ?? '—'}</span>
+            <span><strong>Alignment:</strong> {character.alignment ? alignmentLabel(character.alignment) : '—'}</span>
             <span><strong>Total Level:</strong> {charLevel}</span>
             <span><strong>Size:</strong> {race?.size ?? '—'}</span>
           </div>

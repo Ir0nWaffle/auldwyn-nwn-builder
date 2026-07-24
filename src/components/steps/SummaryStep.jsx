@@ -11,6 +11,7 @@ import {
   validateCharacter, effectiveScore, freeFeatsGrantedAtLevel,
 } from '../../utils/validation.js'
 import { CLASS_ICONS, SKILL_ICONS, FEAT_ICONS } from '../../data/icons.js'
+import { alignmentLabel } from '../../data/alignments.js'
 import IconSlot from '../IconSlot.jsx'
 
 const ABILITY_KEYS = ['str', 'dex', 'con', 'int', 'wis', 'cha']
@@ -75,7 +76,7 @@ export default function SummaryStep({ onBack }) {
   function exportText() {
     const lines = [
       `=== ${character.name} ===`,
-      `Race: ${race?.name ?? 'Unknown'}  Alignment: ${character.alignment ?? 'Unknown'}`,
+      `Race: ${race?.name ?? 'Unknown'}  Alignment: ${alignmentLabel(character.alignment)}`,
       `Level: ${charLevel}  BAB: +${bab}`,
       '',
       'Classes:',
@@ -139,7 +140,7 @@ export default function SummaryStep({ onBack }) {
         <div>
           <h2 className="step-title mb-0">{character.name || 'Unnamed Character'}</h2>
           <p className="text-auldwyn-muted text-sm">
-            {race?.name} · {character.alignment} · Level {charLevel}
+            {race?.name} · {alignmentLabel(character.alignment)} · Level {charLevel}
           </p>
         </div>
         <div className="flex gap-2">
