@@ -348,6 +348,19 @@ export const FEATS = {
   spellfocusnec:  { name: 'Spell Focus (Necromancy)',   type: 'spellcasting', description: '+2 DC to Necromancy spells.', prereqs: { spellcasting: true } },
   spellfocustrans:{ name: 'Spell Focus (Transmutation)',type: 'spellcasting', description: '+2 DC to Transmutation spells.', prereqs: { spellcasting: true } },
   spellfocusill:  { name: 'Spell Focus (Illusion)',     type: 'spellcasting', description: '+2 DC to Illusion spells.', prereqs: { spellcasting: true } },
+
+  // ── Greater Spell Focus Feats ──────────────────────────────────────────────
+  // Each requires Spell Focus in that exact school; the +4 DC replaces (does
+  // not stack with) Spell Focus's +2 for that school.
+  greaterspellfocusabj:   { name: 'Greater Spell Focus (Abjuration)',    type: 'spellcasting', description: '+4 DC to Abjuration spells (replaces Spell Focus).', prereqs: { spellcasting: true, feats: ['spellfocusabj'] } },
+  greaterspellfocuscon:   { name: 'Greater Spell Focus (Conjuration)',   type: 'spellcasting', description: '+4 DC to Conjuration spells (replaces Spell Focus).', prereqs: { spellcasting: true, feats: ['spellfocuscon'] } },
+  greaterspellfocusdiv:   { name: 'Greater Spell Focus (Divination)',    type: 'spellcasting', description: '+4 DC to Divination spells (replaces Spell Focus).', prereqs: { spellcasting: true, feats: ['spellfocusdiv'] } },
+  greaterspellfocusenc:   { name: 'Greater Spell Focus (Enchantment)',   type: 'spellcasting', description: '+4 DC to Enchantment spells (replaces Spell Focus).', prereqs: { spellcasting: true, feats: ['spellfocusenc'] } },
+  greaterspellfocusevo:   { name: 'Greater Spell Focus (Evocation)',     type: 'spellcasting', description: '+4 DC to Evocation spells (replaces Spell Focus).', prereqs: { spellcasting: true, feats: ['spellfocusevo'] } },
+  greaterspellfocusnec:   { name: 'Greater Spell Focus (Necromancy)',    type: 'spellcasting', description: '+4 DC to Necromancy spells (replaces Spell Focus).', prereqs: { spellcasting: true, feats: ['spellfocusnec'] } },
+  greaterspellfocustrans: { name: 'Greater Spell Focus (Transmutation)', type: 'spellcasting', description: '+4 DC to Transmutation spells (replaces Spell Focus).', prereqs: { spellcasting: true, feats: ['spellfocustrans'] } },
+  greaterspellfocusill:   { name: 'Greater Spell Focus (Illusion)',      type: 'spellcasting', description: '+4 DC to Illusion spells (replaces Spell Focus).', prereqs: { spellcasting: true, feats: ['spellfocusill'] } },
+
   spellpenetration:{ name: 'Spell Penetration',         type: 'spellcasting', description: '+2 bonus on spell penetration checks.', prereqs: { spellcasting: true } },
   greaterspellpen: { name: 'Greater Spell Penetration', type: 'spellcasting', description: '+2 additional bonus on spell penetration (total +4).', prereqs: { spellcasting: true, feats: ['spellpenetration'] } },
 }
