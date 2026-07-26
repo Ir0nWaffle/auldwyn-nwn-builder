@@ -494,6 +494,8 @@ export default function LevelPlanStep({ onNext, onBack }) {
       if (featSearch && !feat.name.toLowerCase().includes(featSearch.toLowerCase())) return false
       return checkFeatPrereqs(key, snapshot).met
     })
+    const generalFeats = available.filter(([, feat]) => !feat.epic)
+    const epicFeats = available.filter(([, feat]) => feat.epic)
 
     const freeFeats = freeFeatsGrantedAtLevel(levels, i)
 
@@ -525,7 +527,7 @@ export default function LevelPlanStep({ onNext, onBack }) {
                          text-auldwyn-text focus:outline-none focus:border-auldwyn-gold"
             />
             <div className="panel !p-0 max-h-[330px] overflow-y-auto divide-y divide-auldwyn-border/20">
-              {available.map(([key, feat]) => (
+              {generalFeats.map(([key, feat]) => (
                 <button key={key}
                   onClick={() => slotsLeft > 0 && dispatch({ type: 'ADD_LEVEL_FEAT', index: i, featKey: key })}
                   disabled={slotsLeft <= 0}
@@ -537,6 +539,23 @@ export default function LevelPlanStep({ onNext, onBack }) {
                   </span>
                 </button>
               ))}
+              {epicFeats.length > 0 && (
+                <>
+                  <div className="nwn-bar text-[10px] !py-1 tracking-wider text-auldwyn-gold/90">⭐ Epic Feats</div>
+                  {epicFeats.map(([key, feat]) => (
+                    <button key={key}
+                      onClick={() => slotsLeft > 0 && dispatch({ type: 'ADD_LEVEL_FEAT', index: i, featKey: key })}
+                      disabled={slotsLeft <= 0}
+                      className="nwn-list-item disabled:opacity-40 flex items-start gap-2">
+                      <IconSlot icon={FEAT_ICONS[key]} size="sm" className="mt-0.5" />
+                      <span className="flex-1">
+                        <span className="font-bold">{feat.name}</span>
+                        <span className="block text-xs text-auldwyn-muted mt-0.5">{feat.description}</span>
+                      </span>
+                    </button>
+                  ))}
+                </>
+              )}
               {available.length === 0 && (
                 <p className="text-xs text-auldwyn-muted p-3">No eligible feats match.</p>
               )}
