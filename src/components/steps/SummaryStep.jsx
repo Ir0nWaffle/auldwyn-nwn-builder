@@ -12,6 +12,9 @@ import {
 } from '../../utils/validation.js'
 import { CLASS_ICONS, SKILL_ICONS, FEAT_ICONS } from '../../data/icons.js'
 import { alignmentLabel } from '../../data/alignments.js'
+import {
+  CASTING_ABILITY, FIRST_SPELL_LEVEL, totalSpellSlots, baseSpellsKnown,
+} from '../../data/spellSlots.js'
 import IconSlot from '../IconSlot.jsx'
 
 const ABILITY_KEYS = ['str', 'dex', 'con', 'int', 'wis', 'cha']
@@ -66,6 +69,21 @@ export default function SummaryStep({ onBack }) {
   const chosenFeatCount = character.selectedFeats.filter(f => !freeFeatKeys.has(f.featKey)).length
 
   const { valid, errors, warnings } = validateCharacter(character)
+
+  // Spell slots per caster class. Slots freeze at class level 20 — epic levels
+  // grant none — so totalSpellSlots() clamps internally.
+  const casterBlocks = character.classLevels
+    .filter(cl => CASTING_ABILITY[cl.classKey])
+    .map(({ classKey, levels }) => {
+      const ability = CASTING_ABILITY[classKey]
+      const mod = abilityMod(effectiveScore(ability, character.abilities, mods, increases))
+      return {
+        classKey, classLevel: levels, ability, mod,
+        slots: totalSpellSlots(classKey, levels, mod),
+        known: baseSpellsKnown(classKey, levels),
+      }
+    })
+    .filter(b => b.slots)
 
   // HP is max per level on Auldwyn
   const avgHp = character.classLevels.reduce((sum, { classKey, levels }) => {
@@ -257,6 +275,40 @@ export default function SummaryStep({ onBack }) {
           </Section>
         </div>
       </div>
+
+      {/* Spells per day — only for characters with caster levels */}
+      {casterBlocks.length > 0 && (
+        <Section title="Spells per Day">
+          {casterBlocks.map(({ classKey, classLevel, ability, mod, slots, known }) => (
+            <div key={classKey} className="mb-3 last:mb-0">
+              <div className="flex items-center gap-2 mb-1">
+                <IconSlot icon={CLASS_ICONS[classKey]} size="sm" />
+                <span className="text-auldwyn-text font-bold">
+                  {CLASSES[classKey]?.name} {classLevel}
+                </span>
+                <span className="text-auldwyn-muted text-xs">
+                  {ability.toUpperCase()} {mod >= 0 ? '+' : ''}{mod}
+                  {classLevel > 20 && ' · slots capped at class level 20'}
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {slots.map((n, idx) => {
+                  if (n === null) return null
+                  const lvl = idx + (FIRST_SPELL_LEVEL[classKey] ?? 0)
+                  const k = known?.[idx]
+                  return (
+                    <span key={lvl} className="text-xs font-mono bg-black/20 rounded-sm px-2 py-1">
+                      <span className="text-auldwyn-muted">{lvl === 0 ? 'Cant' : `L${lvl}`}</span>
+                      <span className="text-auldwyn-gold font-bold ml-1.5">{n}</span>
+                      {k != null && <span className="text-auldwyn-muted/70 ml-1">({k} known)</span>}
+                    </span>
+                  )
+                })}
+              </div>
+            </div>
+          ))}
+        </Section>
+      )}
 
       {/* Leveling guide */}
       {character.levels?.length > 0 && (
