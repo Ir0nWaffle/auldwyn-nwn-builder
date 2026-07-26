@@ -3,6 +3,7 @@ import { RACES } from '../data/races.js'
 import { CLASSES } from '../data/classes.js'
 import { SKILLS } from '../data/skills.js'
 import { FEATS } from '../data/feats.js'
+import { SPELLS } from '../data/spells.js'
 import { abilityMod, calcBAB, babFromPlan, calcClassSaves, savesFromPlan, totalCharacterLevel, calcTotalSkillPoints, calcSkillPointsSpent, calcTotalFeatsAvailable, effectiveScore, freeFeatsGrantedAtLevel, featuresAtClassLevel } from '../utils/validation.js'
 import { CLASS_ICONS, SKILL_ICONS, FEAT_ICONS, getFeatureIcon } from '../data/icons.js'
 import { alignmentLabel } from '../data/alignments.js'
@@ -210,6 +211,10 @@ export default function PrintSheet({ onClose }) {
                   if (free) parts.push(`Free: ${free}`)
                   const fl = (lv.feats ?? []).map(f => FEATS[f]?.name ?? f).join(', ')
                   if (fl) parts.push(`Feats: ${fl}`)
+                  const spl = (lv.spells ?? []).map(k => SPELLS[k]?.name ?? k).join(', ')
+                  if (spl) parts.push(`Spells: ${spl}`)
+                  const swp = (lv.spellSwaps ?? []).map(s => `${SPELLS[s.out]?.name ?? s.out} → ${SPELLS[s.in]?.name ?? s.in}`).join(', ')
+                  if (swp) parts.push(`Swap: ${swp}`)
                   const sl = Object.entries(lv.skills ?? {}).filter(([, r]) => r > 0)
                     .map(([k, r]) => `${SKILLS[k]?.name} +${r}`).join(', ')
                   if (sl) parts.push(`Skills: ${sl}`)

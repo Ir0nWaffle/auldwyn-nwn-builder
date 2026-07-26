@@ -391,8 +391,7 @@ export const SERVER_SETTINGS = {
   maxLevel: 20,
   maxDistinctClasses: 3,
   allowedClasses: Object.keys(CLASSES).filter(k => !['shadowdancer','dragondisciple'].includes(k)),
-  // Per-level spell selection (Wizard spellbook picks, Sorcerer/Bard spells
-  // known) is built but not yet wired into the live level planner. Flip to
-  // true once verified end-to-end. See src/data/spellSelection.js.
-  spellSelectionEnabled: false,
+  // Per-level spell selection: Wizard spellbook picks, Sorcerer/Bard spells
+  // known plus unlimited same-level swaps. See src/data/spellSelection.js.
+  spellSelectionEnabled: true,
 }

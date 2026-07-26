@@ -15,6 +15,7 @@ import { alignmentLabel } from '../../data/alignments.js'
 import {
   CASTING_ABILITY, FIRST_SPELL_LEVEL, totalSpellSlots, baseSpellsKnown,
 } from '../../data/spellSlots.js'
+import { SPELLS } from '../../data/spells.js'
 import IconSlot from '../IconSlot.jsx'
 
 const ABILITY_KEYS = ['str', 'dex', 'con', 'int', 'wis', 'cha']
@@ -131,6 +132,10 @@ export default function SummaryStep({ onBack }) {
         const sl = Object.entries(lv.skills ?? {}).filter(([, r]) => r > 0)
           .map(([k, r]) => `${SKILLS[k]?.name} +${r}`).join(', ')
         if (sl) parts.push(`Skills: ${sl}`)
+        const spl = (lv.spells ?? []).map(k => SPELLS[k]?.name ?? k).join(', ')
+        if (spl) parts.push(`Spells: ${spl}`)
+        const swp = (lv.spellSwaps ?? []).map(s => `${SPELLS[s.out]?.name ?? s.out} → ${SPELLS[s.in]?.name ?? s.in}`).join(', ')
+        if (swp) parts.push(`Swap: ${swp}`)
         return `  Lv ${String(i + 1).padStart(2)}: ${CLASSES[lv.classKey]?.name} ${classNum}${parts.length ? ' — ' + parts.join('; ') : ''}`
       }),
     ]
@@ -323,6 +328,8 @@ export default function SummaryStep({ onBack }) {
               const featList = (lv.feats ?? []).map(f => FEATS[f]?.name ?? f).join(', ')
               const freeList = freeFeatsGrantedAtLevel(character.levels, i).map(f => FEATS[f]?.name ?? f).join(', ')
               const featureList = featuresAtClassLevel(lv.classKey, classNum).map(f => `${getFeatureIcon(f.name, lv.classKey)} ${f.name}`).join(', ')
+              const spellList = (lv.spells ?? []).map(k => SPELLS[k]?.name ?? k).join(', ')
+              const swapList = (lv.spellSwaps ?? []).map(s => `${SPELLS[s.out]?.name ?? s.out} → ${SPELLS[s.in]?.name ?? s.in}`).join(', ')
               return (
                 <div key={i} className="flex gap-3 text-sm py-1 border-b border-auldwyn-border/30 last:border-0">
                   <span className="text-auldwyn-gold font-bold w-8 shrink-0">{i + 1}</span>
@@ -333,8 +340,10 @@ export default function SummaryStep({ onBack }) {
                     {featureList && <span className="text-auldwyn-gold/80">Gains: {featureList}. </span>}
                     {freeList && <span>Free: {freeList}. </span>}
                     {featList && <span>Feats: {featList}. </span>}
+                    {spellList && <span>Spells: {spellList}. </span>}
+                    {swapList && <span>Swap: {swapList}. </span>}
                     {skillList && <span>Skills: {skillList}.</span>}
-                    {!lv.abilityIncrease && !featureList && !featList && !freeList && !skillList && '—'}
+                    {!lv.abilityIncrease && !featureList && !featList && !freeList && !skillList && !spellList && !swapList && '—'}
                   </span>
                 </div>
               )
