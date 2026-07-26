@@ -8,7 +8,7 @@ import { FEATS } from '../../data/feats.js'
 import {
   abilityMod, calcBAB, babFromPlan, totalCharacterLevel,
   calcTotalSkillPoints, calcSkillPointsSpent, calcTotalFeatsAvailable,
-  validateCharacter, effectiveScore, freeFeatsGrantedAtLevel,
+  validateCharacter, effectiveScore, freeFeatsGrantedAtLevel, featuresAtClassLevel,
 } from '../../utils/validation.js'
 import { CLASS_ICONS, SKILL_ICONS, FEAT_ICONS } from '../../data/icons.js'
 import { alignmentLabel } from '../../data/alignments.js'
@@ -104,6 +104,8 @@ export default function SummaryStep({ onBack }) {
         const classNum = character.levels.slice(0, i + 1).filter(l => l.classKey === lv.classKey).length
         const parts = []
         if (lv.abilityIncrease) parts.push(`+1 ${lv.abilityIncrease.toUpperCase()}`)
+        const gains = featuresAtClassLevel(lv.classKey, classNum).map(f => f.name).join(', ')
+        if (gains) parts.push(`Gains: ${gains}`)
         const free = freeFeatsGrantedAtLevel(character.levels, i).map(f => FEATS[f]?.name ?? f).join(', ')
         if (free) parts.push(`Free: ${free}`)
         const fl = (lv.feats ?? []).map(f => FEATS[f]?.name ?? f).join(', ')
@@ -268,6 +270,7 @@ export default function SummaryStep({ onBack }) {
                 .join(', ')
               const featList = (lv.feats ?? []).map(f => FEATS[f]?.name ?? f).join(', ')
               const freeList = freeFeatsGrantedAtLevel(character.levels, i).map(f => FEATS[f]?.name ?? f).join(', ')
+              const featureList = featuresAtClassLevel(lv.classKey, classNum).map(f => f.name).join(', ')
               return (
                 <div key={i} className="flex gap-3 text-sm py-1 border-b border-auldwyn-border/30 last:border-0">
                   <span className="text-auldwyn-gold font-bold w-8 shrink-0">{i + 1}</span>
@@ -275,10 +278,11 @@ export default function SummaryStep({ onBack }) {
                   <span className="text-auldwyn-text w-36 shrink-0">{CLASSES[lv.classKey]?.name} {classNum}</span>
                   <span className="text-auldwyn-muted text-xs leading-relaxed">
                     {lv.abilityIncrease && <span className="text-auldwyn-gold">+1 {lv.abilityIncrease.toUpperCase()}. </span>}
+                    {featureList && <span className="text-auldwyn-gold/80">Gains: {featureList}. </span>}
                     {freeList && <span>Free: {freeList}. </span>}
                     {featList && <span>Feats: {featList}. </span>}
                     {skillList && <span>Skills: {skillList}.</span>}
-                    {!lv.abilityIncrease && !featList && !freeList && !skillList && '—'}
+                    {!lv.abilityIncrease && !featureList && !featList && !freeList && !skillList && '—'}
                   </span>
                 </div>
               )

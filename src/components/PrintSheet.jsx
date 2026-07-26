@@ -3,7 +3,7 @@ import { RACES } from '../data/races.js'
 import { CLASSES } from '../data/classes.js'
 import { SKILLS } from '../data/skills.js'
 import { FEATS } from '../data/feats.js'
-import { abilityMod, calcBAB, babFromPlan, calcClassSaves, savesFromPlan, totalCharacterLevel, calcTotalSkillPoints, calcSkillPointsSpent, calcTotalFeatsAvailable, effectiveScore, freeFeatsGrantedAtLevel } from '../utils/validation.js'
+import { abilityMod, calcBAB, babFromPlan, calcClassSaves, savesFromPlan, totalCharacterLevel, calcTotalSkillPoints, calcSkillPointsSpent, calcTotalFeatsAvailable, effectiveScore, freeFeatsGrantedAtLevel, featuresAtClassLevel } from '../utils/validation.js'
 import { CLASS_ICONS, SKILL_ICONS, FEAT_ICONS } from '../data/icons.js'
 import { alignmentLabel } from '../data/alignments.js'
 
@@ -204,6 +204,8 @@ export default function PrintSheet({ onClose }) {
                   const classNum = character.levels.slice(0, i + 1).filter(l => l.classKey === lv.classKey).length
                   const parts = []
                   if (lv.abilityIncrease) parts.push(`+1 ${lv.abilityIncrease.toUpperCase()}`)
+                  const gains = featuresAtClassLevel(lv.classKey, classNum).map(f => f.name).join(', ')
+                  if (gains) parts.push(`Gains: ${gains}`)
                   const free = freeFeatsGrantedAtLevel(character.levels, i).map(f => FEATS[f]?.name ?? f).join(', ')
                   if (free) parts.push(`Free: ${free}`)
                   const fl = (lv.feats ?? []).map(f => FEATS[f]?.name ?? f).join(', ')

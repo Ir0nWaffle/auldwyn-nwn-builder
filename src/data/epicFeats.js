@@ -37,8 +37,10 @@ export const EPIC_FEATS = {
   epicdodge: {
     name: 'Epic Dodge', type: 'general', epic: true,
     description: 'Automatically avoid the first attack against you each round.',
-    prereqs: { minLevel: 21, dex: 25, feats: ['dodge'], skills: { tumble: 30 } },
-    prereqNote: 'Also requires Improved Evasion and Defensive Roll (class features).',
+    prereqs: {
+      minLevel: 21, dex: 25, feats: ['dodge'], skills: { tumble: 30 },
+      classFeatures: { improvedevasion: 'Improved Evasion', defensiveroll: 'Defensive Roll' },
+    },
   },
   epicenergyresistance: {
     name: 'Epic Energy Resistance', type: 'general', epic: true, stackable: 10,
@@ -73,14 +75,15 @@ export const EPIC_FEATS = {
   selfconcealment: {
     name: 'Self Concealment', type: 'general', epic: true, stackable: 5,
     description: '+10% concealment. May be taken up to 5 times (to 50%).',
-    prereqs: { minLevel: 21, dex: 30, skills: { hide: 30, tumble: 30 } },
-    prereqNote: 'Also requires Improved Evasion (class feature).',
+    prereqs: {
+      minLevel: 21, dex: 30, skills: { hide: 30, tumble: 30 },
+      classFeatures: { improvedevasion: 'Improved Evasion' },
+    },
   },
   improvedspellresistance: {
     name: 'Improved Spell Resistance', type: 'general', epic: true, stackable: 10,
     description: '+2 spell resistance. May be taken up to 10 times (to +20).',
-    prereqs: { minLevel: 21, classLevels: { monk: 13 } },
-    prereqNote: 'Requires the monk Diamond Soul class feature (Monk 13).',
+    prereqs: { minLevel: 21, classFeatures: { diamondsoul: 'Diamond Soul (Monk 12)' } },
   },
 
   // ── Ability scores ────────────────────────────────────────────────────────
@@ -177,8 +180,7 @@ export const EPIC_FEATS = {
   greatsmiting: {
     name: 'Great Smiting', type: 'general', epic: true, stackable: 10,
     description: 'Smite attacks add twice your level to damage. May be taken up to 10 times.',
-    prereqs: { minLevel: 21, cha: 25 },
-    prereqNote: 'Requires Smite Good or Smite Evil (Paladin or Blackguard class feature).',
+    prereqs: { minLevel: 21, cha: 25, classFeatures: { smite: 'Smite Good or Smite Evil' } },
   },
   epicreputation: {
     name: 'Epic Reputation', type: 'general', epic: true,
@@ -267,37 +269,44 @@ export const EPIC_FEATS = {
   mightyrage: {
     name: 'Mighty Rage', type: 'general', epic: true,
     description: 'Rage grants +8 Strength and Constitution, and +4 morale bonus to Will saves.',
-    prereqs: { minLevel: 21, str: 21, con: 21, classLevels: { barbarian: 20 } },
-    prereqNote: 'Requires Greater Rage 6x/day (Barbarian 20).',
+    prereqs: {
+      minLevel: 21, str: 21, con: 21,
+      classFeatures: { greaterrage6: 'Greater Rage 6x/day (Barbarian 20)' },
+    },
   },
   terrifyingrage: {
     name: 'Terrifying Rage', type: 'general', epic: true,
     description: 'Enemies near you while raging must save or become panicked.',
-    prereqs: { minLevel: 21, classLevels: { barbarian: 21 }, skills: { intimidate: 25 } },
-    prereqNote: 'Requires Greater Rage 4x/day.',
+    prereqs: {
+      minLevel: 21, skills: { intimidate: 25 },
+      classFeatures: { greaterrage: 'Greater Rage (Barbarian 15)' },
+    },
   },
   thunderingrage: {
     name: 'Thundering Rage', type: 'general', epic: true,
     description: 'Weapons deal +2d6 on a critical while raging, and may deafen the target.',
-    prereqs: { minLevel: 21, str: 25, classLevels: { barbarian: 21 } },
-    prereqNote: 'Requires Greater Rage 4x/day.',
+    prereqs: {
+      minLevel: 21, str: 25,
+      classFeatures: { greaterrage: 'Greater Rage (Barbarian 15)' },
+    },
   },
   lastinginspiration: {
     name: 'Lasting Inspiration', type: 'general', epic: true,
     description: 'Bardic music effects last ten times longer.',
-    prereqs: { minLevel: 21, classLevels: { bard: 21 }, skills: { perform: 25 } },
+    prereqs: {
+      minLevel: 21, skills: { perform: 25 },
+      classFeatures: { bardsong: 'Bard Song' },
+    },
   },
   planarturning: {
     name: 'Planar Turning', type: 'general', epic: true,
     description: 'Allows outsiders to be turned as though they were undead.',
-    prereqs: { minLevel: 21, wis: 25, cha: 25 },
-    prereqNote: 'Requires the Turn Undead class feature (Cleric or Paladin).',
+    prereqs: { minLevel: 21, wis: 25, cha: 25, classFeatures: { turnundead: 'Turn Undead' } },
   },
   improvedkistrike4: {
     name: 'Improved Ki Strike 4', type: 'general', epic: true,
     description: 'Unarmed attacks count as a +4 magic weapon against damage reduction.',
-    prereqs: { minLevel: 21, wis: 21, classLevels: { monk: 16 } },
-    prereqNote: 'Requires Ki Strike +3 (Monk 16).',
+    prereqs: { minLevel: 21, wis: 21, classFeatures: { kistrike3: 'Ki Strike +3 (Monk 16)' } },
   },
   improvedkistrike5: {
     name: 'Improved Ki Strike 5', type: 'general', epic: true,
@@ -324,8 +333,8 @@ export const EPIC_FEATS = {
   dragonshape: {
     name: 'Dragon Shape', type: 'general', epic: true,
     description: 'Use wild shape to become a dragon for 1 hour per class level.',
-    prereqs: { minLevel: 21, wis: 30 },
-    prereqNote: 'Requires Wild Shape 6x/day or Greater Wild Shape IV (Druid or Shifter).',
+    prereqs: { minLevel: 21, wis: 30, anyClassFeature: ['wildshape6', 'greaterwildshape4'] },
+    prereqNote: 'Requires Wild Shape 6x/day (Druid 18) or Greater Wild Shape IV (Shifter 10).',
   },
 
   // ── Auto-granted (never player-selected; listed for completeness) ─────────

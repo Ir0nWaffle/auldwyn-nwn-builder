@@ -8,7 +8,7 @@ import {
   planLevelEconomics, featSlotsAtLevel, characterAtLevel, deriveFeats,
   maxRankAtLevel, ranksThroughLevel, checkClassEligibility, checkFeatPrereqs,
   abilityMod, effectiveScore, deriveIncreases, babFromPlan, deriveClassLevels,
-  freeFeatsGrantedAtLevel, classMaxLevel,
+  freeFeatsGrantedAtLevel, classMaxLevel, featuresAtClassLevel,
 } from '../../utils/validation.js'
 import { CLASS_ICONS, SKILL_ICONS, FEAT_ICONS } from '../../data/icons.js'
 import IconSlot from '../IconSlot.jsx'
@@ -146,6 +146,8 @@ export default function LevelPlanStep({ onNext, onBack }) {
                   ...(lv.feats ?? []).map(f => FEATS[f]?.name ?? f),
                 ].join(', ')
                 const skillPts = econ[idx].spent
+                const featureList = featuresAtClassLevel(lv.classKey, classNum)
+                  .map(f => f.name).join(', ')
                 return (
                   <div key={idx} className="flex items-center gap-3 px-3 py-2">
                     <span className="w-7 h-7 rounded-sm border border-auldwyn-gold/40 text-auldwyn-gold
@@ -159,9 +161,10 @@ export default function LevelPlanStep({ onNext, onBack }) {
                     </span>
                     <span className="flex-1 text-xs text-auldwyn-muted truncate">
                       {lv.abilityIncrease && <span className="text-auldwyn-gold">+1 {lv.abilityIncrease.toUpperCase()} · </span>}
+                      {featureList && <span className="text-auldwyn-gold/80">{featureList} · </span>}
                       {featList && <span>{featList} · </span>}
                       {skillPts > 0 && <span>{skillPts} skill pts</span>}
-                      {!lv.abilityIncrease && !featList && skillPts === 0 && '—'}
+                      {!lv.abilityIncrease && !featureList && !featList && skillPts === 0 && '—'}
                     </span>
                     <span className="text-xs text-auldwyn-muted/60 font-mono shrink-0">bank {econ[idx].pool}</span>
                     <button
@@ -583,6 +586,7 @@ export default function LevelPlanStep({ onNext, onBack }) {
       RACES[character.race]?.abilityMods ?? {}, deriveIncreases(levels)))
     const hpGain = (cls?.hitDie ?? 0) + conMod
     const newBab = babFromPlan(levels)
+    const gainedFeatures = featuresAtClassLevel(lv.classKey, classNum)
 
     return (
       <div>
@@ -608,6 +612,14 @@ export default function LevelPlanStep({ onNext, onBack }) {
             <div className="flex justify-between">
               <span className="text-auldwyn-muted">Ability Increase</span>
               <span className="text-auldwyn-gold font-bold">+1 {ABILITY_LABELS[lv.abilityIncrease]}</span>
+            </div>
+          )}
+          {gainedFeatures.length > 0 && (
+            <div className="flex justify-between">
+              <span className="text-auldwyn-muted">Class Features</span>
+              <span className="text-auldwyn-gold text-right max-w-[60%]">
+                {gainedFeatures.map(f => f.name).join(', ')}
+              </span>
             </div>
           )}
           {freeFeats.length > 0 && (

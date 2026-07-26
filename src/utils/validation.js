@@ -6,6 +6,9 @@ import {
   GENERAL_FEAT_LEVELS, CLASS_BONUS_FEAT_LEVELS, classBonusFeatsAt,
   epicAttackBonus, epicSaveBonus, EPIC_CLASS_MAX_LEVEL, EPIC_START_LEVEL,
 } from '../data/epicProgression.js'
+import { hasClassFeature, featuresAtClassLevel, allClassFeatures } from '../data/classFeatures.js'
+
+export { hasClassFeature, featuresAtClassLevel, allClassFeatures }
 
 export { epicAttackBonus, epicSaveBonus }
 
@@ -248,6 +251,19 @@ export function checkFeatPrereqs(featKey, character) {
 
   if (prereqs.epicCaster && !isEpicSpellcaster(classLevels))
     reasons.push('Requires an epic Cleric, Druid, Sorcerer, or Wizard (or Pale Master 15+)')
+
+  if (prereqs.classFeatures) {
+    for (const [key, label] of Object.entries(prereqs.classFeatures)) {
+      if (!hasClassFeature(classLevels, key)) reasons.push(`Requires ${label}`)
+    }
+  }
+
+  // Any-of form, for feats satisfied by either of two class features
+  if (prereqs.anyClassFeature) {
+    if (!prereqs.anyClassFeature.some(k => hasClassFeature(classLevels, k))) {
+      reasons.push(feat.prereqNote ?? 'Requires a qualifying class feature')
+    }
+  }
 
   if (prereqs.feats) {
     for (const req of prereqs.feats) {

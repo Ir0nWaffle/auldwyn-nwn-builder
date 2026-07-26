@@ -63,7 +63,10 @@ export const CLASS_BONUS_FEAT_LEVELS = {
               22, 24, 26, 28, 30, 32, 34, 36, 38, 40],
   monk:      [25, 30, 35, 40],
   paladin:   [23, 26, 29, 32, 35, 38],
-  ranger:    [23, 25, 26, 29, 30, 32, 35, 35, 38, 40],
+  // Ranger's pre-epic grants are the Favored Enemy picks, which come from the
+  // same class bonus-feat list; level 35 grants two.
+  ranger:    [1, 5, 10, 15, 20,
+              23, 25, 26, 29, 30, 32, 35, 35, 38, 40],
   rogue:     [10, 13, 16, 19,
               24, 28, 32, 36, 40],
   sorcerer:  [23, 26, 29, 32, 35, 38],
@@ -74,7 +77,7 @@ export const CLASS_BONUS_FEAT_LEVELS = {
   arcanearcher:    [14, 18, 22, 26, 30],
   assassin:        [14, 18, 22, 26, 30],
   blackguard:      [13, 16, 19, 22, 25, 28],
-  championoftorm:  [14, 18, 22, 26, 30],
+  championoftorm:  [2, 4, 6, 8, 10, 14, 18, 22, 26, 30],
   dwarvendefender: [14, 18, 22, 26, 30],
   palemaster:      [13, 16, 19, 22, 25, 28],
   shadowdancer:    [13, 16, 19, 22, 25, 28],
