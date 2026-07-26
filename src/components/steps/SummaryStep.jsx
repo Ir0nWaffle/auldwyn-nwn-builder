@@ -6,7 +6,7 @@ import { CLASSES } from '../../data/classes.js'
 import { SKILLS } from '../../data/skills.js'
 import { FEATS } from '../../data/feats.js'
 import {
-  abilityMod, calcBAB, totalCharacterLevel,
+  abilityMod, calcBAB, babFromPlan, totalCharacterLevel,
   calcTotalSkillPoints, calcSkillPointsSpent, calcTotalFeatsAvailable,
   validateCharacter, effectiveScore, freeFeatsGrantedAtLevel,
 } from '../../utils/validation.js'
@@ -49,7 +49,10 @@ export default function SummaryStep({ onBack }) {
   const mods = race?.abilityMods ?? {}
 
   const charLevel = totalCharacterLevel(character.classLevels)
-  const bab = calcBAB(character.classLevels)
+  // Epic-aware: past level 20 BAB freezes and gains a flat epic bonus instead
+  const bab = character.levels?.length
+    ? babFromPlan(character.levels)
+    : calcBAB(character.classLevels)
   const increases = character.abilityIncreases ?? {}
   const intMod = abilityMod(effectiveScore('int', character.abilities, mods, increases))
   const conMod = abilityMod(effectiveScore('con', character.abilities, mods, increases))

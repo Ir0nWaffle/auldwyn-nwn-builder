@@ -2,6 +2,12 @@ import { CLASSES, SERVER_SETTINGS } from '../data/classes.js'
 import { FEATS } from '../data/feats.js'
 import { SKILLS, maxClassRanks, maxCrossClassRanks } from '../data/skills.js'
 import { RACES } from '../data/races.js'
+import {
+  GENERAL_FEAT_LEVELS, CLASS_BONUS_FEAT_LEVELS, classBonusFeatsAt,
+  epicAttackBonus, epicSaveBonus, EPIC_CLASS_MAX_LEVEL, EPIC_START_LEVEL,
+} from '../data/epicProgression.js'
+
+export { epicAttackBonus, epicSaveBonus }
 
 // ─── Ability helpers ──────────────────────────────────────────────────────────
 
@@ -104,6 +110,51 @@ export function calcBAB(classLevels) {
     }
   }
   return bab
+}
+
+// Base saves from class progression (good = level/2 + 2, poor = level/3).
+export function calcClassSaves(classLevels) {
+  let fort = 0, ref = 0, will = 0
+  for (const { classKey, levels } of classLevels) {
+    const cls = CLASSES[classKey]
+    if (!cls) continue
+    fort += cls.saves.fort === 'good' ? Math.floor(levels / 2) + 2 : Math.floor(levels / 3)
+    ref  += cls.saves.ref  === 'good' ? Math.floor(levels / 2) + 2 : Math.floor(levels / 3)
+    will += cls.saves.will === 'good' ? Math.floor(levels / 2) + 2 : Math.floor(levels / 3)
+  }
+  return { fort, ref, will }
+}
+
+// ─── Epic-aware BAB and saves ────────────────────────────────────────────────
+// Past character level 20, BAB and saves stop advancing by class and instead
+// freeze at their level-20 value plus a flat epic bonus driven by character
+// level. That means these need the ordered level plan, not just the aggregated
+// class totals — a level of Fighter taken at character level 25 adds no BAB.
+//
+// Below level 21 these are identical to calcBAB / calcClassSaves, so existing
+// level-1-20 characters are unaffected.
+
+// Max levels allowed in a class. Prestige classes cap at 10 (Harper Scout 5)
+// pre-epic; once the character is epic most of them extend to 30.
+export function classMaxLevel(classKey, charLevel) {
+  const base = CLASSES[classKey]?.maxLevel
+  if (charLevel >= EPIC_START_LEVEL) {
+    const epicMax = EPIC_CLASS_MAX_LEVEL[classKey]
+    if (epicMax !== undefined) return epicMax
+  }
+  return base ?? SERVER_SETTINGS.maxLevel
+}
+
+export function babFromPlan(levels) {
+  const preEpic = deriveClassLevels(levels.slice(0, 20))
+  return calcBAB(preEpic) + epicAttackBonus(levels.length)
+}
+
+export function savesFromPlan(levels) {
+  const preEpic = deriveClassLevels(levels.slice(0, 20))
+  const base = calcClassSaves(preEpic)
+  const bonus = epicSaveBonus(levels.length)
+  return { fort: base.fort + bonus, ref: base.ref + bonus, will: base.will + bonus }
 }
 
 // ─── Skill point calculation ──────────────────────────────────────────────────
@@ -221,28 +272,18 @@ export function checkFeatPrereqs(featKey, character) {
   return { met: reasons.length === 0, reasons }
 }
 
-// Total general feats available for the build
+// Total general + class bonus feats available for the build.
+// General feats follow the every-3-levels cadence (1,3,6,...,18) which
+// continues into epic levels (21,24,...,39). Class bonus feats come from each
+// class's own schedule in CLASS_BONUS_FEAT_LEVELS.
 export function calcTotalFeatsAvailable(classLevels, race) {
   const charLevel = totalCharacterLevel(classLevels)
-  const isHuman = race === 'human'
-  let total = 0
-  // General feat at levels 1, 3, 6, 9, 12, 15, 18
-  const generalFeatLevels = [1, 3, 6, 9, 12, 15, 18]
-  total += generalFeatLevels.filter(l => l <= charLevel).length
-  if (isHuman) total += 1
+  let total = GENERAL_FEAT_LEVELS.filter(l => l <= charLevel).length
+  if (race === 'human') total += 1
 
-  // Fighter bonus feats
-  const fl = classLevelFor(classLevels, 'fighter')
-  if (fl > 0) {
-    const bonusFeatLevels = [1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20]
-    total += bonusFeatLevels.filter(l => l <= fl).length
-  }
-
-  // Wizard bonus feats
-  const wl = classLevelFor(classLevels, 'wizard')
-  if (wl > 0) {
-    const wzBonusFeatLevels = [5, 10, 15, 20]
-    total += wzBonusFeatLevels.filter(l => l <= wl).length
+  for (const { classKey, levels } of classLevels) {
+    const schedule = CLASS_BONUS_FEAT_LEVELS[classKey]
+    if (schedule) total += schedule.filter(l => l <= levels).length
   }
 
   return total
@@ -523,11 +564,9 @@ export function ranksThroughLevel(skillKey, levels, i) {
   return total
 }
 
-// Feat slots granted at level index i
-const GENERAL_FEAT_LEVELS = [1, 3, 6, 9, 12, 15, 18]
-const FIGHTER_BONUS_LEVELS = [1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20]
-const WIZARD_BONUS_LEVELS = [5, 10, 15, 20]
-
+// Feat slots granted at level index i — a general feat on the every-3-levels
+// cadence, the human bonus feat at level 1, plus any class bonus feats granted
+// at that class level (Ranger 35 grants two, hence a count rather than a flag).
 export function featSlotsAtLevel(character, i) {
   const levels = character.levels ?? []
   const lv = levels[i]
@@ -537,8 +576,7 @@ export function featSlotsAtLevel(character, i) {
   if (GENERAL_FEAT_LEVELS.includes(charLevel)) slots++
   if (charLevel === 1 && character.race === 'human') slots++
   const classCount = levels.slice(0, i + 1).filter(l => l.classKey === lv.classKey).length
-  if (lv.classKey === 'fighter' && FIGHTER_BONUS_LEVELS.includes(classCount)) slots++
-  if (lv.classKey === 'wizard' && WIZARD_BONUS_LEVELS.includes(classCount)) slots++
+  slots += classBonusFeatsAt(lv.classKey, classCount)
   return slots
 }
 

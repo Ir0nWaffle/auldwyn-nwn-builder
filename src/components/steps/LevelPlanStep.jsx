@@ -7,8 +7,8 @@ import { RACES } from '../../data/races.js'
 import {
   planLevelEconomics, featSlotsAtLevel, characterAtLevel, deriveFeats,
   maxRankAtLevel, ranksThroughLevel, checkClassEligibility, checkFeatPrereqs,
-  abilityMod, effectiveScore, deriveIncreases, calcBAB, deriveClassLevels,
-  freeFeatsGrantedAtLevel,
+  abilityMod, effectiveScore, deriveIncreases, babFromPlan, deriveClassLevels,
+  freeFeatsGrantedAtLevel, classMaxLevel,
 } from '../../utils/validation.js'
 import { CLASS_ICONS, SKILL_ICONS, FEAT_ICONS } from '../../data/icons.js'
 import IconSlot from '../IconSlot.jsx'
@@ -93,8 +93,9 @@ export default function LevelPlanStep({ onNext, onBack }) {
     return checkClassEligibility(key, snapshotNow)
   }
   function classMaxed(key) {
-    const cls = CLASSES[key]
-    return cls.maxLevel ? levels.filter(l => l.classKey === key).length >= cls.maxLevel : false
+    // The cap the character would be under after taking this level
+    const cap = classMaxLevel(key, charLevel + 1)
+    return levels.filter(l => l.classKey === key).length >= cap
   }
   function canTake(key) {
     return key && !classMaxed(key) && classCheck(key).met
@@ -581,7 +582,7 @@ export default function LevelPlanStep({ onNext, onBack }) {
     const conMod = abilityMod(effectiveScore('con', character.abilities,
       RACES[character.race]?.abilityMods ?? {}, deriveIncreases(levels)))
     const hpGain = (cls?.hitDie ?? 0) + conMod
-    const newBab = calcBAB(deriveClassLevels(levels))
+    const newBab = babFromPlan(levels)
 
     return (
       <div>

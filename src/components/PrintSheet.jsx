@@ -3,7 +3,7 @@ import { RACES } from '../data/races.js'
 import { CLASSES } from '../data/classes.js'
 import { SKILLS } from '../data/skills.js'
 import { FEATS } from '../data/feats.js'
-import { abilityMod, calcBAB, totalCharacterLevel, calcTotalSkillPoints, calcSkillPointsSpent, calcTotalFeatsAvailable, effectiveScore, freeFeatsGrantedAtLevel } from '../utils/validation.js'
+import { abilityMod, calcBAB, babFromPlan, calcClassSaves, savesFromPlan, totalCharacterLevel, calcTotalSkillPoints, calcSkillPointsSpent, calcTotalFeatsAvailable, effectiveScore, freeFeatsGrantedAtLevel } from '../utils/validation.js'
 import { CLASS_ICONS, SKILL_ICONS, FEAT_ICONS } from '../data/icons.js'
 import { alignmentLabel } from '../data/alignments.js'
 
@@ -11,17 +11,6 @@ const ABILITY_KEYS = ['str', 'dex', 'con', 'int', 'wis', 'cha']
 const ABILITY_LABELS = { str: 'Strength', dex: 'Dexterity', con: 'Constitution', int: 'Intelligence', wis: 'Wisdom', cha: 'Charisma' }
 const ABILITY_ABBR   = { str: 'STR', dex: 'DEX', con: 'CON', int: 'INT', wis: 'WIS', cha: 'CHA' }
 
-function calcSaves(classLevels) {
-  let fort = 0, ref = 0, will = 0
-  for (const { classKey, levels } of classLevels) {
-    const cls = CLASSES[classKey]
-    if (!cls) continue
-    fort += cls.saves.fort === 'good' ? Math.floor(levels / 2) + 2 : Math.floor(levels / 3)
-    ref  += cls.saves.ref  === 'good' ? Math.floor(levels / 2) + 2 : Math.floor(levels / 3)
-    will += cls.saves.will === 'good' ? Math.floor(levels / 2) + 2 : Math.floor(levels / 3)
-  }
-  return { fort, ref, will }
-}
 
 function Box({ label, value, sub }) {
   return (
@@ -43,8 +32,10 @@ export default function PrintSheet({ onClose }) {
   const mods = race?.abilityMods ?? {}
 
   const charLevel = totalCharacterLevel(character.classLevels)
-  const bab = calcBAB(character.classLevels)
-  const saves = calcSaves(character.classLevels)
+  // Epic-aware: past level 20 BAB and saves freeze and gain a flat epic bonus
+  const hasPlan = character.levels?.length > 0
+  const bab = hasPlan ? babFromPlan(character.levels) : calcBAB(character.classLevels)
+  const saves = hasPlan ? savesFromPlan(character.levels) : calcClassSaves(character.classLevels)
 
   const increases = character.abilityIncreases ?? {}
   const conMod  = abilityMod(effectiveScore('con', character.abilities, mods, increases))
