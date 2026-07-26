@@ -10,6 +10,7 @@ import {
   abilityMod, effectiveScore, deriveIncreases, babFromPlan, deriveClassLevels,
   freeFeatsGrantedAtLevel, classMaxLevel, featuresAtClassLevel,
   needsSpellSelection, spellPickBudget, eligibleSpellPicks, deriveSpells, spellLevelForClass,
+  canSwapSpells, eligibleSwapTargets,
 } from '../../utils/validation.js'
 import { CLASS_ICONS, SKILL_ICONS, FEAT_ICONS, getFeatureIcon } from '../../data/icons.js'
 import { SPELLS, getSpellIcon } from '../../data/spells.js'
@@ -39,7 +40,9 @@ function subStepsFor(character, i) {
       const racialMods = RACES[character.race]?.abilityMods ?? {}
       const intMod = abilityMod(effectiveScore('int', character.abilities, racialMods, deriveIncreases(character.levels.slice(0, i + 1))))
       const budget = spellPickBudget(lv.classKey, classNum, intMod)
-      if (budget && budget.total > 0) steps.push('spells')
+      const known = deriveSpells(character.levels.slice(0, i))[lv.classKey] ?? []
+      const canSwap = canSwapSpells(lv.classKey) && known.length > 0
+      if ((budget && budget.total > 0) || canSwap) steps.push('spells')
     }
   }
   steps.push('confirm')
@@ -56,6 +59,7 @@ export default function LevelPlanStep({ onNext, onBack }) {
   const [mode, setMode] = useState('overview')
   const [selClass, setSelClass] = useState(null)
   const [featSearch, setFeatSearch] = useState('')
+  const [swapOut, setSwapOut] = useState(null)
 
   const econ = planLevelEconomics(character)
   const i = charLevel - 1 // index of the level being built while in a sub-step
@@ -75,11 +79,13 @@ export default function LevelPlanStep({ onNext, onBack }) {
       charLevel
     )
     setFeatSearch('')
+    setSwapOut(null)
     setMode(nextSteps[0])
   }
 
   function cancelLevel() {
     dispatch({ type: 'TRUNCATE_LEVELS', index: i })
+    setSwapOut(null)
     setMode('overview')
   }
 
@@ -93,6 +99,7 @@ export default function LevelPlanStep({ onNext, onBack }) {
     if (stepIdx > 0) setMode(steps[stepIdx - 1])
   }
   function finishLevel() {
+    setSwapOut(null)
     setMode('overview')
   }
 
@@ -629,6 +636,10 @@ export default function LevelPlanStep({ onNext, onBack }) {
     }
     const levelKeys = Object.keys(byLevel).map(Number).sort((a, b) => a - b)
 
+    const canSwap = canSwapSpells(lv.classKey)
+    const swapsUsed = lv.spellSwaps ?? []
+    const swapTargets = swapOut ? eligibleSwapTargets(lv.classKey, swapOut, known) : []
+
     return (
       <div>
         {header}
@@ -711,6 +722,64 @@ export default function LevelPlanStep({ onNext, onBack }) {
             )}
           </div>
         </div>
+
+        {canSwap && known.length > 0 && (
+          <div className="mt-4">
+            <div className="nwn-bar mb-px text-xs">Swap a Known Spell (once per level-up)</div>
+            <div className="panel !p-0">
+              {swapsUsed.length > 0 ? (
+                <div className="flex items-center justify-between px-3 py-2 text-sm">
+                  <span>
+                    <span className="text-red-400/80 line-through">{SPELLS[swapsUsed[0].out]?.name}</span>
+                    {' → '}
+                    <span className="text-auldwyn-gold">{SPELLS[swapsUsed[0].in]?.name}</span>
+                  </span>
+                  <button className="btn-secondary text-xs"
+                          onClick={() => dispatch({ type: 'UNDO_LEVEL_SPELL_SWAP', index: i, outKey: swapsUsed[0].out })}>
+                    Undo Swap
+                  </button>
+                </div>
+              ) : !swapOut ? (
+                <div className="max-h-[220px] overflow-y-auto divide-y divide-auldwyn-border/20">
+                  {known.map(key => (
+                    <button key={key} onClick={() => setSwapOut(key)}
+                            className="nwn-list-item flex items-start gap-2 w-full">
+                      <IconSlot icon={getSpellIcon(key)} size="sm" className="mt-0.5" />
+                      <span className="flex-1 text-left">
+                        <span className="font-bold">{SPELLS[key]?.name ?? key}</span>
+                        <span className="block text-xs text-auldwyn-muted mt-0.5">Click to swap out</span>
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div>
+                  <div className="flex items-center justify-between px-3 py-2 text-sm border-b border-auldwyn-border/30">
+                    <span>Swapping out <span className="text-red-400/80">{SPELLS[swapOut]?.name}</span> — pick a replacement of the same level:</span>
+                    <button className="btn-secondary text-xs" onClick={() => setSwapOut(null)}>Cancel</button>
+                  </div>
+                  <div className="max-h-[220px] overflow-y-auto divide-y divide-auldwyn-border/20">
+                    {swapTargets.map(key => (
+                      <button key={key}
+                        onClick={() => { dispatch({ type: 'SWAP_LEVEL_SPELL', index: i, outKey: swapOut, inKey: key }); setSwapOut(null) }}
+                        className="nwn-list-item flex items-start gap-2 w-full">
+                        <IconSlot icon={getSpellIcon(key)} size="sm" className="mt-0.5" />
+                        <span className="flex-1 text-left">
+                          <span className="font-bold">{SPELLS[key]?.name ?? key}</span>
+                          <span className="block text-xs text-auldwyn-muted mt-0.5">{SPELLS[key]?.description}</span>
+                        </span>
+                      </button>
+                    ))}
+                    {swapTargets.length === 0 && (
+                      <p className="text-xs text-auldwyn-muted p-3">No other spells of that level to swap in.</p>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {footer(false)}
       </div>
     )
@@ -778,6 +847,14 @@ export default function LevelPlanStep({ onNext, onBack }) {
               <span className="text-auldwyn-muted">Spells Learned</span>
               <span className="text-auldwyn-text text-right max-w-[60%]">
                 {lv.spells.map(k => SPELLS[k]?.name ?? k).join(', ')}
+              </span>
+            </div>
+          )}
+          {(lv.spellSwaps?.length > 0) && (
+            <div className="flex justify-between">
+              <span className="text-auldwyn-muted">Spell Swap</span>
+              <span className="text-auldwyn-text text-right max-w-[60%]">
+                {lv.spellSwaps.map(s => `${SPELLS[s.out]?.name ?? s.out} → ${SPELLS[s.in]?.name ?? s.in}`).join(', ')}
               </span>
             </div>
           )}

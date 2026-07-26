@@ -3,7 +3,7 @@ import { SKILLS } from '../data/skills.js'
 import { FEATS } from '../data/feats.js'
 import {
   deriveClassLevels, deriveSkills, deriveFeats, deriveIncreases, featSlotsAtLevel,
-  canPickSpell, deriveSpells,
+  canPickSpell, deriveSpells, canSwapSpell,
 } from '../utils/validation.js'
 
 const CharacterContext = createContext(null)
@@ -70,6 +70,7 @@ function hydrate(saved) {
           skills: { ...(lv.skills ?? {}) },
           feats: Array.isArray(lv.feats) ? lv.feats : [],
           spells: Array.isArray(lv.spells) ? lv.spells : [],
+          spellSwaps: Array.isArray(lv.spellSwaps) ? lv.spellSwaps : [],
           abilityIncrease: lv.abilityIncrease ?? null,
         }))
       : [],
@@ -147,7 +148,7 @@ function reducer(state, action) {
     case 'ADD_LEVEL':
       return withDerived({
         ...state,
-        levels: [...state.levels, { classKey: action.classKey, skills: {}, feats: [], spells: [], abilityIncrease: null }],
+        levels: [...state.levels, { classKey: action.classKey, skills: {}, feats: [], spells: [], spellSwaps: [], abilityIncrease: null }],
       })
     case 'TRUNCATE_LEVELS':
       // Remove level at `index` and everything after it
@@ -192,6 +193,24 @@ function reducer(state, action) {
     case 'REMOVE_LEVEL_SPELL': {
       const levels = state.levels.map((lv, i) =>
         i === action.index ? { ...lv, spells: (lv.spells ?? []).filter(s => s !== action.spellKey) } : lv
+      )
+      return withDerived({ ...state, levels })
+    }
+    // GATED behind SERVER_SETTINGS.spellSelectionEnabled. Trades a previously
+    // known spell for a different one of the same level; free, doesn't touch
+    // the level's new-spell-pick budget. Confirmed in-game (see spellSelection.js).
+    case 'SWAP_LEVEL_SPELL': {
+      if (!canSwapSpell(state.levels, action.index, action.outKey, action.inKey)) return state
+      const levels = state.levels.map((lv, i) =>
+        i === action.index
+          ? { ...lv, spellSwaps: [...(lv.spellSwaps ?? []), { out: action.outKey, in: action.inKey }] }
+          : lv
+      )
+      return withDerived({ ...state, levels })
+    }
+    case 'UNDO_LEVEL_SPELL_SWAP': {
+      const levels = state.levels.map((lv, i) =>
+        i === action.index ? { ...lv, spellSwaps: (lv.spellSwaps ?? []).filter(s => s.out !== action.outKey) } : lv
       )
       return withDerived({ ...state, levels })
     }
