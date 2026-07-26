@@ -1,9 +1,7 @@
 // NWN:EE epic progression rules (character levels 21-40), from the wiki's
 // Level progression table and each class's own level-progression table.
 //
-// Auldwyn is still capped at level 20 (SERVER_SETTINGS.maxLevel), so none of
-// this is reachable in the builder yet — it exists so raising the cap is a
-// one-line change rather than a rules rewrite.
+// Reachable now that SERVER_SETTINGS.maxLevel is 40 (see classes.js).
 //
 // The key structural rule, quoting the wiki: "After character level 20, the
 // base attack and base save advancements become based on character level,

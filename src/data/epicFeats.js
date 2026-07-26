@@ -2,9 +2,7 @@
 // Category:Epic feats. These are only selectable by epic characters
 // (character level 21+), which is why every entry carries `epic: true`.
 //
-// Auldwyn is currently capped at level 20, so nothing here is reachable yet —
-// this database exists so the builder is ready if/when the server raises the
-// cap to 40. See SERVER_SETTINGS.maxLevel in classes.js.
+// Reachable now that SERVER_SETTINGS.maxLevel is 40 (see classes.js).
 //
 // Extra schema fields beyond the normal FEATS shape:
 //   epic: true          — only offered at character level 21+

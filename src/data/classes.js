@@ -388,7 +388,7 @@ export const CLASSES = {
 
 // Auldwyn server settings — edit here when the server makes changes
 export const SERVER_SETTINGS = {
-  maxLevel: 20,
+  maxLevel: 40,
   maxDistinctClasses: 3,
   allowedClasses: Object.keys(CLASSES).filter(k => !['shadowdancer','dragondisciple'].includes(k)),
   // Per-level spell selection: Wizard spellbook picks, Sorcerer/Bard spells

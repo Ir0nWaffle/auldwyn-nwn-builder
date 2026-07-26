@@ -7,8 +7,10 @@ import { SPELL_ICONS, SCHOOL_ICONS } from './icons.js'
 // game text — every description below is written fresh in original wording.
 // It covers all 9 arcane levels (Sorcerer/Wizard share one list), all 9
 // divine levels (Cleric and Druid lists differ), Bard (0-6), and Paladin/
-// Ranger (1-4). Epic spells (caster level 21+) are intentionally excluded
-// since Auldwyn's level cap is 20.
+// Ranger (1-4). Epic spells (Mummy Dust, Hellball, etc.) are intentionally
+// excluded from this database — spell slots freeze at class level 20 (see
+// spellSlots.js), so epic casters gain power through epic feats instead of
+// new numbered-level spells; those six are modeled as feats in epicFeats.js.
 //
 // Coverage note: this favors the well-established, commonly-used spells at
 // each level over exhaustive inclusion of every obscure Bioware-exclusive

@@ -1,5 +1,6 @@
 import { CharacterProvider } from './store/CharacterContext.jsx'
 import CharacterBuilder from './components/CharacterBuilder.jsx'
+import { SERVER_SETTINGS } from './data/classes.js'
 
 export default function App() {
   return (
@@ -43,7 +44,7 @@ export default function App() {
 
         <footer className="border-t border-auldwyn-border mt-8 py-4">
           <p className="text-center text-xs text-auldwyn-muted/50">
-            Auldwyn Character Builder · NWN:EE rules · Level cap: 20 · Not affiliated with Beamdog
+            Auldwyn Character Builder · NWN:EE rules · Level cap: {SERVER_SETTINGS.maxLevel} · Not affiliated with Beamdog
           </p>
         </footer>
       </div>
