@@ -7,10 +7,16 @@ import {
   epicAttackBonus, epicSaveBonus, EPIC_CLASS_MAX_LEVEL, EPIC_START_LEVEL,
 } from '../data/epicProgression.js'
 import { hasClassFeature, featuresAtClassLevel, allClassFeatures } from '../data/classFeatures.js'
+import {
+  needsSpellSelection, spellPickBudget, spellLevelForClass, eligibleSpellPicks,
+  maxSpellLevelAtClassLevel,
+} from '../data/spellSelection.js'
 
 export { hasClassFeature, featuresAtClassLevel, allClassFeatures }
 
 export { epicAttackBonus, epicSaveBonus }
+
+export { needsSpellSelection, spellPickBudget, eligibleSpellPicks }
 
 // ─── Ability helpers ──────────────────────────────────────────────────────────
 
@@ -517,6 +523,43 @@ export function deriveFeats(levels) {
     }
   }
   return [...auto, ...levels.flatMap(lv => lv.feats ?? [])]
+}
+
+// Spells known/in the spellbook per class, accumulated from the level plan.
+// GATED behind SERVER_SETTINGS.spellSelectionEnabled — see spellSelection.js.
+export function deriveSpells(levels) {
+  const byClass = {}
+  for (const lv of levels) {
+    if (!lv.spells?.length) continue
+    byClass[lv.classKey] = [...(byClass[lv.classKey] ?? []), ...lv.spells]
+  }
+  return byClass
+}
+
+// Whether `spellKey` can be added as a new pick at level index `i`.
+// `intMod` is only used for wizards (drives the level-1 free-pick count).
+export function canPickSpell(levels, i, spellKey, intMod) {
+  const lv = levels[i]
+  if (!lv || !needsSpellSelection(lv.classKey)) return false
+  const classNum = levels.slice(0, i + 1).filter(l => l.classKey === lv.classKey).length
+  const budget = spellPickBudget(lv.classKey, classNum, intMod)
+  if (!budget) return false
+  const chosen = lv.spells ?? []
+  if (chosen.length >= budget.total) return false
+
+  const known = deriveSpells(levels.slice(0, i))[lv.classKey] ?? []
+  if (known.includes(spellKey) || chosen.includes(spellKey)) return false
+
+  const spellLevel = spellLevelForClass(lv.classKey, spellKey)
+  if (spellLevel === null) return false
+  if (spellLevel > maxSpellLevelAtClassLevel(lv.classKey, classNum)) return false
+  if (lv.classKey === 'wizard' && classNum === 1 && spellLevel !== 1) return false
+
+  if (budget.mode === 'perLevel') {
+    const chosenAtThisLevel = chosen.filter(k => spellLevelForClass(lv.classKey, k) === spellLevel).length
+    if (chosenAtThisLevel >= (budget.perLevel[spellLevel] ?? 0)) return false
+  }
+  return true
 }
 
 export function deriveIncreases(levels) {

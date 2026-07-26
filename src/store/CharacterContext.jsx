@@ -1,7 +1,10 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react'
 import { SKILLS } from '../data/skills.js'
 import { FEATS } from '../data/feats.js'
-import { deriveClassLevels, deriveSkills, deriveFeats, deriveIncreases, featSlotsAtLevel } from '../utils/validation.js'
+import {
+  deriveClassLevels, deriveSkills, deriveFeats, deriveIncreases, featSlotsAtLevel,
+  canPickSpell, deriveSpells,
+} from '../utils/validation.js'
 
 const CharacterContext = createContext(null)
 
@@ -25,6 +28,7 @@ const initialState = {
   abilityIncreases: { ...initialIncreases },
   skills: { ...initialSkills },
   selectedFeats: [],
+  spells: {},
 }
 
 function freshState() {
@@ -45,6 +49,7 @@ function withDerived(state) {
     skills: { ...initialSkills, ...deriveSkills(state.levels) },
     selectedFeats: deriveFeats(state.levels).map(featKey => ({ featKey })),
     abilityIncreases: deriveIncreases(state.levels),
+    spells: deriveSpells(state.levels),
   }
 }
 
@@ -64,6 +69,7 @@ function hydrate(saved) {
           classKey: lv.classKey,
           skills: { ...(lv.skills ?? {}) },
           feats: Array.isArray(lv.feats) ? lv.feats : [],
+          spells: Array.isArray(lv.spells) ? lv.spells : [],
           abilityIncrease: lv.abilityIncrease ?? null,
         }))
       : [],
@@ -141,7 +147,7 @@ function reducer(state, action) {
     case 'ADD_LEVEL':
       return withDerived({
         ...state,
-        levels: [...state.levels, { classKey: action.classKey, skills: {}, feats: [], abilityIncrease: null }],
+        levels: [...state.levels, { classKey: action.classKey, skills: {}, feats: [], spells: [], abilityIncrease: null }],
       })
     case 'TRUNCATE_LEVELS':
       // Remove level at `index` and everything after it
@@ -171,6 +177,21 @@ function reducer(state, action) {
     case 'REMOVE_LEVEL_FEAT': {
       const levels = state.levels.map((lv, i) =>
         i === action.index ? { ...lv, feats: lv.feats.filter(f => f !== action.featKey) } : lv
+      )
+      return withDerived({ ...state, levels })
+    }
+    // GATED behind SERVER_SETTINGS.spellSelectionEnabled — not yet wired
+    // into the live level planner. See src/data/spellSelection.js.
+    case 'ADD_LEVEL_SPELL': {
+      if (!canPickSpell(state.levels, action.index, action.spellKey, action.intMod ?? 0)) return state
+      const levels = state.levels.map((lv, i) =>
+        i === action.index ? { ...lv, spells: [...(lv.spells ?? []), action.spellKey] } : lv
+      )
+      return withDerived({ ...state, levels })
+    }
+    case 'REMOVE_LEVEL_SPELL': {
+      const levels = state.levels.map((lv, i) =>
+        i === action.index ? { ...lv, spells: (lv.spells ?? []).filter(s => s !== action.spellKey) } : lv
       )
       return withDerived({ ...state, levels })
     }
