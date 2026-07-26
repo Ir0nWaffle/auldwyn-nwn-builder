@@ -9,7 +9,7 @@ import {
   maxRankAtLevel, ranksThroughLevel, checkClassEligibility, checkFeatPrereqs,
   abilityMod, effectiveScore, deriveIncreases, babFromPlan, deriveClassLevels,
   freeFeatsGrantedAtLevel, classMaxLevel, featuresAtClassLevel,
-  needsSpellSelection, spellPickBudget, eligibleSpellPicks, deriveSpells,
+  needsSpellSelection, spellPickBudget, eligibleSpellPicks, deriveSpells, spellLevelForClass,
 } from '../../utils/validation.js'
 import { CLASS_ICONS, SKILL_ICONS, FEAT_ICONS, getFeatureIcon } from '../../data/icons.js'
 import { SPELLS, getSpellIcon } from '../../data/spells.js'
