@@ -9,7 +9,7 @@ import {
 import { hasClassFeature, featuresAtClassLevel, allClassFeatures } from '../data/classFeatures.js'
 import {
   needsSpellSelection, spellPickBudget, spellLevelForClass, eligibleSpellPicks,
-  maxSpellLevelAtClassLevel, canSwapSpells, eligibleSwapTargets, MAX_SWAPS_PER_LEVEL,
+  maxSpellLevelAtClassLevel, canSwapSpells, eligibleSwapTargets, applySwaps,
 } from '../data/spellSelection.js'
 
 export { hasClassFeature, featuresAtClassLevel, allClassFeatures }
@@ -18,7 +18,7 @@ export { epicAttackBonus, epicSaveBonus }
 
 export {
   needsSpellSelection, spellPickBudget, eligibleSpellPicks, spellLevelForClass,
-  canSwapSpells, eligibleSwapTargets,
+  canSwapSpells, eligibleSwapTargets, applySwaps,
 }
 
 // ─── Ability helpers ──────────────────────────────────────────────────────────
@@ -559,7 +559,8 @@ export function canPickSpell(levels, i, spellKey, intMod) {
   const chosen = lv.spells ?? []
   if (chosen.length >= budget.total) return false
 
-  const known = deriveSpells(levels.slice(0, i))[lv.classKey] ?? []
+  const baseKnown = deriveSpells(levels.slice(0, i))[lv.classKey] ?? []
+  const known = applySwaps(baseKnown, lv.spellSwaps)
   if (known.includes(spellKey) || chosen.includes(spellKey)) return false
 
   const spellLevel = spellLevelForClass(lv.classKey, spellKey)
@@ -574,15 +575,16 @@ export function canPickSpell(levels, i, spellKey, intMod) {
   return true
 }
 
-// Whether `outKey` (a previously known spell) can be swapped for `inKey` (a
+// Whether `outKey` (a currently known spell) can be swapped for `inKey` (a
 // different spell of the same level) at level index `i`. Free — doesn't
-// touch the level's new-spell-pick budget — capped at MAX_SWAPS_PER_LEVEL.
+// touch the level's new-spell-pick budget — unlimited swaps per level-up,
+// so this only checks the swap itself, not any per-level count.
 export function canSwapSpell(levels, i, outKey, inKey) {
   const lv = levels[i]
   if (!lv || !canSwapSpells(lv.classKey)) return false
-  if ((lv.spellSwaps ?? []).length >= MAX_SWAPS_PER_LEVEL) return false
 
-  const known = deriveSpells(levels.slice(0, i))[lv.classKey] ?? []
+  const baseKnown = deriveSpells(levels.slice(0, i))[lv.classKey] ?? []
+  const known = applySwaps(baseKnown, lv.spellSwaps)
   if (!known.includes(outKey)) return false
   if (known.includes(inKey) || (lv.spells ?? []).includes(inKey)) return false
 

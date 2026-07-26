@@ -10,7 +10,7 @@ import {
   abilityMod, effectiveScore, deriveIncreases, babFromPlan, deriveClassLevels,
   freeFeatsGrantedAtLevel, classMaxLevel, featuresAtClassLevel,
   needsSpellSelection, spellPickBudget, eligibleSpellPicks, deriveSpells, spellLevelForClass,
-  canSwapSpells, eligibleSwapTargets,
+  canSwapSpells, eligibleSwapTargets, applySwaps,
 } from '../../utils/validation.js'
 import { CLASS_ICONS, SKILL_ICONS, FEAT_ICONS, getFeatureIcon } from '../../data/icons.js'
 import { SPELLS, getSpellIcon } from '../../data/spells.js'
@@ -619,7 +619,12 @@ export default function LevelPlanStep({ onNext, onBack }) {
     const intMod = abilityMod(effectiveScore('int', character.abilities, racialMods, deriveIncreases(levels.slice(0, i + 1))))
     const budget = spellPickBudget(lv.classKey, classNum, intMod)
     const chosen = lv.spells ?? []
-    const known = deriveSpells(levels.slice(0, i))[lv.classKey] ?? []
+    const swapsUsed = lv.spellSwaps ?? []
+    // "known" reflects the CURRENT state at this point in the level-up,
+    // i.e. prior levels' spells with this level's own swaps already applied
+    // — so a spell just swapped out becomes pickable again, and one just
+    // swapped in is excluded, without waiting for the level to finish.
+    const known = applySwaps(deriveSpells(levels.slice(0, i))[lv.classKey] ?? [], swapsUsed)
     const eligible = eligibleSpellPicks(lv.classKey, classNum, [...known, ...chosen])
     const remaining = budget.total - chosen.length
 
@@ -637,7 +642,6 @@ export default function LevelPlanStep({ onNext, onBack }) {
     const levelKeys = Object.keys(byLevel).map(Number).sort((a, b) => a - b)
 
     const canSwap = canSwapSpells(lv.classKey)
-    const swapsUsed = lv.spellSwaps ?? []
     const swapTargets = swapOut ? eligibleSwapTargets(lv.classKey, swapOut, known) : []
 
     return (
@@ -723,35 +727,42 @@ export default function LevelPlanStep({ onNext, onBack }) {
           </div>
         </div>
 
-        {canSwap && known.length > 0 && (
+        {canSwap && (known.length > 0 || swapsUsed.length > 0) && (
           <div className="mt-4">
-            <div className="nwn-bar mb-px text-xs">Swap a Known Spell (once per level-up)</div>
+            <div className="nwn-bar mb-px text-xs">Swap Known Spells (unlimited — trade any for a same-level spell)</div>
             <div className="panel !p-0">
-              {swapsUsed.length > 0 ? (
-                <div className="flex items-center justify-between px-3 py-2 text-sm">
-                  <span>
-                    <span className="text-red-400/80 line-through">{SPELLS[swapsUsed[0].out]?.name}</span>
-                    {' → '}
-                    <span className="text-auldwyn-gold">{SPELLS[swapsUsed[0].in]?.name}</span>
-                  </span>
-                  <button className="btn-secondary text-xs"
-                          onClick={() => dispatch({ type: 'UNDO_LEVEL_SPELL_SWAP', index: i, outKey: swapsUsed[0].out })}>
-                    Undo Swap
-                  </button>
-                </div>
-              ) : !swapOut ? (
-                <div className="max-h-[220px] overflow-y-auto divide-y divide-auldwyn-border/20">
-                  {known.map(key => (
-                    <button key={key} onClick={() => setSwapOut(key)}
-                            className="nwn-list-item flex items-start gap-2 w-full">
-                      <IconSlot icon={getSpellIcon(key)} size="sm" className="mt-0.5" />
-                      <span className="flex-1 text-left">
-                        <span className="font-bold">{SPELLS[key]?.name ?? key}</span>
-                        <span className="block text-xs text-auldwyn-muted mt-0.5">Click to swap out</span>
+              {swapsUsed.length > 0 && (
+                <div className="divide-y divide-auldwyn-border/20 border-b border-auldwyn-border/30">
+                  {swapsUsed.map((s, idx) => (
+                    <div key={idx} className="flex items-center justify-between px-3 py-2 text-sm">
+                      <span>
+                        <span className="text-red-400/80 line-through">{SPELLS[s.out]?.name}</span>
+                        {' → '}
+                        <span className="text-auldwyn-gold">{SPELLS[s.in]?.name}</span>
                       </span>
-                    </button>
+                      <button className="btn-secondary text-xs"
+                              onClick={() => dispatch({ type: 'UNDO_LEVEL_SPELL_SWAP', index: i, outKey: s.out })}>
+                        Undo
+                      </button>
+                    </div>
                   ))}
                 </div>
+              )}
+              {!swapOut ? (
+                known.length > 0 && (
+                  <div className="max-h-[220px] overflow-y-auto divide-y divide-auldwyn-border/20">
+                    {known.map(key => (
+                      <button key={key} onClick={() => setSwapOut(key)}
+                              className="nwn-list-item flex items-start gap-2 w-full">
+                        <IconSlot icon={getSpellIcon(key)} size="sm" className="mt-0.5" />
+                        <span className="flex-1 text-left">
+                          <span className="font-bold">{SPELLS[key]?.name ?? key}</span>
+                          <span className="block text-xs text-auldwyn-muted mt-0.5">Click to swap out</span>
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )
               ) : (
                 <div>
                   <div className="flex items-center justify-between px-3 py-2 text-sm border-b border-auldwyn-border/30">

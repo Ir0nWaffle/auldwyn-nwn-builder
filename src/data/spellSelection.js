@@ -109,17 +109,27 @@ export function eligibleSpellPicks(classKey, classLevel, known) {
 // Sorcerer/Bard spell swap-out: confirmed via direct in-game testing (not
 // documented on the wiki's class pages, which only cover new-spell counts —
 // this is level-up UI behavior, not a class trait the wiki catalogs).
-// At every level-up, a spontaneous caster may trade one previously known
-// spell for a different spell of the SAME spell level. It's free — doesn't
-// consume the level's normal new-spell-pick budget — and any known spell is
-// eligible, including 1st-level starting spells. Limited to one swap per
-// level-up (matching the classic same-named D&D rule this is clearly based
-// on); adjust here if further testing shows otherwise.
+// At every level-up, a spontaneous caster may trade any number of previously
+// known spells for different spells of the SAME spell level — up to and
+// including their entire known spellbook. It's free — doesn't consume the
+// level's normal new-spell-pick budget — and any known spell is eligible,
+// including 1st-level starting spells. Unlimited per level-up (confirmed by
+// the user in-game; an earlier one-swap assumption was wrong).
 export function canSwapSpells(classKey) {
   return SPONTANEOUS_CASTERS.includes(classKey)
 }
 
-export const MAX_SWAPS_PER_LEVEL = 1
+// Applies a level's already-committed swaps to a known-spells list, so
+// eligibility checks for the NEXT swap (or new pick) at the same level see
+// the up-to-date result rather than the pre-level snapshot.
+export function applySwaps(known, swaps) {
+  let result = [...known]
+  for (const { out, in: inKey } of swaps ?? []) {
+    result = result.filter(k => k !== out)
+    result.push(inKey)
+  }
+  return result
+}
 
 // Same-level replacement candidates for a known spell being swapped out.
 export function eligibleSwapTargets(classKey, outKey, known) {
