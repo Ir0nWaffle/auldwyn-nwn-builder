@@ -16,7 +16,7 @@ export { hasClassFeature, featuresAtClassLevel, allClassFeatures }
 
 export { epicAttackBonus, epicSaveBonus }
 
-export { needsSpellSelection, spellPickBudget, eligibleSpellPicks }
+export { needsSpellSelection, spellPickBudget, eligibleSpellPicks, spellLevelForClass }
 
 // ─── Ability helpers ──────────────────────────────────────────────────────────
 

@@ -9,8 +9,10 @@ import {
   maxRankAtLevel, ranksThroughLevel, checkClassEligibility, checkFeatPrereqs,
   abilityMod, effectiveScore, deriveIncreases, babFromPlan, deriveClassLevels,
   freeFeatsGrantedAtLevel, classMaxLevel, featuresAtClassLevel,
+  needsSpellSelection, spellPickBudget, eligibleSpellPicks, deriveSpells,
 } from '../../utils/validation.js'
 import { CLASS_ICONS, SKILL_ICONS, FEAT_ICONS, getFeatureIcon } from '../../data/icons.js'
+import { SPELLS, getSpellIcon } from '../../data/spells.js'
 import IconSlot from '../IconSlot.jsx'
 
 const ABILITY_LABELS = {
@@ -30,6 +32,16 @@ function subStepsFor(character, i) {
   if ((i + 1) % 4 === 0) steps.push('ability')
   steps.push('skills')
   if (featSlotsAtLevel(character, i) > 0) steps.push('feats')
+  if (SERVER_SETTINGS.spellSelectionEnabled) {
+    const lv = character.levels[i]
+    if (lv && needsSpellSelection(lv.classKey)) {
+      const classNum = character.levels.slice(0, i + 1).filter(l => l.classKey === lv.classKey).length
+      const racialMods = RACES[character.race]?.abilityMods ?? {}
+      const intMod = abilityMod(effectiveScore('int', character.abilities, racialMods, deriveIncreases(character.levels.slice(0, i + 1))))
+      const budget = spellPickBudget(lv.classKey, classNum, intMod)
+      if (budget && budget.total > 0) steps.push('spells')
+    }
+  }
   steps.push('confirm')
   return steps
 }
@@ -351,7 +363,7 @@ export default function LevelPlanStep({ onNext, onBack }) {
   const lv = levels[i]
   const cls = CLASSES[lv.classKey]
   const classNum = levels.filter(l => l.classKey === lv.classKey).length
-  const stepLabels = { ability: 'Ability Increase', skills: 'Skills', feats: 'Feats', confirm: 'Confirm' }
+  const stepLabels = { ability: 'Ability Increase', skills: 'Skills', feats: 'Feats', spells: 'Spells', confirm: 'Confirm' }
 
   const header = (
     <div className="nwn-bar mb-3 flex items-center justify-between gap-3">
@@ -594,6 +606,116 @@ export default function LevelPlanStep({ onNext, onBack }) {
     )
   }
 
+  // ═══════════════════════ SPELLS ═══════════════════════
+  if (mode === 'spells') {
+    const racialMods = RACES[character.race]?.abilityMods ?? {}
+    const intMod = abilityMod(effectiveScore('int', character.abilities, racialMods, deriveIncreases(levels.slice(0, i + 1))))
+    const budget = spellPickBudget(lv.classKey, classNum, intMod)
+    const chosen = lv.spells ?? []
+    const known = deriveSpells(levels.slice(0, i))[lv.classKey] ?? []
+    const eligible = eligibleSpellPicks(lv.classKey, classNum, [...known, ...chosen])
+    const remaining = budget.total - chosen.length
+
+    function remainingAtLevel(spellLevel) {
+      if (budget.mode !== 'perLevel') return remaining
+      const chosenAtLevel = chosen.filter(k => spellLevelForClass(lv.classKey, k) === spellLevel).length
+      return (budget.perLevel[spellLevel] ?? 0) - chosenAtLevel
+    }
+
+    const byLevel = {}
+    for (const { key, level } of eligible) {
+      if (remainingAtLevel(level) <= 0) continue
+      ;(byLevel[level] ??= []).push(key)
+    }
+    const levelKeys = Object.keys(byLevel).map(Number).sort((a, b) => a - b)
+
+    return (
+      <div>
+        {header}
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-sm text-auldwyn-muted">
+            {budget.mode === 'any'
+              ? 'Choose new spells for your spellbook, from any level you can already cast.'
+              : 'Choose new spells known — each new pick fills the spell level that just opened up.'}
+          </p>
+          <p className="text-sm font-mono">
+            <span className="text-auldwyn-muted">Spells remaining: </span>
+            <span className={`text-lg font-bold ${remaining > 0 ? 'text-auldwyn-gold' : 'text-green-400'}`}>{remaining}</span>
+            <span className="text-auldwyn-muted"> / {budget.total}</span>
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {/* Available (left) */}
+          <div>
+            <div className="nwn-bar mb-px text-xs">Available Spells</div>
+            <div className="panel !p-0 max-h-[380px] overflow-y-auto divide-y divide-auldwyn-border/20">
+              {levelKeys.map(spellLevel => (
+                <div key={spellLevel}>
+                  <div className="px-3 py-1 text-xs uppercase tracking-widest text-auldwyn-muted/70 bg-black/20">
+                    {spellLevel === 0 ? 'Cantrips' : `Level ${spellLevel}`}
+                    {budget.mode === 'perLevel' && (
+                      <span className="text-auldwyn-gold/70 ml-2">({remainingAtLevel(spellLevel)} left)</span>
+                    )}
+                  </div>
+                  {byLevel[spellLevel].map(key => {
+                    const spell = SPELLS[key]
+                    return (
+                      <button key={key}
+                        onClick={() => remaining > 0 && dispatch({ type: 'ADD_LEVEL_SPELL', index: i, spellKey: key, intMod })}
+                        disabled={remaining <= 0}
+                        className="nwn-list-item disabled:opacity-40 flex items-start gap-2 w-full">
+                        <IconSlot icon={getSpellIcon(key)} size="sm" className="mt-0.5" />
+                        <span className="flex-1 text-left">
+                          <span className="font-bold">{spell?.name ?? key}</span>
+                          <span className="block text-xs text-auldwyn-muted mt-0.5">{spell?.description}</span>
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
+              ))}
+              {levelKeys.length === 0 && (
+                <p className="text-xs text-auldwyn-muted p-3">No eligible spells match.</p>
+              )}
+            </div>
+          </div>
+
+          {/* Chosen (right) */}
+          <div>
+            <div className="nwn-bar mb-px text-xs">Selected This Level</div>
+            <div className="panel min-h-[120px] divide-y divide-auldwyn-border/20 !p-0">
+              {chosen.map(key => {
+                const spell = SPELLS[key]
+                return (
+                  <button key={key}
+                    onClick={() => dispatch({ type: 'REMOVE_LEVEL_SPELL', index: i, spellKey: key })}
+                    className="nwn-list-item hover:!bg-red-950/30 flex items-start gap-2 w-full" title="Click to remove">
+                    <IconSlot icon={getSpellIcon(key)} size="sm" className="mt-0.5" />
+                    <span className="flex-1 text-left">
+                      <span className="font-bold text-auldwyn-gold">{spell?.name ?? key}</span>
+                      <span className="text-xs text-red-400/70 float-right">remove ✕</span>
+                      <span className="block text-xs text-auldwyn-muted mt-0.5">{spell?.description}</span>
+                    </span>
+                  </button>
+                )
+              })}
+              {chosen.length === 0 && (
+                <p className="text-xs text-auldwyn-muted p-3">Nothing selected yet.</p>
+              )}
+            </div>
+            {remaining > 0 && (
+              <p className="text-xs text-yellow-500/80 mt-2">
+                ⚠ {remaining} spell pick{remaining > 1 ? 's' : ''} unfilled — you can still continue, but the pick is wasted.
+              </p>
+            )}
+          </div>
+        </div>
+        {footer(false)}
+      </div>
+    )
+  }
+
   // ═══════════════════════ CONFIRM ═══════════════════════
   if (mode === 'confirm') {
     const skillList = Object.entries(lv.skills ?? {})
@@ -651,6 +773,14 @@ export default function LevelPlanStep({ onNext, onBack }) {
             <span className="text-auldwyn-muted">Feats</span>
             <span className="text-auldwyn-text text-right">{featList.length ? featList.join(', ') : '—'}</span>
           </div>
+          {(lv.spells?.length > 0) && (
+            <div className="flex justify-between">
+              <span className="text-auldwyn-muted">Spells Learned</span>
+              <span className="text-auldwyn-text text-right max-w-[60%]">
+                {lv.spells.map(k => SPELLS[k]?.name ?? k).join(', ')}
+              </span>
+            </div>
+          )}
           <div className="flex justify-between">
             <span className="text-auldwyn-muted">Skills</span>
             <span className="text-auldwyn-text text-right max-w-[60%]">{skillList.length ? skillList.join(', ') : '—'}</span>
