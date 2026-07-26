@@ -1,11 +1,16 @@
+import { EPIC_FEATS } from './epicFeats.js'
+
 // NWN:EE feat definitions
-// prereqs: { bab, str, dex, int, wis, con, cha, feats[], skills{}, spellcasting, fighterLevel, classLevels{} }
-// type: 'general' | 'fighter' | 'spellcasting' | 'metamagic' | 'skillbonus'
+// prereqs: { bab, str, dex, int, wis, con, cha, feats[], skills{}, spellcasting,
+//            fighterLevel, classLevels{}, minLevel, cast9th, epicCaster }
+// type: 'general' | 'fighter' | 'spellcasting' | 'metamagic' | 'skillbonus' | 'classfeat'
 // weaponFocus: if true, requires a weapon selection when taken
 // firstLevelOnly: represents a character background trait — only offered when
 // picking feats at character level 1, hidden from the feat list afterward
+// epic: only offered to epic characters (level 21+); see epicFeats.js
+// stackable: N — feat may be taken up to N times
 
-export const FEATS = {
+const BASE_FEATS = {
   // ── 1st-Level-Only Feats ───────────────────────────────────────────────────
   luckofheroes: {
     name: 'Luck of Heroes',
@@ -364,6 +369,11 @@ export const FEATS = {
   spellpenetration:{ name: 'Spell Penetration',         type: 'spellcasting', description: '+2 bonus on spell penetration checks.', prereqs: { spellcasting: true } },
   greaterspellpen: { name: 'Greater Spell Penetration', type: 'spellcasting', description: '+2 additional bonus on spell penetration (total +4).', prereqs: { spellcasting: true, feats: ['spellpenetration'] } },
 }
+
+// Epic feats are merged in so every existing system (icons, prereq checks,
+// summary, print sheet) works on them unchanged. They carry `epic: true`, and
+// the feat picker filters them out below character level 21.
+export const FEATS = { ...BASE_FEATS, ...EPIC_FEATS }
 
 // How many general feats a character gets at each level
 export function getFeatCountAtLevel(level, isHuman) {

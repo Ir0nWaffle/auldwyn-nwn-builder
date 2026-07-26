@@ -68,6 +68,29 @@ export function hasSpellcasting(classLevels) {
   return hasArcaneSpellcasting(classLevels) || hasDivineSpellcasting(classLevels)
 }
 
+// ─── Epic spellcasting helpers ───────────────────────────────────────────────
+
+// Class level at which each full caster gains access to 9th-level spells.
+// Bard/Paladin/Ranger are partial casters and never reach 9th, so they're
+// intentionally absent.
+const NINTH_LEVEL_SPELL_AT = { wizard: 17, cleric: 17, druid: 17, sorcerer: 18 }
+
+export function canCast9thLevelSpells(classLevels) {
+  return classLevels.some(cl => {
+    const needed = NINTH_LEVEL_SPELL_AT[cl.classKey]
+    return needed !== undefined && cl.levels >= needed
+  })
+}
+
+// The real in-game gate for the Epic Spell feats: an epic Cleric, Druid,
+// Sorcerer, or Wizard, or at least 15 Pale Master levels.
+const EPIC_SPELL_CLASSES = ['cleric', 'druid', 'sorcerer', 'wizard']
+
+export function isEpicSpellcaster(classLevels) {
+  if (classLevelFor(classLevels, 'palemaster') >= 15) return true
+  return EPIC_SPELL_CLASSES.some(c => classLevelFor(classLevels, c) > 0)
+}
+
 // BAB from progression table
 export function calcBAB(classLevels) {
   let bab = 0
@@ -143,6 +166,13 @@ export function checkFeatPrereqs(featKey, character) {
   const increases = character.abilityIncreases ?? {}
   const eff = k => effectiveScore(k, abilities, racialMods, increases)
 
+  if (prereqs.minLevel) {
+    const charLevel = totalCharacterLevel(classLevels)
+    if (charLevel < prereqs.minLevel) {
+      reasons.push(`Character level ${prereqs.minLevel} required (have ${charLevel})`)
+    }
+  }
+
   if (prereqs.bab && bab < prereqs.bab) reasons.push(`BAB +${prereqs.bab} required (have +${bab})`)
   for (const k of ['str', 'dex', 'con', 'int', 'wis', 'cha']) {
     if (prereqs[k] && eff(k) < prereqs[k]) {
@@ -150,8 +180,23 @@ export function checkFeatPrereqs(featKey, character) {
     }
   }
 
+  if (prereqs.skills) {
+    for (const [sk, minRank] of Object.entries(prereqs.skills)) {
+      const have = character.skills?.[sk] ?? 0
+      if (have < minRank) {
+        reasons.push(`${SKILLS[sk]?.name ?? sk}: ${minRank} ranks required (have ${have})`)
+      }
+    }
+  }
+
   if (prereqs.spellcasting && !hasSpellcasting(classLevels))
     reasons.push('Requires spellcasting levels')
+
+  if (prereqs.cast9th && !canCast9thLevelSpells(classLevels))
+    reasons.push('Requires the ability to cast 9th-level spells')
+
+  if (prereqs.epicCaster && !isEpicSpellcaster(classLevels))
+    reasons.push('Requires an epic Cleric, Druid, Sorcerer, or Wizard (or Pale Master 15+)')
 
   if (prereqs.feats) {
     for (const req of prereqs.feats) {

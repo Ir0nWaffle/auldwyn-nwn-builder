@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react'
 import { SKILLS } from '../data/skills.js'
+import { FEATS } from '../data/feats.js'
 import { deriveClassLevels, deriveSkills, deriveFeats, deriveIncreases, featSlotsAtLevel } from '../utils/validation.js'
 
 const CharacterContext = createContext(null)
@@ -156,8 +157,10 @@ function reducer(state, action) {
       return withDerived({ ...state, levels })
     }
     case 'ADD_LEVEL_FEAT': {
-      // Guard against double-dispatch: no duplicates anywhere, no slot overflow
-      if (deriveFeats(state.levels).includes(action.featKey)) return state
+      // Guard against double-dispatch and slot overflow. Most feats can only
+      // be taken once; stackable ones (e.g. epic Great Strength) up to N times.
+      const timesTaken = deriveFeats(state.levels).filter(f => f === action.featKey).length
+      if (timesTaken >= (FEATS[action.featKey]?.stackable ?? 1)) return state
       const lv = state.levels[action.index]
       if (!lv || lv.feats.length >= featSlotsAtLevel(state, action.index)) return state
       const levels = state.levels.map((l, i) =>

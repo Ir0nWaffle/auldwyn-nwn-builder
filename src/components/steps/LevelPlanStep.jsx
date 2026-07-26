@@ -481,7 +481,11 @@ export default function LevelPlanStep({ onNext, onBack }) {
     const allPlanned = deriveFeats(levels)
 
     const available = Object.entries(FEATS).filter(([key, feat]) => {
-      if (allPlanned.includes(key)) return false
+      // Stackable feats (mostly epic ones like Great Strength) stay available
+      // until they hit their cap; everything else disappears once taken.
+      const timesTaken = allPlanned.filter(f => f === key).length
+      if (timesTaken >= (feat.stackable ?? 1)) return false
+      if (feat.autoGranted) return false
       if (feat.firstLevelOnly && i !== 0) return false
       if (featSearch && !feat.name.toLowerCase().includes(featSearch.toLowerCase())) return false
       return checkFeatPrereqs(key, snapshot).met
