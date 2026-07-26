@@ -10,7 +10,7 @@ import {
   calcTotalSkillPoints, calcSkillPointsSpent, calcTotalFeatsAvailable,
   validateCharacter, effectiveScore, freeFeatsGrantedAtLevel, featuresAtClassLevel,
 } from '../../utils/validation.js'
-import { CLASS_ICONS, SKILL_ICONS, FEAT_ICONS } from '../../data/icons.js'
+import { CLASS_ICONS, SKILL_ICONS, FEAT_ICONS, getFeatureIcon } from '../../data/icons.js'
 import { alignmentLabel } from '../../data/alignments.js'
 import {
   CASTING_ABILITY, FIRST_SPELL_LEVEL, totalSpellSlots, baseSpellsKnown,
@@ -322,7 +322,7 @@ export default function SummaryStep({ onBack }) {
                 .join(', ')
               const featList = (lv.feats ?? []).map(f => FEATS[f]?.name ?? f).join(', ')
               const freeList = freeFeatsGrantedAtLevel(character.levels, i).map(f => FEATS[f]?.name ?? f).join(', ')
-              const featureList = featuresAtClassLevel(lv.classKey, classNum).map(f => f.name).join(', ')
+              const featureList = featuresAtClassLevel(lv.classKey, classNum).map(f => `${getFeatureIcon(f.name, lv.classKey)} ${f.name}`).join(', ')
               return (
                 <div key={i} className="flex gap-3 text-sm py-1 border-b border-auldwyn-border/30 last:border-0">
                   <span className="text-auldwyn-gold font-bold w-8 shrink-0">{i + 1}</span>

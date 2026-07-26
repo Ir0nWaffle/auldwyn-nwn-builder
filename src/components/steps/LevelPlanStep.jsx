@@ -10,7 +10,7 @@ import {
   abilityMod, effectiveScore, deriveIncreases, babFromPlan, deriveClassLevels,
   freeFeatsGrantedAtLevel, classMaxLevel, featuresAtClassLevel,
 } from '../../utils/validation.js'
-import { CLASS_ICONS, SKILL_ICONS, FEAT_ICONS } from '../../data/icons.js'
+import { CLASS_ICONS, SKILL_ICONS, FEAT_ICONS, getFeatureIcon } from '../../data/icons.js'
 import IconSlot from '../IconSlot.jsx'
 
 const ABILITY_LABELS = {
@@ -618,7 +618,7 @@ export default function LevelPlanStep({ onNext, onBack }) {
             <div className="flex justify-between">
               <span className="text-auldwyn-muted">Class Features</span>
               <span className="text-auldwyn-gold text-right max-w-[60%]">
-                {gainedFeatures.map(f => f.name).join(', ')}
+                {gainedFeatures.map(f => `${getFeatureIcon(f.name, lv.classKey)} ${f.name}`).join(', ')}
               </span>
             </div>
           )}

@@ -126,6 +126,7 @@ export const FEAT_ICONS = {
   weaponspec: '💥',
   whirlwindattack: '🌀',
   scribescroll: '📜',
+  combatcasting: '🧘',
 
   // Skill Focus
   skillfocusdiscipline: '💪',
@@ -314,4 +315,65 @@ export const SPELL_ICONS = {
   // Universal / utility
   see_invisible: '👁️', invisibilitypurge: '💡', invisibilitysphere: '👻',
   continualflame: '🕯️', dismissal: '🌀', confusion: '🌀',
+
+  // Divination/Abjuration/Necromancy odds and ends
+  augury: '🪙', auravsalignment: '🧭', blightspell: '🥀',
+}
+
+// ── Class feature icons ──────────────────────────────────────────────────
+// Class features (see classFeatures.js) aren't individually hand-picked —
+// there are 229 of them — so instead we match on keywords in the display
+// name, falling back to the granting class's own icon. Order matters: more
+// specific phrases are checked before generic ones.
+const FEATURE_KEYWORD_ICONS = [
+  ['epic shifter forms', '🐾'], ['greater wild shape', '🐾'], ['wild shape', '🐺'],
+  ['elemental shape', '🌪️'], ['humanoid shape', '🧍'],
+  ['uncanny dodge', '👁️'], ['damage reduction', '🪨'],
+  ['sneak attack', '🗡️'], ['death attack', '💀'],
+  ['rage', '😡'],
+  ['evasion', '💨'],
+  ['turn undead', '☀️'], ['smite', '🔨'],
+  ['bardic knowledge', '📚'], ['bard song', '🎵'],
+  ['ki strike', '✊'], ['ki damage', '✊'], ['ki critical', '✊'],
+  ['stunning fist', '👊'], ['knockdown', '🤼'], ['deflect arrows', '🏹'],
+  ['diamond', '💎'], ['quivering palm', '✋'], ['empty body', '🌫️'],
+  ['perfect self', '☯️'], ['still mind', '🧘'], ['purity of body', '🧘'],
+  ['wholeness of body', '➕'], ['fast movement', '👟'], ['monk ac bonus', '🥋'],
+  ['cleave', '🪓'],
+  ['divine grace', '🙏'], ['divine health', '❤️'], ['divine wrath', '⚡'],
+  ['lay on hands', '✋'], ['aura of courage', '🦁'], ['remove disease', '💊'],
+  ['summon mount', '🐴'], ['summon familiar', '🐱'],
+  ['fiendish servant', '😈'], ['summon undead', '💀'], ['summon shadow', '🌑'],
+  ['animate dead', '💀'], ['create undead', '💀'],
+  ['scribe scroll', '📜'],
+  ['dual-wield', '🤺'], ['two-weapon fighting', '🤺'],
+  ['trackless step', '👣'], ['woodland stride', '🌲'],
+  ["nature's lure", '🌿'], ['nature sense', '🌿'], ['venom immunity', '🐍'],
+  ['animal companion', '🐾'],
+  ['use poison', '🐍'], ['poison', '🐍'],
+  ['ghostly visage', '👤'], ['darkness', '🌑'], ['invisibility', '👻'],
+  ["bull's strength", '💪'], ['dark blessing', '🖤'],
+  ['inflict', '☠️'], ['contagion', '🦠'],
+  ['sacred defense', '🛡️'],
+  ['draconic', '🐉'], ['dragon breath', '🐉'], ['half-dragon', '🐲'],
+  ['dragon abilities', '🐲'], ['wings', '🪽'],
+  ['defensive stance', '🛡️'], ['defensive awareness', '👁️'],
+  ["deneir's eye", '👁️'], ['craft harper item', '🛠️'], ["tymora's smile", '🍀'],
+  ["lliira's heart", '💗'],
+  ['bone skin', '🦴'], ['darkvision', '🌙'], ['deathless', '💀'],
+  ['undead graft', '🦴'], ['tough as bone', '🦴'],
+  ['hide in plain sight', '🫥'], ['shadow', '🌑'], ['defensive roll', '🎲'],
+  ['slippery mind', '🧠'],
+  ['weapon of choice', '⚔️'], ['multiplier', '✖️'], ['weapon focus', '🎯'],
+  ['infinite', '♾️'],
+  ['seeker arrow', '🏹'], ['arrow of death', '🏹'], ['hail of arrows', '🏹'],
+  ['enchant arrow', '🏹'], ['imbue arrow', '🏹'],
+]
+
+export function getFeatureIcon(name, classKey) {
+  const n = name.toLowerCase()
+  for (const [kw, icon] of FEATURE_KEYWORD_ICONS) {
+    if (n.includes(kw)) return icon
+  }
+  return CLASS_ICONS[classKey] ?? '⭐'
 }
