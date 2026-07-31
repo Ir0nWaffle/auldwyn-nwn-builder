@@ -251,6 +251,13 @@ const BASE_FEATS = {
     description: 'Inscribe arcane spells onto scrolls.',
     prereqs: { spellcasting: true },
   },
+  favoredenemy: {
+    name: 'Favored Enemy',
+    type: 'classfeat',
+    stackable: 5,
+    description: 'Choose a creature type as a favored enemy: bonus damage plus Spot, Listen, and Taunt checks against it, increasing every 5 ranger levels. May be taken once per ranger bonus-feat level (1st, 5th, 10th, 15th, 20th) for a different creature type each time.',
+    prereqs: { classLevels: { ranger: 1 } },
+  },
   rapidshot: {
     name: 'Rapid Shot',
     type: 'general',

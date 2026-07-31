@@ -127,6 +127,7 @@ export const FEAT_ICONS = {
   whirlwindattack: '🌀',
   scribescroll: '📜',
   combatcasting: '🧘',
+  favoredenemy: '🎯',
 
   // Skill Focus
   skillfocusdiscipline: '💪',
