@@ -1,3 +1,5 @@
+import { CLASSES } from './classes.js'
+
 // NWN:EE epic progression rules (character levels 21-40), from the wiki's
 // Level progression table and each class's own level-progression table.
 //
@@ -94,22 +96,25 @@ export function classBonusFeatsAt(classKey, classLevel) {
 
 // ─── Bonus-feat POOLS ─────────────────────────────────────────────────────────
 // Which classes restrict their bonus-feat slots to a specific list, rather
-// than letting the player spend the slot on any eligible feat. Confirmed per
-// class via the wiki's own class page:
-//   - Fighter's bonus feat is explicitly "chosen from a subset of the entire
-//     feat list" with no further restriction pre-epic — i.e. genuinely
-//     unrestricted, so it has no entry here pre-epic.
-//   - Ranger (favored enemy, greater spell focus), Rogue ("special bonus
-//     feats": crippling strike, defensive roll, improved evasion,
-//     opportunist, skill mastery, slippery mind), and Wizard (a named list of
-//     metamagic/spell feats) all have an explicit inclusion list.
-// Not yet verified for every other class (Barbarian, Cleric, Druid, Monk,
-// Paladin, or any prestige class) — those bonus-feat slots remain
-// unrestricted until checked against the wiki, same as before this fix.
+// than letting the player spend the slot on any eligible feat. Every entry
+// below is transcribed from that class's own wiki page ("Bonus feats:" /
+// "Epic <class> bonus feats:" lines) — nothing here is guessed.
 //
-// Missing from these pools: a few named wiki feats with no equivalent in
-// feats.js yet (Wizard's Arcane Defense/Brew Potion/Craft Wand, Bard's Curse
-// Song/Extra Music/Lingering Song) — omitted rather than guessed at.
+// Fighter's PRE-epic bonus feat is the one confirmed exception: its page
+// explicitly says the bonus feat is "chosen from a subset of the entire feat
+// list" with no further restriction, so it has no pre-epic entry — genuinely
+// unrestricted, not an oversight. Its EPIC bonus feat schedule, however, IS a
+// named list, so it does appear in EPIC_CLASS_BONUS_FEAT_POOL.
+//
+// Missing from these pools: a handful of named wiki feats with no equivalent
+// in feats.js/epicFeats.js yet — omitted rather than guessed at:
+//   - Wizard/Sorcerer: Arcane Defense, Brew Potion, Craft Wand
+//   - Bard: Curse Song, Extra Music, Lingering Song
+//   - Champion of Torm: Called Shot, Disarm, Improved Disarm, Improved
+//     Expertise, Improved Parry, Improved Power Attack, exotic weapon prof.
+//   - Blackguard: Epic Fiendish Servant (modeled as autoGranted, never
+//     player-picked, so it wouldn't show even if listed here)
+//   - Shadowdancer: Epic Shadowlord
 export const CLASS_BONUS_FEAT_POOL = {
   ranger: [
     'favoredenemy',
@@ -125,31 +130,62 @@ export const CLASS_BONUS_FEAT_POOL = {
     'greaterspellfocusevo', 'greaterspellfocusnec', 'greaterspellfocustrans', 'greaterspellfocusill',
     'spellpenetration', 'greaterspellpen',
   ],
+  // Champion of Torm's bonus feat starts at class level 2, well before epic.
+  championoftorm: [
+    'ambidexterity', 'armorprofheavy', 'blindfight', 'cleave', 'deflectarrows', 'dodge', 'expertise',
+    'greatcleave', 'improvedcritical', 'improvedknockdown', 'improvedtwowfighting', 'improvedunarmedstrike',
+    'knockdown', 'mobility', 'pointblankshot', 'powerattack', 'rapidshot', 'springattack', 'stunningfist',
+    'twowfighting', 'weaponfinesse', 'weaponfocus', 'whirlwindattack',
+  ],
 }
 
-// Same idea, for the EPIC portion of each class's bonus-feat schedule
-// (character level 21+) — the wiki's "Epic <class> bonus feats" lists.
-// Only populated for classes actually checked against the wiki so far.
+// Same idea, for the EPIC portion of each class's bonus-feat schedule —
+// the wiki's "Epic <class> bonus feats" lists. The threshold for "epic" is
+// each class's own level cap (classBonusFeatPool below), not a flat 20,
+// since prestige classes like Arcane Archer only reach class level 14+ once
+// already epic (their pre-epic cap is 10).
 export const EPIC_CLASS_BONUS_FEAT_POOL = {
+  // ── Base classes ──
+  barbarian: [
+    'armorskin', 'devastatingcritical', 'epicdamagereduction', 'epicprowess', 'epictoughness',
+    'epicweaponfocus', 'mightyrage', 'overwhelmingcritical', 'superiorinitiative', 'terrifyingrage', 'thunderingrage',
+  ],
+  cleric: [
+    'armorskin', 'automaticquickenspell', 'automaticsilentspell', 'automaticstillspell', 'epicspellfocus',
+    'epicspellpenetration', 'greatwisdom', 'improvedcombatcasting', 'planarturning',
+    'greaterspellfocusabj', 'greaterspellfocuscon', 'greaterspellfocusdiv', 'greaterspellfocusenc',
+    'greaterspellfocusevo', 'greaterspellfocusnec', 'greaterspellfocustrans', 'greaterspellfocusill',
+  ],
+  druid: [
+    'automaticquickenspell', 'automaticsilentspell', 'automaticstillspell', 'dragonshape', 'epicenergyresistance',
+    'epicspellfocus', 'epicspellpenetration', 'greatwisdom', 'improvedcombatcasting',
+    'greaterspellfocusabj', 'greaterspellfocuscon', 'greaterspellfocusdiv', 'greaterspellfocusenc',
+    'greaterspellfocusevo', 'greaterspellfocusnec', 'greaterspellfocustrans', 'greaterspellfocusill',
+  ],
   fighter: [
     'armorskin', 'devastatingcritical', 'epicdamagereduction', 'epicprowess', 'epictoughness',
     'epicweaponfocus', 'epicweaponspecialization', 'improvedstunningfist', 'improvedwhirlwindattack',
     'overwhelmingcritical', 'superiorinitiative',
   ],
-  rogue: [
-    'blindingspeed', 'cripplingstrike', 'defensiveroll', 'epicdodge', 'epicreputation', 'epicskillfocus',
-    'improvedevasion', 'improvedsneakattack', 'opportunist', 'selfconcealment', 'skillmastery',
-    'slipperymind', 'superiorinitiative',
+  monk: [
+    'armorskin', 'blindingspeed', 'epicdamagereduction', 'epicenergyresistance', 'epictoughness',
+    'improvedkistrike4', 'improvedkistrike5', 'improvedspellresistance', 'improvedstunningfist', 'selfconcealment',
+  ],
+  paladin: [
+    'armorskin', 'devastatingcritical', 'epicprowess', 'epicreputation', 'epicspellfocus', 'epictoughness',
+    'epicweaponfocus', 'greatsmiting', 'improvedcombatcasting', 'improvedcritical', 'overwhelmingcritical',
+    'perfecthealth', 'planarturning',
+    'greaterspellfocusabj', 'greaterspellfocuscon', 'greaterspellfocusdiv', 'greaterspellfocusenc',
+    'greaterspellfocusevo', 'greaterspellfocusnec', 'greaterspellfocustrans', 'greaterspellfocusill',
   ],
   ranger: [
     'baneofenemies', 'blindingspeed', 'epicprowess', 'epicspellfocus', 'epictoughness',
     'epicweaponfocus', 'improvedcombatcasting', 'perfecthealth',
   ],
-  wizard: [
-    'automaticquickenspell', 'automaticsilentspell', 'automaticstillspell', 'epicspellfocus',
-    'epicspellpenetration', 'epicspelldragonknight', 'epicspellmagearmor', 'epicspellepicwarding',
-    'epicspellgreaterruin', 'epicspellhellball', 'epicspellmummydust', 'greatintelligence',
-    'improvedcombatcasting',
+  rogue: [
+    'blindingspeed', 'cripplingstrike', 'defensiveroll', 'epicdodge', 'epicreputation', 'epicskillfocus',
+    'improvedevasion', 'improvedsneakattack', 'opportunist', 'selfconcealment', 'skillmastery',
+    'slipperymind', 'superiorinitiative',
   ],
   sorcerer: [
     'automaticquickenspell', 'automaticsilentspell', 'automaticstillspell', 'epicenergyresistance',
@@ -157,18 +193,72 @@ export const EPIC_CLASS_BONUS_FEAT_POOL = {
     'epicspellepicwarding', 'epicspellgreaterruin', 'epicspellhellball', 'epicspellmummydust',
     'greatcharisma', 'improvedcombatcasting',
   ],
+  wizard: [
+    'automaticquickenspell', 'automaticsilentspell', 'automaticstillspell', 'epicspellfocus',
+    'epicspellpenetration', 'epicspelldragonknight', 'epicspellmagearmor', 'epicspellepicwarding',
+    'epicspellgreaterruin', 'epicspellhellball', 'epicspellmummydust', 'greatintelligence',
+    'improvedcombatcasting',
+  ],
   bard: [
     'epicskillfocus', 'epicspellfocus', 'epicwill', 'greatcharisma', 'greatdexterity',
     'greaterspellfocusabj', 'greaterspellfocuscon', 'greaterspellfocusdiv', 'greaterspellfocusenc',
     'greaterspellfocusevo', 'greaterspellfocusnec', 'greaterspellfocustrans', 'greaterspellfocusill',
     'greaterspellpen', 'improvedcombatcasting', 'lastinginspiration',
   ],
+
+  // ── Prestige classes ──
+  arcanearcher: [
+    'blindingspeed', 'devastatingcritical', 'epicprowess', 'epicreflexes', 'epictoughness',
+    'epicweaponfocus', 'greatdexterity', 'improvedcombatcasting', 'overwhelmingcritical',
+  ],
+  assassin: [
+    'epicreflexes', 'epicskillfocus', 'greatdexterity', 'improvedcombatcasting', 'improvedsneakattack',
+    'selfconcealment', 'superiorinitiative',
+  ],
+  blackguard: [
+    'armorskin', 'devastatingcritical', 'epicprowess', 'epicreputation', 'epictoughness', 'epicweaponfocus',
+    'greatsmiting', 'improvedcombatcasting', 'improvedsneakattack', 'overwhelmingcritical', 'perfecthealth',
+    'planarturning',
+  ],
+  championoftorm: [
+    'armorskin', 'automaticquickenspell', 'automaticsilentspell', 'automaticstillspell', 'devastatingcritical',
+    'epicdamagereduction', 'epicprowess', 'epicspellfocus', 'epicspellpenetration', 'epictoughness',
+    'epicweaponfocus', 'epicweaponspecialization', 'greatsmiting', 'greatwisdom', 'improvedcombatcasting',
+    'improvedstunningfist', 'improvedwhirlwindattack', 'overwhelmingcritical', 'planarturning', 'superiorinitiative',
+  ],
+  dwarvendefender: [
+    'armorskin', 'devastatingcritical', 'epicdamagereduction', 'epicenergyresistance', 'epicprowess',
+    'epictoughness', 'epicweaponfocus', 'overwhelmingcritical', 'perfecthealth', 'twowfighting',
+  ],
+  palemaster: [
+    'automaticquickenspell', 'automaticsilentspell', 'automaticstillspell', 'epicenergyresistance',
+    'epicspellfocus', 'epicspellpenetration', 'improvedcombatcasting',
+    'epicspelldragonknight', 'epicspellmagearmor', 'epicspellepicwarding', 'epicspellgreaterruin',
+    'epicspellhellball', 'epicspellmummydust',
+  ],
+  shadowdancer: [
+    'blindingspeed', 'epicdodge', 'epicreflexes', 'epicskillfocus', 'improvedwhirlwindattack',
+    'selfconcealment', 'superiorinitiative',
+  ],
+  shifter: [
+    'automaticquickenspell', 'automaticsilentspell', 'automaticstillspell', 'constructshape', 'dragonshape',
+    'epicenergyresistance', 'epicspellfocus', 'epicspellpenetration', 'greatwisdom', 'improvedcombatcasting',
+    'outsidershape', 'undeadshape',
+  ],
+  weaponmaster: [
+    'armorskin', 'blindingspeed', 'devastatingcritical', 'epicdamagereduction', 'epicprowess', 'epictoughness',
+    'epicweaponfocus', 'improvedwhirlwindattack', 'overwhelmingcritical', 'planarturning', 'superiorinitiative',
+  ],
 }
 
 // The pool restricting a class's bonus-feat slots at a given CLASS level, or
-// null if that class's bonus feat is unrestricted (any eligible feat).
+// null if that class's bonus feat is unrestricted (any eligible feat). The
+// pre-epic/epic split is each class's own level cap — 20 for base classes,
+// 10 (or 5 for Harper Scout) for prestige classes — not a flat 20, since a
+// 10-cap prestige class only reaches class level 11+ once already epic.
 export function classBonusFeatPool(classKey, classLevel) {
-  const pool = classLevel > 20 ? EPIC_CLASS_BONUS_FEAT_POOL[classKey] : CLASS_BONUS_FEAT_POOL[classKey]
+  const preEpicCap = CLASSES[classKey]?.maxLevel ?? 20
+  const pool = classLevel > preEpicCap ? EPIC_CLASS_BONUS_FEAT_POOL[classKey] : CLASS_BONUS_FEAT_POOL[classKey]
   return pool ?? null
 }
 
