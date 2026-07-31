@@ -10,7 +10,7 @@ import {
   abilityMod, effectiveScore, deriveIncreases, babFromPlan, deriveClassLevels,
   freeFeatsGrantedAtLevel, classMaxLevel, featuresAtClassLevel,
   needsSpellSelection, spellPickBudget, eligibleSpellPicks, deriveSpells, spellLevelForClass,
-  canSwapSpells, eligibleSwapTargets, applySwaps,
+  canSwapSpells, eligibleSwapTargets, applySwaps, requiredBonusFeatPool,
 } from '../../utils/validation.js'
 import { CLASS_ICONS, SKILL_ICONS, FEAT_ICONS, getFeatureIcon } from '../../data/icons.js'
 import { SPELLS, getSpellIcon } from '../../data/spells.js'
@@ -503,6 +503,8 @@ export default function LevelPlanStep({ onNext, onBack }) {
     const snapshot = characterAtLevel(character, i)
     const allPlanned = deriveFeats(levels)
 
+    const bonusPool = requiredBonusFeatPool(character, i)
+
     const available = Object.entries(FEATS).filter(([key, feat]) => {
       // Stackable feats (mostly epic ones like Great Strength) stay available
       // until they hit their cap; everything else disappears once taken.
@@ -511,6 +513,9 @@ export default function LevelPlanStep({ onNext, onBack }) {
       if (feat.autoGranted) return false
       if (feat.firstLevelOnly && i !== 0) return false
       if (featSearch && !feat.name.toLowerCase().includes(featSearch.toLowerCase())) return false
+      // Once every remaining slot is needed to cover a class's restricted
+      // bonus feat (e.g. Ranger's Favored Enemy), unrelated feats drop out.
+      if (bonusPool && !bonusPool.includes(key)) return false
       return checkFeatPrereqs(key, snapshot).met
     })
     const generalFeats = available.filter(([, feat]) => !feat.epic)
@@ -524,6 +529,11 @@ export default function LevelPlanStep({ onNext, onBack }) {
         {freeFeats.length > 0 && (
           <p className="text-xs text-auldwyn-gold/80 mb-2">
             ✓ Granted free by {cls?.name}: {freeFeats.map(f => FEATS[f]?.name ?? f).join(', ')}
+          </p>
+        )}
+        {bonusPool && (
+          <p className="text-xs text-auldwyn-gold/80 mb-2">
+            ⭐ This slot must be a {cls?.name} bonus feat — the general feat list is hidden until it's filled.
           </p>
         )}
         <div className="flex items-center justify-between mb-3">

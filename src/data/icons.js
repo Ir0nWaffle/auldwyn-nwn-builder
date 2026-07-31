@@ -128,6 +128,12 @@ export const FEAT_ICONS = {
   scribescroll: '📜',
   combatcasting: '🧘',
   favoredenemy: '🎯',
+  cripplingstrike: '🩸',
+  defensiveroll: '🎲',
+  improvedevasion: '💨',
+  opportunist: '⚔️',
+  skillmastery: '🏅',
+  slipperymind: '🧠',
 
   // Skill Focus
   skillfocusdiscipline: '💪',

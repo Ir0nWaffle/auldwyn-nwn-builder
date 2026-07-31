@@ -3,7 +3,7 @@ import { FEATS } from '../data/feats.js'
 import { SKILLS, maxClassRanks, maxCrossClassRanks } from '../data/skills.js'
 import { RACES } from '../data/races.js'
 import {
-  GENERAL_FEAT_LEVELS, CLASS_BONUS_FEAT_LEVELS, classBonusFeatsAt,
+  GENERAL_FEAT_LEVELS, CLASS_BONUS_FEAT_LEVELS, classBonusFeatsAt, classBonusFeatPool,
   epicAttackBonus, epicSaveBonus, EPIC_CLASS_MAX_LEVEL, EPIC_START_LEVEL,
 } from '../data/epicProgression.js'
 import { hasClassFeature, featuresAtClassLevel, allClassFeatures } from '../data/classFeatures.js'
@@ -669,6 +669,40 @@ export function featSlotsAtLevel(character, i) {
   const classCount = levels.slice(0, i + 1).filter(l => l.classKey === lv.classKey).length
   slots += classBonusFeatsAt(lv.classKey, classCount)
   return slots
+}
+
+// If this level's class grants a restricted bonus feat (Ranger's Favored
+// Enemy/Greater Spell Focus, Rogue's special bonus feats, Wizard's metamagic/
+// spell feat list, etc.) and the player hasn't picked enough of them yet to
+// cover the bonus-feat slots, returns the array of feat keys the REMAINING
+// pick(s) must come from. Once every remaining slot is accounted for by a
+// still-unmet bonus obligation, general (non-bonus) feats disappear from the
+// available list — but nothing stops spending an earlier slot on a bonus-pool
+// feat too, since the two slot types aren't otherwise distinguished.
+// Returns null when the slots are unrestricted or already satisfied.
+export function requiredBonusFeatPool(character, i) {
+  const levels = character.levels ?? []
+  const lv = levels[i]
+  if (!lv) return null
+  const charLevel = i + 1
+  const classCount = levels.slice(0, i + 1).filter(l => l.classKey === lv.classKey).length
+  const bonusSlots = classBonusFeatsAt(lv.classKey, classCount)
+  if (bonusSlots === 0) return null
+  const pool = classBonusFeatPool(lv.classKey, classCount)
+  if (!pool) return null
+
+  let generalSlots = 0
+  if (GENERAL_FEAT_LEVELS.includes(charLevel)) generalSlots++
+  if (charLevel === 1 && character.race === 'human') generalSlots++
+
+  const chosen = lv.feats ?? []
+  const bonusPicked = chosen.filter(k => pool.includes(k)).length
+  const totalSlots = generalSlots + bonusSlots
+  const slotsLeft = totalSlots - chosen.length
+  const bonusObligationRemaining = Math.max(0, bonusSlots - bonusPicked)
+
+  if (slotsLeft > 0 && bonusObligationRemaining >= slotsLeft) return pool
+  return null
 }
 
 // Snapshot of the character as it exists through level index i (inclusive),

@@ -92,6 +92,86 @@ export function classBonusFeatsAt(classKey, classLevel) {
   return levels.filter(l => l === classLevel).length
 }
 
+// ─── Bonus-feat POOLS ─────────────────────────────────────────────────────────
+// Which classes restrict their bonus-feat slots to a specific list, rather
+// than letting the player spend the slot on any eligible feat. Confirmed per
+// class via the wiki's own class page:
+//   - Fighter's bonus feat is explicitly "chosen from a subset of the entire
+//     feat list" with no further restriction pre-epic — i.e. genuinely
+//     unrestricted, so it has no entry here pre-epic.
+//   - Ranger (favored enemy, greater spell focus), Rogue ("special bonus
+//     feats": crippling strike, defensive roll, improved evasion,
+//     opportunist, skill mastery, slippery mind), and Wizard (a named list of
+//     metamagic/spell feats) all have an explicit inclusion list.
+// Not yet verified for every other class (Barbarian, Cleric, Druid, Monk,
+// Paladin, or any prestige class) — those bonus-feat slots remain
+// unrestricted until checked against the wiki, same as before this fix.
+//
+// Missing from these pools: a few named wiki feats with no equivalent in
+// feats.js yet (Wizard's Arcane Defense/Brew Potion/Craft Wand, Bard's Curse
+// Song/Extra Music/Lingering Song) — omitted rather than guessed at.
+export const CLASS_BONUS_FEAT_POOL = {
+  ranger: [
+    'favoredenemy',
+    'greaterspellfocusabj', 'greaterspellfocuscon', 'greaterspellfocusdiv', 'greaterspellfocusenc',
+    'greaterspellfocusevo', 'greaterspellfocusnec', 'greaterspellfocustrans', 'greaterspellfocusill',
+  ],
+  rogue: ['cripplingstrike', 'defensiveroll', 'improvedevasion', 'opportunist', 'skillmastery', 'slipperymind'],
+  wizard: [
+    'combatcasting', 'empowerspell', 'extendspell', 'maximizespell', 'quickenspell', 'silentspell', 'stillspell',
+    'spellfocusabj', 'spellfocuscon', 'spellfocusdiv', 'spellfocusenc', 'spellfocusevo', 'spellfocusnec',
+    'spellfocustrans', 'spellfocusill',
+    'greaterspellfocusabj', 'greaterspellfocuscon', 'greaterspellfocusdiv', 'greaterspellfocusenc',
+    'greaterspellfocusevo', 'greaterspellfocusnec', 'greaterspellfocustrans', 'greaterspellfocusill',
+    'spellpenetration', 'greaterspellpen',
+  ],
+}
+
+// Same idea, for the EPIC portion of each class's bonus-feat schedule
+// (character level 21+) — the wiki's "Epic <class> bonus feats" lists.
+// Only populated for classes actually checked against the wiki so far.
+export const EPIC_CLASS_BONUS_FEAT_POOL = {
+  fighter: [
+    'armorskin', 'devastatingcritical', 'epicdamagereduction', 'epicprowess', 'epictoughness',
+    'epicweaponfocus', 'epicweaponspecialization', 'improvedstunningfist', 'improvedwhirlwindattack',
+    'overwhelmingcritical', 'superiorinitiative',
+  ],
+  rogue: [
+    'blindingspeed', 'cripplingstrike', 'defensiveroll', 'epicdodge', 'epicreputation', 'epicskillfocus',
+    'improvedevasion', 'improvedsneakattack', 'opportunist', 'selfconcealment', 'skillmastery',
+    'slipperymind', 'superiorinitiative',
+  ],
+  ranger: [
+    'baneofenemies', 'blindingspeed', 'epicprowess', 'epicspellfocus', 'epictoughness',
+    'epicweaponfocus', 'improvedcombatcasting', 'perfecthealth',
+  ],
+  wizard: [
+    'automaticquickenspell', 'automaticsilentspell', 'automaticstillspell', 'epicspellfocus',
+    'epicspellpenetration', 'epicspelldragonknight', 'epicspellmagearmor', 'epicspellepicwarding',
+    'epicspellgreaterruin', 'epicspellhellball', 'epicspellmummydust', 'greatintelligence',
+    'improvedcombatcasting',
+  ],
+  sorcerer: [
+    'automaticquickenspell', 'automaticsilentspell', 'automaticstillspell', 'epicenergyresistance',
+    'epicspellfocus', 'epicspellpenetration', 'epicspelldragonknight', 'epicspellmagearmor',
+    'epicspellepicwarding', 'epicspellgreaterruin', 'epicspellhellball', 'epicspellmummydust',
+    'greatcharisma', 'improvedcombatcasting',
+  ],
+  bard: [
+    'epicskillfocus', 'epicspellfocus', 'epicwill', 'greatcharisma', 'greatdexterity',
+    'greaterspellfocusabj', 'greaterspellfocuscon', 'greaterspellfocusdiv', 'greaterspellfocusenc',
+    'greaterspellfocusevo', 'greaterspellfocusnec', 'greaterspellfocustrans', 'greaterspellfocusill',
+    'greaterspellpen', 'improvedcombatcasting', 'lastinginspiration',
+  ],
+}
+
+// The pool restricting a class's bonus-feat slots at a given CLASS level, or
+// null if that class's bonus feat is unrestricted (any eligible feat).
+export function classBonusFeatPool(classKey, classLevel) {
+  const pool = classLevel > 20 ? EPIC_CLASS_BONUS_FEAT_POOL[classKey] : CLASS_BONUS_FEAT_POOL[classKey]
+  return pool ?? null
+}
+
 // ─── Epic class level caps ───────────────────────────────────────────────────
 // Prestige classes that cap at 10 pre-epic extend to 30 once epic. Harper
 // Scout is the exception and stays at 5. Base classes have no class-level cap

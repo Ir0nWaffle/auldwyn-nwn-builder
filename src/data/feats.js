@@ -258,6 +258,43 @@ const BASE_FEATS = {
     description: 'Choose a creature type as a favored enemy: bonus damage plus Spot, Listen, and Taunt checks against it, increasing every 5 ranger levels. May be taken once per ranger bonus-feat level (1st, 5th, 10th, 15th, 20th) for a different creature type each time.',
     prereqs: { classLevels: { ranger: 1 } },
   },
+  // ── Rogue special bonus feats (10th, 13th, 16th, 19th) ──────────────────────
+  cripplingstrike: {
+    name: 'Crippling Strike',
+    type: 'classfeat',
+    description: 'Sneak attacks also deal 2 points of Strength damage.',
+    prereqs: { classLevels: { rogue: 10 } },
+  },
+  defensiveroll: {
+    name: 'Defensive Roll',
+    type: 'classfeat',
+    description: 'Once per day, halve damage from a hit that would otherwise drop you to 0 HP or below.',
+    prereqs: { classLevels: { rogue: 10 } },
+  },
+  improvedevasion: {
+    name: 'Improved Evasion',
+    type: 'classfeat',
+    description: 'Take no damage on a successful Reflex save against area effects, and only half on a failed one.',
+    prereqs: { classLevels: { rogue: 10 } },
+  },
+  opportunist: {
+    name: 'Opportunist',
+    type: 'classfeat',
+    description: 'Once per round, make an attack of opportunity against an enemy just struck by an ally.',
+    prereqs: { classLevels: { rogue: 10 } },
+  },
+  skillmastery: {
+    name: 'Skill Mastery',
+    type: 'classfeat',
+    description: 'Take 10 on chosen skills even under pressure or distraction.',
+    prereqs: { classLevels: { rogue: 10 } },
+  },
+  slipperymind: {
+    name: 'Slippery Mind',
+    type: 'classfeat',
+    description: 'A second saving throw against enchantment spells that penetrated the first.',
+    prereqs: { classLevels: { rogue: 10 } },
+  },
   rapidshot: {
     name: 'Rapid Shot',
     type: 'general',
