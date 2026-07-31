@@ -2,6 +2,8 @@
 // NWN-style icon slot (see IconSlot.jsx). These are original glyph choices,
 // not extracted game art — chosen only to evoke each class/skill at a glance.
 
+import { baseFeatKey } from './feats.js'
+
 // Fallback icon per spell school — every spell resolves to at least this,
 // even ones without a hand-picked icon in SPELL_ICONS below.
 export const SCHOOL_ICONS = {
@@ -229,6 +231,12 @@ export const FEAT_ICONS = {
   constructshape: '🗿',
   dragonshape: '🐲',
   epicfiendishservant: '😈',
+}
+
+// Looks up a feat's icon even for a choice-encoded key like
+// 'favoredenemy__goblinoid' (resolves via the base 'favoredenemy' key).
+export function featIcon(key) {
+  return FEAT_ICONS[baseFeatKey(key)]
 }
 
 // Hand-picked icons for the most iconic/recognizable spells. Any spell key

@@ -2,7 +2,9 @@ import { useState } from 'react'
 import { useCharacter } from '../../store/CharacterContext.jsx'
 import { CLASSES, SERVER_SETTINGS } from '../../data/classes.js'
 import { SKILLS } from '../../data/skills.js'
-import { FEATS } from '../../data/feats.js'
+import {
+  FEATS, featDef, featDisplayName, baseFeatKey, makeChoiceFeatKey, FAVORED_ENEMY_TYPES,
+} from '../../data/feats.js'
 import { RACES } from '../../data/races.js'
 import {
   planLevelEconomics, featSlotsAtLevel, characterAtLevel, deriveFeats,
@@ -12,7 +14,7 @@ import {
   needsSpellSelection, spellPickBudget, eligibleSpellPicks, deriveSpells, spellLevelForClass,
   canSwapSpells, eligibleSwapTargets, applySwaps, requiredBonusFeatPool,
 } from '../../utils/validation.js'
-import { CLASS_ICONS, SKILL_ICONS, FEAT_ICONS, getFeatureIcon } from '../../data/icons.js'
+import { CLASS_ICONS, SKILL_ICONS, FEAT_ICONS, getFeatureIcon, featIcon } from '../../data/icons.js'
 import { SPELLS, getSpellIcon } from '../../data/spells.js'
 import IconSlot from '../IconSlot.jsx'
 
@@ -60,6 +62,7 @@ export default function LevelPlanStep({ onNext, onBack }) {
   const [selClass, setSelClass] = useState(null)
   const [featSearch, setFeatSearch] = useState('')
   const [swapOut, setSwapOut] = useState(null)
+  const [choosingFeatKey, setChoosingFeatKey] = useState(null)
 
   const econ = planLevelEconomics(character)
   const i = charLevel - 1 // index of the level being built while in a sub-step
@@ -80,12 +83,14 @@ export default function LevelPlanStep({ onNext, onBack }) {
     )
     setFeatSearch('')
     setSwapOut(null)
+    setChoosingFeatKey(null)
     setMode(nextSteps[0])
   }
 
   function cancelLevel() {
     dispatch({ type: 'TRUNCATE_LEVELS', index: i })
     setSwapOut(null)
+    setChoosingFeatKey(null)
     setMode('overview')
   }
 
@@ -100,6 +105,7 @@ export default function LevelPlanStep({ onNext, onBack }) {
   }
   function finishLevel() {
     setSwapOut(null)
+    setChoosingFeatKey(null)
     setMode('overview')
   }
 
@@ -161,8 +167,8 @@ export default function LevelPlanStep({ onNext, onBack }) {
                 const classNum = levels.slice(0, idx + 1).filter(l => l.classKey === lv.classKey).length
                 const freeFeats = freeFeatsGrantedAtLevel(levels, idx)
                 const featList = [
-                  ...freeFeats.map(f => FEATS[f]?.name ?? f),
-                  ...(lv.feats ?? []).map(f => FEATS[f]?.name ?? f),
+                  ...freeFeats.map(f => featDisplayName(f)),
+                  ...(lv.feats ?? []).map(f => featDisplayName(f)),
                 ].join(', ')
                 const skillPts = econ[idx].spent
                 const featureList = featuresAtClassLevel(lv.classKey, classNum)
@@ -326,8 +332,8 @@ export default function LevelPlanStep({ onNext, onBack }) {
                     <div className="flex flex-wrap gap-1.5">
                       {details.freeFeats.map(f => (
                         <span key={f} className="inline-flex items-center gap-1 bg-black/20 rounded-sm px-1.5 py-0.5">
-                          <IconSlot icon={FEAT_ICONS[f]} size="sm" />
-                          {FEATS[f]?.name ?? f}
+                          <IconSlot icon={featIcon(f)} size="sm" />
+                          {featDisplayName(f)}
                         </span>
                       ))}
                     </div>
@@ -508,7 +514,9 @@ export default function LevelPlanStep({ onNext, onBack }) {
     const available = Object.entries(FEATS).filter(([key, feat]) => {
       // Stackable feats (mostly epic ones like Great Strength) stay available
       // until they hit their cap; everything else disappears once taken.
-      const timesTaken = allPlanned.filter(f => f === key).length
+      // Choice feats (Favored Enemy) are counted by base key so every
+      // creature-type pick counts toward the same cap.
+      const timesTaken = allPlanned.filter(f => baseFeatKey(f) === key).length
       if (timesTaken >= (feat.stackable ?? 1)) return false
       if (feat.autoGranted) return false
       if (feat.firstLevelOnly && i !== 0) return false
@@ -521,6 +529,23 @@ export default function LevelPlanStep({ onNext, onBack }) {
     const generalFeats = available.filter(([, feat]) => !feat.epic)
     const epicFeats = available.filter(([, feat]) => feat.epic)
 
+    // Favored Enemy (and any future needsChoice feat) picks a creature type
+    // via a small follow-up list rather than adding the feat directly; a
+    // type already used elsewhere in the build can't be picked again.
+    const choosingFeat = choosingFeatKey ? FEATS[choosingFeatKey] : null
+    const choiceOptions = choosingFeat?.needsChoice === 'favoredEnemyType'
+      ? FAVORED_ENEMY_TYPES.filter(t => !allPlanned.includes(makeChoiceFeatKey(choosingFeatKey, t.key)))
+      : []
+
+    function pickFeat(key, feat) {
+      if (slotsLeft <= 0) return
+      if (feat.needsChoice) {
+        setChoosingFeatKey(key)
+        return
+      }
+      dispatch({ type: 'ADD_LEVEL_FEAT', index: i, featKey: key })
+    }
+
     const freeFeats = freeFeatsGrantedAtLevel(levels, i)
 
     return (
@@ -528,7 +553,7 @@ export default function LevelPlanStep({ onNext, onBack }) {
         {header}
         {freeFeats.length > 0 && (
           <p className="text-xs text-auldwyn-gold/80 mb-2">
-            ✓ Granted free by {cls?.name}: {freeFeats.map(f => FEATS[f]?.name ?? f).join(', ')}
+            ✓ Granted free by {cls?.name}: {freeFeats.map(f => featDisplayName(f)).join(', ')}
           </p>
         )}
         {bonusPool && (
@@ -555,40 +580,65 @@ export default function LevelPlanStep({ onNext, onBack }) {
               className="w-full bg-auldwyn-dark border border-auldwyn-border rounded-none px-3 py-1.5 text-sm
                          text-auldwyn-text focus:outline-none focus:border-auldwyn-gold"
             />
-            <div className="panel !p-0 max-h-[330px] overflow-y-auto divide-y divide-auldwyn-border/20">
-              {generalFeats.map(([key, feat]) => (
-                <button key={key}
-                  onClick={() => slotsLeft > 0 && dispatch({ type: 'ADD_LEVEL_FEAT', index: i, featKey: key })}
-                  disabled={slotsLeft <= 0}
-                  className="nwn-list-item disabled:opacity-40 flex items-start gap-2">
-                  <IconSlot icon={FEAT_ICONS[key]} size="sm" className="mt-0.5" />
-                  <span className="flex-1">
-                    <span className="font-bold">{feat.name}</span>
-                    <span className="block text-xs text-auldwyn-muted mt-0.5">{feat.description}</span>
-                  </span>
-                </button>
-              ))}
-              {epicFeats.length > 0 && (
-                <>
-                  <div className="nwn-bar text-[10px] !py-1 tracking-wider text-auldwyn-gold/90">⭐ Epic Feats</div>
-                  {epicFeats.map(([key, feat]) => (
-                    <button key={key}
-                      onClick={() => slotsLeft > 0 && dispatch({ type: 'ADD_LEVEL_FEAT', index: i, featKey: key })}
-                      disabled={slotsLeft <= 0}
-                      className="nwn-list-item disabled:opacity-40 flex items-start gap-2">
-                      <IconSlot icon={FEAT_ICONS[key]} size="sm" className="mt-0.5" />
-                      <span className="flex-1">
-                        <span className="font-bold">{feat.name}</span>
-                        <span className="block text-xs text-auldwyn-muted mt-0.5">{feat.description}</span>
-                      </span>
+            {choosingFeat ? (
+              <div className="panel !p-0 max-h-[330px] overflow-y-auto">
+                <div className="flex items-center justify-between px-3 py-2 text-sm border-b border-auldwyn-border/30">
+                  <span>Choose a creature type for <span className="text-auldwyn-gold">{choosingFeat.name}</span>:</span>
+                  <button className="btn-secondary text-xs" onClick={() => setChoosingFeatKey(null)}>Cancel</button>
+                </div>
+                <div className="divide-y divide-auldwyn-border/20">
+                  {choiceOptions.map(t => (
+                    <button key={t.key}
+                      onClick={() => {
+                        dispatch({ type: 'ADD_LEVEL_FEAT', index: i, featKey: makeChoiceFeatKey(choosingFeatKey, t.key) })
+                        setChoosingFeatKey(null)
+                      }}
+                      className="nwn-list-item flex items-start gap-2 w-full">
+                      <IconSlot icon={FEAT_ICONS[choosingFeatKey]} size="sm" className="mt-0.5" />
+                      <span className="flex-1 text-left font-bold">{t.label}</span>
                     </button>
                   ))}
-                </>
-              )}
-              {available.length === 0 && (
-                <p className="text-xs text-auldwyn-muted p-3">No eligible feats match.</p>
-              )}
-            </div>
+                  {choiceOptions.length === 0 && (
+                    <p className="text-xs text-auldwyn-muted p-3">No creature types left to choose.</p>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="panel !p-0 max-h-[330px] overflow-y-auto divide-y divide-auldwyn-border/20">
+                {generalFeats.map(([key, feat]) => (
+                  <button key={key}
+                    onClick={() => pickFeat(key, feat)}
+                    disabled={slotsLeft <= 0}
+                    className="nwn-list-item disabled:opacity-40 flex items-start gap-2">
+                    <IconSlot icon={FEAT_ICONS[key]} size="sm" className="mt-0.5" />
+                    <span className="flex-1">
+                      <span className="font-bold">{feat.name}</span>
+                      <span className="block text-xs text-auldwyn-muted mt-0.5">{feat.description}</span>
+                    </span>
+                  </button>
+                ))}
+                {epicFeats.length > 0 && (
+                  <>
+                    <div className="nwn-bar text-[10px] !py-1 tracking-wider text-auldwyn-gold/90">⭐ Epic Feats</div>
+                    {epicFeats.map(([key, feat]) => (
+                      <button key={key}
+                        onClick={() => pickFeat(key, feat)}
+                        disabled={slotsLeft <= 0}
+                        className="nwn-list-item disabled:opacity-40 flex items-start gap-2">
+                        <IconSlot icon={FEAT_ICONS[key]} size="sm" className="mt-0.5" />
+                        <span className="flex-1">
+                          <span className="font-bold">{feat.name}</span>
+                          <span className="block text-xs text-auldwyn-muted mt-0.5">{feat.description}</span>
+                        </span>
+                      </button>
+                    ))}
+                  </>
+                )}
+                {available.length === 0 && (
+                  <p className="text-xs text-auldwyn-muted p-3">No eligible feats match.</p>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Chosen (right, like NWN) */}
@@ -599,11 +649,11 @@ export default function LevelPlanStep({ onNext, onBack }) {
                 <button key={f}
                   onClick={() => dispatch({ type: 'REMOVE_LEVEL_FEAT', index: i, featKey: f })}
                   className="nwn-list-item hover:!bg-red-950/30 flex items-start gap-2" title="Click to remove">
-                  <IconSlot icon={FEAT_ICONS[f]} size="sm" className="mt-0.5" />
+                  <IconSlot icon={featIcon(f)} size="sm" className="mt-0.5" />
                   <span className="flex-1">
-                    <span className="font-bold text-auldwyn-gold">{FEATS[f]?.name}</span>
+                    <span className="font-bold text-auldwyn-gold">{featDisplayName(f)}</span>
                     <span className="text-xs text-red-400/70 float-right">remove ✕</span>
-                    <span className="block text-xs text-auldwyn-muted mt-0.5">{FEATS[f]?.description}</span>
+                    <span className="block text-xs text-auldwyn-muted mt-0.5">{featDef(f)?.description}</span>
                   </span>
                 </button>
               ))}
@@ -811,8 +861,8 @@ export default function LevelPlanStep({ onNext, onBack }) {
     const skillList = Object.entries(lv.skills ?? {})
       .filter(([, r]) => r > 0)
       .map(([k, r]) => `${SKILLS[k]?.name} +${r}`)
-    const featList = (lv.feats ?? []).map(f => FEATS[f]?.name ?? f)
-    const freeFeats = freeFeatsGrantedAtLevel(levels, i).map(f => FEATS[f]?.name ?? f)
+    const featList = (lv.feats ?? []).map(f => featDisplayName(f))
+    const freeFeats = freeFeatsGrantedAtLevel(levels, i).map(f => featDisplayName(f))
     const conMod = abilityMod(effectiveScore('con', character.abilities,
       RACES[character.race]?.abilityMods ?? {}, deriveIncreases(levels)))
     const hpGain = (cls?.hitDie ?? 0) + conMod

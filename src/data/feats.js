@@ -9,6 +9,57 @@ import { EPIC_FEATS } from './epicFeats.js'
 // picking feats at character level 1, hidden from the feat list afterward
 // epic: only offered to epic characters (level 21+); see epicFeats.js
 // stackable: N — feat may be taken up to N times
+// needsChoice: 'favoredEnemyType' — taking this feat requires picking a value
+// from a list (see FAVORED_ENEMY_TYPES below); the choice is baked into the
+// stored feat key as `${baseKey}__${choiceKey}` (see baseFeatKey/featChoiceValue/
+// makeChoiceFeatKey/featDisplayName) so every other part of the app — prereqs,
+// stackable counts, display — keeps working on plain string feat keys.
+
+// Favored Enemy creature types, per the wiki's Favored Enemy page: "There are
+// 24 favored enemy races available; of the 25 standard races, only ooze
+// cannot be selected." (7 playable + 18 non-playable races, minus ooze.)
+export const FAVORED_ENEMY_TYPES = [
+  { key: 'aberration', label: 'Aberration' },
+  { key: 'animal', label: 'Animal' },
+  { key: 'beast', label: 'Beast' },
+  { key: 'construct', label: 'Construct' },
+  { key: 'dragon', label: 'Dragon' },
+  { key: 'dwarf', label: 'Dwarf' },
+  { key: 'elemental', label: 'Elemental' },
+  { key: 'elf', label: 'Elf' },
+  { key: 'fey', label: 'Fey' },
+  { key: 'giant', label: 'Giant' },
+  { key: 'gnome', label: 'Gnome' },
+  { key: 'goblinoid', label: 'Goblinoid' },
+  { key: 'halfelf', label: 'Half-Elf' },
+  { key: 'halforc', label: 'Half-Orc' },
+  { key: 'halfling', label: 'Halfling' },
+  { key: 'human', label: 'Human' },
+  { key: 'magicalbeast', label: 'Magical Beast' },
+  { key: 'monstroushumanoid', label: 'Monstrous Humanoid' },
+  { key: 'orc', label: 'Orc' },
+  { key: 'outsider', label: 'Outsider' },
+  { key: 'reptilian', label: 'Reptilian' },
+  { key: 'shapechanger', label: 'Shapechanger' },
+  { key: 'undead', label: 'Undead' },
+  { key: 'vermin', label: 'Vermin' },
+]
+
+const CHOICE_KEY_SEP = '__'
+
+export function baseFeatKey(key) {
+  const idx = key.indexOf(CHOICE_KEY_SEP)
+  return idx === -1 ? key : key.slice(0, idx)
+}
+
+export function featChoiceValue(key) {
+  const idx = key.indexOf(CHOICE_KEY_SEP)
+  return idx === -1 ? null : key.slice(idx + CHOICE_KEY_SEP.length)
+}
+
+export function makeChoiceFeatKey(baseKey, choiceKey) {
+  return `${baseKey}${CHOICE_KEY_SEP}${choiceKey}`
+}
 
 const BASE_FEATS = {
   // ── 1st-Level-Only Feats ───────────────────────────────────────────────────
@@ -255,6 +306,7 @@ const BASE_FEATS = {
     name: 'Favored Enemy',
     type: 'classfeat',
     stackable: 5,
+    needsChoice: 'favoredEnemyType',
     description: 'Choose a creature type as a favored enemy: bonus damage plus Spot, Listen, and Taunt checks against it, increasing every 5 ranger levels. May be taken once per ranger bonus-feat level (1st, 5th, 10th, 15th, 20th) for a different creature type each time.',
     prereqs: { classLevels: { ranger: 1 } },
   },
@@ -418,6 +470,23 @@ const BASE_FEATS = {
 // summary, print sheet) works on them unchanged. They carry `epic: true`, and
 // the feat picker filters them out below character level 21.
 export const FEATS = { ...BASE_FEATS, ...EPIC_FEATS }
+
+// Looks up a feat's definition even for a choice-encoded key like
+// 'favoredenemy__goblinoid' (resolves to the base 'favoredenemy' entry).
+export function featDef(key) {
+  return FEATS[baseFeatKey(key)]
+}
+
+// Display name for a feat key, including the choice if the key encodes one:
+// 'favoredenemy__goblinoid' -> 'Favored Enemy (Goblinoid)'.
+export function featDisplayName(key) {
+  const def = featDef(key)
+  if (!def) return key
+  const choiceVal = featChoiceValue(key)
+  if (!choiceVal) return def.name
+  const type = FAVORED_ENEMY_TYPES.find(t => t.key === choiceVal)
+  return `${def.name} (${type?.label ?? choiceVal})`
+}
 
 // How many general feats a character gets at each level
 export function getFeatCountAtLevel(level, isHuman) {

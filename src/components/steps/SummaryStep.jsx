@@ -4,13 +4,13 @@ import { useCharacter, buildShareLink } from '../../store/CharacterContext.jsx'
 import { RACES } from '../../data/races.js'
 import { CLASSES } from '../../data/classes.js'
 import { SKILLS } from '../../data/skills.js'
-import { FEATS } from '../../data/feats.js'
+import { FEATS, featDisplayName } from '../../data/feats.js'
 import {
   abilityMod, calcBAB, babFromPlan, totalCharacterLevel,
   calcTotalSkillPoints, calcSkillPointsSpent, calcTotalFeatsAvailable,
   validateCharacter, effectiveScore, freeFeatsGrantedAtLevel, featuresAtClassLevel,
 } from '../../utils/validation.js'
-import { CLASS_ICONS, SKILL_ICONS, FEAT_ICONS, getFeatureIcon } from '../../data/icons.js'
+import { CLASS_ICONS, SKILL_ICONS, FEAT_ICONS, getFeatureIcon, featIcon } from '../../data/icons.js'
 import { alignmentLabel } from '../../data/alignments.js'
 import {
   CASTING_ABILITY, FIRST_SPELL_LEVEL, totalSpellSlots, baseSpellsKnown, palemasterSlotBonus,
@@ -130,7 +130,7 @@ export default function SummaryStep({ onBack }) {
       ...takenSkills.map(([k, r]) => `  ${SKILLS[k]?.name}: ${r}`),
       '',
       'Feats:',
-      ...character.selectedFeats.map(({ featKey }) => `  ${FEATS[featKey]?.name}${freeFeatKeys.has(featKey) ? ' (class)' : ''}`),
+      ...character.selectedFeats.map(({ featKey }) => `  ${featDisplayName(featKey)}${freeFeatKeys.has(featKey) ? ' (class)' : ''}`),
       '',
       'Leveling Guide:',
       ...(character.levels ?? []).map((lv, i) => {
@@ -139,9 +139,9 @@ export default function SummaryStep({ onBack }) {
         if (lv.abilityIncrease) parts.push(`+1 ${lv.abilityIncrease.toUpperCase()}`)
         const gains = featuresAtClassLevel(lv.classKey, classNum).map(f => f.name).join(', ')
         if (gains) parts.push(`Gains: ${gains}`)
-        const free = freeFeatsGrantedAtLevel(character.levels, i).map(f => FEATS[f]?.name ?? f).join(', ')
+        const free = freeFeatsGrantedAtLevel(character.levels, i).map(f => featDisplayName(f)).join(', ')
         if (free) parts.push(`Free: ${free}`)
-        const fl = (lv.feats ?? []).map(f => FEATS[f]?.name ?? f).join(', ')
+        const fl = (lv.feats ?? []).map(f => featDisplayName(f)).join(', ')
         if (fl) parts.push(`Feats: ${fl}`)
         const sl = Object.entries(lv.skills ?? {}).filter(([, r]) => r > 0)
           .map(([k, r]) => `${SKILLS[k]?.name} +${r}`).join(', ')
@@ -285,8 +285,8 @@ export default function SummaryStep({ onBack }) {
               const isFree = freeFeatKeys.has(featKey)
               return (
                 <div key={`${featKey}-${idx}`} className="flex items-center gap-1.5 text-sm py-0.5">
-                  <IconSlot icon={FEAT_ICONS[featKey]} size="sm" />
-                  <span>{FEATS[featKey]?.name ?? featKey}</span>
+                  <IconSlot icon={featIcon(featKey)} size="sm" />
+                  <span>{featDisplayName(featKey)}</span>
                   {isFree && <span className="text-auldwyn-muted text-xs ml-1">(class)</span>}
                 </div>
               )
@@ -340,8 +340,8 @@ export default function SummaryStep({ onBack }) {
                 .filter(([, r]) => r > 0)
                 .map(([k, r]) => `${SKILLS[k]?.name} +${r}`)
                 .join(', ')
-              const featList = (lv.feats ?? []).map(f => FEATS[f]?.name ?? f).join(', ')
-              const freeList = freeFeatsGrantedAtLevel(character.levels, i).map(f => FEATS[f]?.name ?? f).join(', ')
+              const featList = (lv.feats ?? []).map(f => featDisplayName(f)).join(', ')
+              const freeList = freeFeatsGrantedAtLevel(character.levels, i).map(f => featDisplayName(f)).join(', ')
               const featureList = featuresAtClassLevel(lv.classKey, classNum).map(f => `${getFeatureIcon(f.name, lv.classKey)} ${f.name}`).join(', ')
               const spellList = (lv.spells ?? []).map(k => SPELLS[k]?.name ?? k).join(', ')
               const swapList = (lv.spellSwaps ?? []).map(s => `${SPELLS[s.out]?.name ?? s.out} → ${SPELLS[s.in]?.name ?? s.in}`).join(', ')

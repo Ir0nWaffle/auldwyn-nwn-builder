@@ -1,5 +1,7 @@
 import { CLASSES, SERVER_SETTINGS } from '../data/classes.js'
-import { FEATS } from '../data/feats.js'
+import { FEATS, baseFeatKey, featDisplayName } from '../data/feats.js'
+
+export { baseFeatKey, featDisplayName }
 import { SKILLS, maxClassRanks, maxCrossClassRanks } from '../data/skills.js'
 import { RACES } from '../data/races.js'
 import {
@@ -215,13 +217,13 @@ export function maxRankForSkill(skillKey, classLevels) {
 // ─── Feat prerequisites check ─────────────────────────────────────────────────
 
 export function checkFeatPrereqs(featKey, character) {
-  const feat = FEATS[featKey]
+  const feat = FEATS[baseFeatKey(featKey)]
   if (!feat) return { met: false, reasons: ['Unknown feat'] }
 
   const { abilities, classLevels, race, selectedFeats } = character
   const prereqs = feat.prereqs
   const reasons = []
-  const takenFeatKeys = selectedFeats.map(f => f.featKey)
+  const takenFeatKeys = selectedFeats.map(f => baseFeatKey(f.featKey))
   const bab = calcBAB(classLevels)
 
   // Prereqs check against final scores: point-buy + racial mods + level-up increases

@@ -2,10 +2,10 @@ import { useCharacter } from '../store/CharacterContext.jsx'
 import { RACES } from '../data/races.js'
 import { CLASSES, SERVER_SETTINGS } from '../data/classes.js'
 import { SKILLS } from '../data/skills.js'
-import { FEATS } from '../data/feats.js'
+import { FEATS, featDef, featDisplayName } from '../data/feats.js'
 import { SPELLS } from '../data/spells.js'
 import { abilityMod, calcBAB, babFromPlan, calcClassSaves, savesFromPlan, totalCharacterLevel, calcTotalSkillPoints, calcSkillPointsSpent, calcTotalFeatsAvailable, effectiveScore, freeFeatsGrantedAtLevel, featuresAtClassLevel } from '../utils/validation.js'
-import { CLASS_ICONS, SKILL_ICONS, FEAT_ICONS, getFeatureIcon } from '../data/icons.js'
+import { CLASS_ICONS, SKILL_ICONS, FEAT_ICONS, getFeatureIcon, featIcon } from '../data/icons.js'
 import { alignmentLabel } from '../data/alignments.js'
 
 const ABILITY_KEYS = ['str', 'dex', 'con', 'int', 'wis', 'cha']
@@ -154,9 +154,9 @@ export default function PrintSheet({ onClose }) {
                     const isFree = freeFeatKeys.has(featKey)
                     return (
                       <li key={`${featKey}-${idx}`}>
-                        {FEAT_ICONS[featKey]} <strong>{FEATS[featKey]?.name ?? featKey}</strong>
+                        {featIcon(featKey)} <strong>{featDisplayName(featKey)}</strong>
                         {isFree && <span className="print-muted"> (class)</span>}
-                        <span className="print-muted"> — {FEATS[featKey]?.description}</span>
+                        <span className="print-muted"> — {featDef(featKey)?.description}</span>
                       </li>
                     )
                   })}
@@ -207,9 +207,9 @@ export default function PrintSheet({ onClose }) {
                   if (lv.abilityIncrease) parts.push(`+1 ${lv.abilityIncrease.toUpperCase()}`)
                   const gains = featuresAtClassLevel(lv.classKey, classNum).map(f => `${getFeatureIcon(f.name, lv.classKey)} ${f.name}`).join(', ')
                   if (gains) parts.push(`Gains: ${gains}`)
-                  const free = freeFeatsGrantedAtLevel(character.levels, i).map(f => FEATS[f]?.name ?? f).join(', ')
+                  const free = freeFeatsGrantedAtLevel(character.levels, i).map(f => featDisplayName(f)).join(', ')
                   if (free) parts.push(`Free: ${free}`)
-                  const fl = (lv.feats ?? []).map(f => FEATS[f]?.name ?? f).join(', ')
+                  const fl = (lv.feats ?? []).map(f => featDisplayName(f)).join(', ')
                   if (fl) parts.push(`Feats: ${fl}`)
                   const spl = (lv.spells ?? []).map(k => SPELLS[k]?.name ?? k).join(', ')
                   if (spl) parts.push(`Spells: ${spl}`)

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react'
 import { SKILLS } from '../data/skills.js'
-import { FEATS } from '../data/feats.js'
+import { FEATS, baseFeatKey } from '../data/feats.js'
 import {
   deriveClassLevels, deriveSkills, deriveFeats, deriveIncreases, featSlotsAtLevel,
   canPickSpell, deriveSpells, canSwapSpell,
@@ -165,9 +165,16 @@ function reducer(state, action) {
     }
     case 'ADD_LEVEL_FEAT': {
       // Guard against double-dispatch and slot overflow. Most feats can only
-      // be taken once; stackable ones (e.g. epic Great Strength) up to N times.
-      const timesTaken = deriveFeats(state.levels).filter(f => f === action.featKey).length
-      if (timesTaken >= (FEATS[action.featKey]?.stackable ?? 1)) return state
+      // be taken once; stackable ones (e.g. epic Great Strength, or Favored
+      // Enemy across its 5 picks) up to N times — counted by BASE feat key so
+      // choice-encoded picks (favoredenemy__goblinoid) all count toward the
+      // same cap. A choice feat can also never repeat the exact same choice.
+      const allPlanned = deriveFeats(state.levels)
+      const base = baseFeatKey(action.featKey)
+      const feat = FEATS[base]
+      if (feat?.needsChoice && allPlanned.includes(action.featKey)) return state
+      const timesTaken = allPlanned.filter(f => baseFeatKey(f) === base).length
+      if (timesTaken >= (feat?.stackable ?? 1)) return state
       const lv = state.levels[action.index]
       if (!lv || lv.feats.length >= featSlotsAtLevel(state, action.index)) return state
       const levels = state.levels.map((l, i) =>
