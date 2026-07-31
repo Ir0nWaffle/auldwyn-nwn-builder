@@ -13,7 +13,7 @@ import {
 import { CLASS_ICONS, SKILL_ICONS, FEAT_ICONS, getFeatureIcon } from '../../data/icons.js'
 import { alignmentLabel } from '../../data/alignments.js'
 import {
-  CASTING_ABILITY, FIRST_SPELL_LEVEL, totalSpellSlots, baseSpellsKnown,
+  CASTING_ABILITY, FIRST_SPELL_LEVEL, totalSpellSlots, baseSpellsKnown, palemasterSlotBonus,
 } from '../../data/spellSlots.js'
 import { SPELLS } from '../../data/spells.js'
 import IconSlot from '../IconSlot.jsx'
@@ -71,6 +71,17 @@ export default function SummaryStep({ onBack }) {
 
   const { valid, errors, warnings } = validateCharacter(character)
 
+  // Pale Master boosts spell-slot depth (not spells known) in whichever of
+  // Bard/Sorcerer/Wizard is the character's highest-level caster class —
+  // see palemasterSlotBonus() for the exact rule.
+  const palemasterLevels = character.classLevels.find(cl => cl.classKey === 'palemaster')?.levels ?? 0
+  const pmBonus = palemasterSlotBonus(palemasterLevels)
+  const boostedCasterKey = pmBonus > 0
+    ? character.classLevels
+        .filter(cl => ['bard', 'sorcerer', 'wizard'].includes(cl.classKey))
+        .reduce((best, cl) => (!best || cl.levels > best.levels ? cl : best), null)?.classKey
+    : null
+
   // Spell slots per caster class. Slots freeze at class level 20 — epic levels
   // grant none — so totalSpellSlots() clamps internally.
   const casterBlocks = character.classLevels
@@ -78,10 +89,13 @@ export default function SummaryStep({ onBack }) {
     .map(({ classKey, levels }) => {
       const ability = CASTING_ABILITY[classKey]
       const mod = abilityMod(effectiveScore(ability, character.abilities, mods, increases))
+      const isBoosted = classKey === boostedCasterKey
+      const slotLevel = isBoosted ? levels + pmBonus : levels
       return {
         classKey, classLevel: levels, ability, mod,
-        slots: totalSpellSlots(classKey, levels, mod),
+        slots: totalSpellSlots(classKey, slotLevel, mod),
         known: baseSpellsKnown(classKey, levels),
+        pmBonus: isBoosted ? pmBonus : 0,
       }
     })
     .filter(b => b.slots)
@@ -284,7 +298,7 @@ export default function SummaryStep({ onBack }) {
       {/* Spells per day — only for characters with caster levels */}
       {casterBlocks.length > 0 && (
         <Section title="Spells per Day">
-          {casterBlocks.map(({ classKey, classLevel, ability, mod, slots, known }) => (
+          {casterBlocks.map(({ classKey, classLevel, ability, mod, slots, known, pmBonus }) => (
             <div key={classKey} className="mb-3 last:mb-0">
               <div className="flex items-center gap-2 mb-1">
                 <IconSlot icon={CLASS_ICONS[classKey]} size="sm" />
@@ -294,6 +308,7 @@ export default function SummaryStep({ onBack }) {
                 <span className="text-auldwyn-muted text-xs">
                   {ability.toUpperCase()} {mod >= 0 ? '+' : ''}{mod}
                   {classLevel > 20 && ' · slots capped at class level 20'}
+                  {pmBonus > 0 && ` · slots as ${classKey === 'wizard' ? 'an' : 'a'} ${CLASSES[classKey]?.name} ${Math.min(20, classLevel + pmBonus)} (Pale Master)`}
                 </span>
               </div>
               <div className="flex flex-wrap gap-1.5">

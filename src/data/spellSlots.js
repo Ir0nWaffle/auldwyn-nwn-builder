@@ -164,6 +164,18 @@ export function bonusSpellsForLevel(abilityMod, spellLevel) {
   return Math.floor((abilityMod - spellLevel) / 4) + 1
 }
 
+// Pale Master (see the wiki's Pale Master page): at every ODD pale master
+// level — 1, 3, 5, 7, 9, and continuing into epic at 11, 13, ... — the
+// character gains spells per day as if she'd also gained a level in her
+// highest arcane/bardic caster class (Bard, Sorcerer, or Wizard). This is
+// slots only: it does NOT grant new spells known, doesn't raise caster
+// level for anything else, and caps out once the effective level hits
+// MAX_CASTER_LEVEL (20) same as normal slots do.
+export function palemasterSlotBonus(palemasterLevel) {
+  if (!palemasterLevel) return 0
+  return Math.floor((palemasterLevel + 1) / 2)
+}
+
 // Full slots for a class, including ability bonuses. `abilityMod` is the
 // modifier of that class's casting ability. Entries stay null where the
 // caster has no access to that spell level yet — a bonus spell requires at
