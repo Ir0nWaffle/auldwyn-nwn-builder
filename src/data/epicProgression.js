@@ -111,7 +111,7 @@ export function classBonusFeatsAt(classKey, classLevel) {
 //   - Wizard/Sorcerer: Arcane Defense, Brew Potion, Craft Wand
 //   - Bard: Curse Song, Extra Music, Lingering Song
 //   - Champion of Torm: Called Shot, Disarm, Improved Disarm, Improved
-//     Expertise, Improved Parry, Improved Power Attack, exotic weapon prof.
+//     Expertise, Improved Parry, Improved Power Attack
 //   - Blackguard: Epic Fiendish Servant (modeled as autoGranted, never
 //     player-picked, so it wouldn't show even if listed here)
 //   - Shadowdancer: Epic Shadowlord
@@ -132,10 +132,10 @@ export const CLASS_BONUS_FEAT_POOL = {
   ],
   // Champion of Torm's bonus feat starts at class level 2, well before epic.
   championoftorm: [
-    'ambidexterity', 'armorprofheavy', 'blindfight', 'cleave', 'deflectarrows', 'dodge', 'expertise',
-    'greatcleave', 'improvedcritical', 'improvedknockdown', 'improvedtwowfighting', 'improvedunarmedstrike',
-    'knockdown', 'mobility', 'pointblankshot', 'powerattack', 'rapidshot', 'springattack', 'stunningfist',
-    'twowfighting', 'weaponfinesse', 'weaponfocus', 'whirlwindattack',
+    'ambidexterity', 'armorprofheavy', 'blindfight', 'cleave', 'deflectarrows', 'dodge', 'exoticwpnprof',
+    'expertise', 'greatcleave', 'improvedcritical', 'improvedknockdown', 'improvedtwowfighting',
+    'improvedunarmedstrike', 'knockdown', 'mobility', 'pointblankshot', 'powerattack', 'rapidshot',
+    'springattack', 'stunningfist', 'twowfighting', 'weaponfinesse', 'weaponfocus', 'whirlwindattack',
   ],
 }
 

@@ -266,6 +266,12 @@ const BASE_FEATS = {
     description: 'You are proficient with all martial weapons.',
     prereqs: {},
   },
+  exoticwpnprof: {
+    name: 'Exotic Weapon Proficiency',
+    type: 'general',
+    description: 'Proficiency with exotic weapons: bastard sword, dire mace, dwarven waraxe, double axe, kama, katana, kukri, scythe, shuriken, whip, and two-bladed sword.',
+    prereqs: { bab: 1 },
+  },
   mobility: {
     name: 'Mobility',
     type: 'general',

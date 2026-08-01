@@ -110,6 +110,7 @@ export const FEAT_ICONS = {
   knockdown: '🤼',
   lightningflexes: '⚡',
   martialweaponprof: '⚔️',
+  exoticwpnprof: '🪓',
   mobility: '🏃',
   pointblankshot: '🏹',
   powerattack: '💥',

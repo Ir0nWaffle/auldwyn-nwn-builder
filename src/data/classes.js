@@ -126,7 +126,7 @@ export const CLASSES = {
     classSkills: ['animalempathy','concentration','craftarmor','craftweapon','crafttrap','discipline','heal','hide','listen','lore','movesilently','parry','search','settrap','spot'],
     alignmentRestriction: null,
     bonusFeats: [],
-    freeFeats: ['simplewpnprof','martialweaponprof','armorproflight'],
+    freeFeats: ['simplewpnprof','martialweaponprof','armorproflight','armorprofmedium','shieldprof'],
     prereqs: {},
   },
   rogue: {
