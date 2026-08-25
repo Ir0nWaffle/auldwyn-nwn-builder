@@ -234,7 +234,7 @@ const BASE_FEATS = {
     name: 'Improved Two-Weapon Fighting',
     type: 'general',
     description: 'Gain an additional off-hand attack at -5 penalty.',
-    prereqs: { dex: 15, bab: 9, feats: ['twowfighting','ambidexterity'] },
+    prereqs: { bab: 9, feats: ['twowfighting','ambidexterity'] },
   },
   improvedunarmedstrike: {
     name: 'Improved Unarmed Strike',
@@ -392,8 +392,8 @@ const BASE_FEATS = {
   twowfighting: {
     name: 'Two-Weapon Fighting',
     type: 'general',
-    description: 'Reduce the penalty when fighting with two weapons.',
-    prereqs: { dex: 15, feats: ['ambidexterity'] },
+    description: 'Reduce the penalty when fighting with two weapons: -4/-8 instead of -6/-10 (further reduced by Ambidexterity, and again if the off-hand weapon is light).',
+    prereqs: {},
   },
   weaponfinesse: {
     name: 'Weapon Finesse',
