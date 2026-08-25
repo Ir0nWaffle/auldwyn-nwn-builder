@@ -193,6 +193,30 @@ const BASE_FEATS = {
     description: '+3 stunning attacks per day.',
     prereqs: { feats: ['stunningfist'] },
   },
+  extrasmiting: {
+    name: 'Extra Smiting',
+    type: 'general',
+    description: 'Increases Smite Good/Smite Evil to 3 uses per day (both, if you have each).',
+    prereqs: { classFeatures: { smite: 'Smite Good or Smite Evil' } },
+  },
+  extramusic: {
+    name: 'Extra Music',
+    type: 'general',
+    description: 'Use Bard Song 4 additional times per day.',
+    prereqs: { classFeatures: { bardsong: 'Bard Song' } },
+  },
+  cursesong: {
+    name: 'Curse Song',
+    type: 'general',
+    description: 'Sing a song that weakens all enemies within 30 feet for 10 rounds: penalties to attack, damage, saves, AC, and skills that scale with level and Perform. Shares uses per day with Bard Song.',
+    prereqs: {},
+  },
+  lingeringsong: {
+    name: 'Lingering Song',
+    type: 'general',
+    description: "Bard song effects (including Curse Song) last an additional 5 rounds.",
+    prereqs: { classFeatures: { bardsong: 'Bard Song' } },
+  },
   extraturning: {
     name: 'Extra Turning',
     type: 'general',

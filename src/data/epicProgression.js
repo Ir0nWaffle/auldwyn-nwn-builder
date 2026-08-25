@@ -108,13 +108,14 @@ export function classBonusFeatsAt(classKey, classLevel) {
 //
 // Missing from these pools: a handful of named wiki feats with no equivalent
 // in feats.js/epicFeats.js yet — omitted rather than guessed at:
-//   - Wizard/Sorcerer: Arcane Defense, Brew Potion, Craft Wand
-//   - Bard: Curse Song, Extra Music, Lingering Song
+//   - Wizard/Sorcerer: Arcane Defense (needs a per-school variant, like Spell
+//     Focus), Brew Potion, Craft Wand
 //   - Champion of Torm: Called Shot, Disarm, Improved Disarm, Improved
 //     Expertise, Improved Parry, Improved Power Attack
 //   - Blackguard: Epic Fiendish Servant (modeled as autoGranted, never
 //     player-picked, so it wouldn't show even if listed here)
-//   - Shadowdancer: Epic Shadowlord
+// Shadowdancer's Epic Shadowlord is likewise modeled as autoGranted (the
+// wiki calls it "Use: automatic"), so it's not in any pool either.
 export const CLASS_BONUS_FEAT_POOL = {
   ranger: [
     'favoredenemy',
@@ -200,10 +201,10 @@ export const EPIC_CLASS_BONUS_FEAT_POOL = {
     'improvedcombatcasting',
   ],
   bard: [
-    'epicskillfocus', 'epicspellfocus', 'epicwill', 'greatcharisma', 'greatdexterity',
+    'cursesong', 'epicskillfocus', 'epicspellfocus', 'epicwill', 'extramusic', 'greatcharisma', 'greatdexterity',
     'greaterspellfocusabj', 'greaterspellfocuscon', 'greaterspellfocusdiv', 'greaterspellfocusenc',
     'greaterspellfocusevo', 'greaterspellfocusnec', 'greaterspellfocustrans', 'greaterspellfocusill',
-    'greaterspellpen', 'improvedcombatcasting', 'lastinginspiration',
+    'greaterspellpen', 'improvedcombatcasting', 'lastinginspiration', 'lingeringsong',
   ],
 
   // ── Prestige classes ──

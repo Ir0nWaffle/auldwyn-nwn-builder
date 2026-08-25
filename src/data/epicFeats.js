@@ -341,4 +341,9 @@ export const EPIC_FEATS = {
     description: 'Your fiendish servant becomes an epic vrock that grows with your level.',
     prereqs: { classLevels: { blackguard: 15 } },
   },
+  epicshadowlord: {
+    name: 'Epic Shadowlord', type: 'classfeat', epic: true, autoGranted: true,
+    description: 'Your Summon Shadow ability calls an epic shadowlord instead — a potent fighter that grows stronger with your level.',
+    prereqs: { classLevels: { shadowdancer: 13 } },
+  },
 }

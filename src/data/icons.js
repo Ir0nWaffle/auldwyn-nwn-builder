@@ -97,8 +97,12 @@ export const FEAT_ICONS = {
   deflectarrows: '🏹',
   dodge: '💨',
   expertise: '🧠',
+  cursesong: '🎤',
+  extramusic: '🎶',
+  extrasmiting: '🔨',
   extrastunningattacks: '👊',
   extraturning: '☀️',
+  lingeringsong: '🎵',
   greatcleave: '🪓',
   greatfortitude: '❤️',
   improvedcritical: '🎯',
@@ -232,6 +236,7 @@ export const FEAT_ICONS = {
   constructshape: '🗿',
   dragonshape: '🐲',
   epicfiendishservant: '😈',
+  epicshadowlord: '🌑',
 }
 
 // Looks up a feat's icon even for a choice-encoded key like
