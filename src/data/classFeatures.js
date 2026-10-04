@@ -14,6 +14,11 @@
 // by CLASS_BONUS_FEAT_LEVELS in epicProgression.js. This file is only the
 // automatic features a class grants.
 
+import { SERVER_SETTINGS } from './classes.js'
+
+// Features for disabled systems (e.g. crafting) are hidden, see SERVER_SETTINGS.
+const isDisabled = f => SERVER_SETTINGS.disabledClassFeatures.includes(f.name)
+
 export const CLASS_FEATURES = {
   // ── Base classes ──────────────────────────────────────────────────────────
   barbarian: [
@@ -294,7 +299,7 @@ export const CLASS_FEATURES = {
 
 // Features granted at exactly this class level.
 export function featuresAtClassLevel(classKey, classLevel) {
-  return (CLASS_FEATURES[classKey] ?? []).filter(f => f.level === classLevel)
+  return (CLASS_FEATURES[classKey] ?? []).filter(f => f.level === classLevel && !isDisabled(f))
 }
 
 // All features a character has, given aggregated [{classKey, levels}].
@@ -302,7 +307,7 @@ export function allClassFeatures(classLevels) {
   const out = []
   for (const { classKey, levels } of classLevels) {
     for (const f of CLASS_FEATURES[classKey] ?? []) {
-      if (f.level <= levels) out.push({ ...f, classKey })
+      if (f.level <= levels && !isDisabled(f)) out.push({ ...f, classKey })
     }
   }
   return out

@@ -507,7 +507,7 @@ export function deriveSkills(levels) {
 // taken (e.g. Fighter's weapon & armor proficiencies, Wizard's Scribe Scroll).
 // These don't consume a feat slot and can't be removed by the player.
 export function getFreeClassFeats(classKey) {
-  return CLASSES[classKey]?.freeFeats ?? []
+  return (CLASSES[classKey]?.freeFeats ?? []).filter(f => !SERVER_SETTINGS.disabledFeats.includes(f))
 }
 
 // Free class feats granted specifically at level index i (only on the level

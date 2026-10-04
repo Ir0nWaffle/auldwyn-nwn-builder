@@ -393,4 +393,9 @@ export const SERVER_SETTINGS = {
   // Per-level spell selection: Wizard spellbook picks, Sorcerer/Bard spells
   // known plus unlimited same-level swaps. See src/data/spellSelection.js.
   spellSelectionEnabled: true,
+  // Crafting (and mounted riding) are disabled on Auldwyn, so they're hidden
+  // from the builder. Data stays in place; remove an entry to bring it back.
+  disabledSkills: ['ride', 'craftarmor', 'craftweapon', 'crafttrap'],
+  disabledFeats: ['scribescroll', 'brewpotion', 'craftwand'],
+  disabledClassFeatures: ['Scribe scroll', 'Craft harper item'],
 }

@@ -318,7 +318,7 @@ export default function LevelPlanStep({ onNext, onBack }) {
                 <div className="text-xs text-auldwyn-muted mb-2">
                   <span className="font-bold text-auldwyn-gold/80 block mb-1">Class Skills</span>
                   <div className="flex flex-wrap gap-1.5">
-                    {details.classSkills.map(k => SKILLS[k] && (
+                    {details.classSkills.filter(k => !SERVER_SETTINGS.disabledSkills.includes(k)).map(k => SKILLS[k] && (
                       <span key={k} className="inline-flex items-center gap-1 bg-black/20 rounded-sm px-1.5 py-0.5">
                         <IconSlot icon={SKILL_ICONS[k]} size="sm" />
                         {SKILLS[k].name}
@@ -330,7 +330,7 @@ export default function LevelPlanStep({ onNext, onBack }) {
                   <div className="text-xs text-auldwyn-muted mb-3">
                     <span className="font-bold text-auldwyn-gold/80 block mb-1">Granted Free at Level 1</span>
                     <div className="flex flex-wrap gap-1.5">
-                      {details.freeFeats.map(f => (
+                      {details.freeFeats.filter(f => !SERVER_SETTINGS.disabledFeats.includes(f)).map(f => (
                         <span key={f} className="inline-flex items-center gap-1 bg-black/20 rounded-sm px-1.5 py-0.5">
                           <IconSlot icon={featIcon(f)} size="sm" />
                           {featDisplayName(f)}
@@ -445,6 +445,7 @@ export default function LevelPlanStep({ onNext, onBack }) {
   // ═══════════════════════ SKILLS ═══════════════════════
   if (mode === 'skills') {
     const skillRows = Object.entries(SKILLS)
+      .filter(([key]) => !SERVER_SETTINGS.disabledSkills.includes(key))
       .map(([key, skill]) => ({
         key, skill,
         isCS: cls?.classSkills.includes(key) ?? false,
@@ -519,6 +520,7 @@ export default function LevelPlanStep({ onNext, onBack }) {
       const timesTaken = allPlanned.filter(f => baseFeatKey(f) === key).length
       if (timesTaken >= (feat.stackable ?? 1)) return false
       if (feat.autoGranted) return false
+      if (SERVER_SETTINGS.disabledFeats.includes(key)) return false
       // Some feats can only be picked while taking a level in particular classes
       if (feat.levelClasses && !feat.levelClasses.includes(lv.classKey)) return false
       if (feat.firstLevelOnly && i !== 0) return false
