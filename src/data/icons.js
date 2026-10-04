@@ -63,6 +63,7 @@ export const SKILL_ICONS = {
   openlocks: '🔓',
   parry: '🛡️',
   perform: '🎼',
+  ride: '🐴',
   persuade: '💬',
   pickpocket: '🧤',
   search: '🔍',

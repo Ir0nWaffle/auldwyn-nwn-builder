@@ -28,6 +28,7 @@ export const SKILLS = {
   movesilently:   { name: 'Move Silently',   ability: 'dex', armorCheckPenalty: true  },
   openlocks:      { name: 'Open Lock',       ability: 'dex', armorCheckPenalty: false },
   parry:          { name: 'Parry',           ability: 'dex', armorCheckPenalty: false },
+  ride:           { name: 'Ride',            ability: 'dex', armorCheckPenalty: false },
   perform:        { name: 'Perform',         ability: 'cha', armorCheckPenalty: false, classOnly: true  },
   persuade:       { name: 'Persuade',        ability: 'cha', armorCheckPenalty: false },
   pickpocket:     { name: 'Pick Pocket',     ability: 'dex', armorCheckPenalty: true  },

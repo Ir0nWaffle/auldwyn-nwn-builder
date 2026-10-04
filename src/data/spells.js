@@ -1,4 +1,5 @@
 import { SPELL_ICONS, SCHOOL_ICONS } from './icons.js'
+import { MORE_SPELLS } from './spellsMore.js'
 
 // NWN:EE spell database.
 //
@@ -31,7 +32,7 @@ export const SCHOOLS = [
   'Evocation', 'Illusion', 'Necromancy', 'Transmutation', 'Universal',
 ]
 
-export const SPELLS = {
+const BASE_SPELLS = {
   // ── Cantrips / Orisons ──────────────────────────────────────────────────
   amplify: { name: 'Amplify', school: 'Transmutation', range: 'Personal', save: 'None', spellResistance: false,
     description: 'Increases the volume of the caster\'s voice and spells for a short time.' },
@@ -466,6 +467,8 @@ export const SPELLS = {
     description: 'Scrambles the minds of creatures in the area, causing them to act randomly.' },
 }
 
+export const SPELLS = { ...BASE_SPELLS, ...MORE_SPELLS }
+
 // Every spell resolves to an icon: a hand-picked one from SPELL_ICONS if it
 // has one, otherwise its school's icon, otherwise a plain scroll.
 export function getSpellIcon(key) {
@@ -473,97 +476,67 @@ export function getSpellIcon(key) {
   return SPELL_ICONS[key] ?? SCHOOL_ICONS[spell?.school] ?? '📜'
 }
 
-// SPELL_LISTS[classKey][level] -> array of spell keys.
-// Sorcerer and Wizard share an identical spell list in NWN:EE.
+// SPELL_LISTS[classKey][level] -> array of spell keys, transcribed from each
+// class's wiki page. Sorcerer and Wizard share an identical list in NWN:EE.
 const arcaneList = {
-  0: ['amplify', 'daze', 'detectundead', 'flare', 'ghostlyvisage', 'light', 'negenergyray', 'acidsplash', 'electricjolt'],
-  1: ['burninghands', 'charmperson', 'colorspray', 'expeditiousretreat', 'grease', 'identify', 'magearmor',
-      'magicmissile', 'shield', 'sleep', 'truestrike', 'summoncreature1', 'nyborsmildreminder'],
-  2: ['bullsstrength', 'catsgrace', 'eaglessplendor', 'foxescunning', 'owlswisdom', 'endurance', 'darknessspell',
-      'flameweapon', 'ghoultouch', 'invisibilityspell', 'knock', 'mirrorimage', 'resistelements',
-      'melfsacidarrow', 'holdperson', 'summoncreature2', 'horrificappearance'],
-  3: ['clairaudienceclairvoyance', 'dispelmagic', 'displacement', 'fireball', 'flamearrow', 'hastespell',
-      'lightningbolt', 'slow', 'suggestion', 'summoncreature3', 'vampirictouch', 'keenedge'],
-  4: ['animatedead', 'bigbysinterposinghand', 'evardsblacktentacles', 'fearspell', 'elementalshield',
-      'improvedinvisibility', 'minorglobeofinvulnerability', 'stoneskin', 'summoncreature4',
-      'greaterbullsstrength', 'greatercatsgrace', 'greatereaglessplendor', 'greaterfoxescunning',
-      'greaterowlswisdom', 'greaterendurance', 'bigbysforcefulhand'],
-  5: ['coneofcold', 'dominateperson', 'feeblemind', 'holdmonster', 'isaacslessermissilestorm',
-      'summoncreature5', 'wallofforce'],
-  6: ['acidfog', 'antimagicfield', 'chainlightning', 'fleshtostone', 'globeofinvulnerability',
-      'tenserstransformation', 'summoncreature6', 'lesserspellmantle', 'bigbysgraspinghand', 'disintegrate'],
-  7: ['banishment', 'delayedblastfireball', 'fingerofdeath', 'summoncreature7', 'greaterspellmantle'],
-  8: ['bigbysclenchedfist', 'horridwilting', 'incendiarycloud', 'summoncreature8'],
-  9: ['bigbyscrushinghand', 'energydrain', 'gate', 'summoncreature9', 'blackblade'],
+  0: ['acidsplash', 'daze', 'electricjolt', 'flare', 'light', 'rayoffrost', 'resistance'],
+  1: ['burninghands', 'charmperson', 'colorspray', 'endureelements', 'expeditiousretreat', 'grease', 'horizikaulsboom', 'icedagger', 'identify', 'ironguts', 'magearmor', 'magicmissile', 'magicweapon', 'negenergyray', 'protectionfromalignment', 'rayofenfeeblement', 'scare', 'shelgarnspersistentblade', 'shield', 'sleep', 'summoncreature1', 'truestrike'],
+  2: ['balagarnsironhorn', 'blindnessdeafness', 'bullsstrength', 'catsgrace', 'cloudofbewilderment', 'combust', 'continualflame', 'darknessspell', 'deatharmor', 'eaglessplendor', 'endurance', 'flameweapon', 'foxescunning', 'gedleeselectricloop', 'ghostlyvisage', 'ghoultouch', 'invisibilityspell', 'knock', 'lesserdispel', 'melfsacidarrow', 'owlswisdom', 'resistelements', 'see_invisible', 'stonebones', 'summoncreature2', 'tashashideouslaughter', 'ultravision', 'web'],
+  3: ['clairaudienceclairvoyance', 'clarity', 'dispelmagic', 'displacement', 'findtraps', 'fireball', 'flamearrow', 'greatermagicweapon', 'gustofwind', 'hastespell', 'holdperson', 'invisibilitysphere', 'keenedge', 'lightningbolt', 'magiccircle', 'mestilsacidbreath', 'negativeenergyburst', 'protectionfromelements', 'scintillatingsphere', 'slow', 'stinkingcloud', 'summoncreature3', 'vampirictouch'],
+  4: ['bestowcurse', 'charmmonster', 'confusion', 'contagion', 'elementalshield', 'enervation', 'evardsblacktentacles', 'fearspell', 'icestorm', 'improvedinvisibility', 'isaacslessermissilestorm', 'lesserspellbreach', 'minorglobeofinvulnerability', 'phantasmalkiller', 'polymorphself', 'removeblindnessdeafness', 'removecurse', 'shadowconjuration', 'stoneskin', 'summoncreature4', 'walloffire'],
+  5: ['animatedead', 'balllightning', 'bigbysinterposinghand', 'cloudkill', 'coneofcold', 'dismissal', 'dominateperson', 'energybuffer', 'feeblemind', 'firebrand', 'greatershadowconjuration', 'holdmonster', 'lessermindblank', 'lesserplanarbinding', 'lesserspellmantle', 'mestilsacidsheath', 'mindfog', 'summoncreature5'],
+  6: ['acidfog', 'bigbysforcefulhand', 'chainlightning', 'circleofdeath', 'etherealvisage', 'fleshtostone', 'globeofinvulnerability', 'dispelmagicgreater', 'greaterspellbreach', 'greaterstoneskin', 'isaacsgreatermissilestorm', 'legendlore', 'masshaste', 'planarbinding', 'shades', 'stonetoflesh', 'summoncreature6', 'tenserstransformation', 'truesight', 'undeathtodeath'],
+  7: ['banishment', 'bigbysgraspinghand', 'controlundead', 'delayedblastfireball', 'fingerofdeath', 'greatthunderclap', 'mordenkainenssword', 'powerwordstun', 'prismaticspray', 'protectionfromspells', 'shadowshield', 'spellmantle', 'summoncreature7'],
+  8: ['bigbysclenchedfist', 'blackstaff', 'createundead', 'greaterplanarbinding', 'greatersanctuary', 'horridwilting', 'incendiarycloud', 'massblindnessdeafness', 'masscharm', 'mindblank', 'premonition', 'summoncreature8', 'sunburst'],
+  9: ['bigbyscrushinghand', 'blackblade', 'dominatemonster', 'energydrain', 'gate', 'greaterspellmantle', 'meteorswarm', 'mordenkainensdisjunction', 'powerwordkill', 'shapechange', 'summoncreature9', 'timestop', 'wailofthebanshee', 'weird'],
 }
 
 export const SPELL_LISTS = {
   sorcerer: arcaneList,
   wizard: arcaneList,
-
   cleric: {
-    0: ['cureminorwounds', 'detectundead', 'light', 'virtue'],
-    1: ['bless', 'curelightwounds', 'inflictlightwounds', 'divinefavor', 'endureelements',
-        'protectionfromalignment', 'doom', 'magicvestment', 'removefear', 'summoncreature1'],
-    2: ['augury', 'auravsalignment', 'aid', 'holdperson', 'deathward', 'removeparalysis',
-        'resistenergy', 'silence', 'soundburst', 'curemoderatewounds', 'inflictmoderatewounds',
-        'summoncreature2', 'darknessspell', 'bane'],
-    3: ['bestowcurse', 'contagion', 'blindnessdeafness', 'cureseriouswounds', 'inflictseriouswounds',
-        'dispelmagic', 'magiccircle', 'neutralizepoison', 'removeblindnessdeafness', 'removecurse',
-        'removedisease', 'summoncreature3'],
-    4: ['discernlies', 'dispelmagicgreater', 'freedomofmovement', 'restorationlesser', 'poisonspell',
-        'divinepower', 'holysword', 'neutralizepoison', 'spellresistance', 'summoncreature4'],
-    5: ['dispelmagic', 'flamestrike', 'insectplague', 'commune', 'wallofstonespell', 'summoncreature5', 'slay'],
-    6: ['createundead', 'greaterrestoration', 'harm', 'heal', 'wallofstonespell', 'summoncreature6', 'blessweapon'],
-    7: ['destruction', 'regenerate', 'restoration', 'summoncreature7', 'earthquake'],
-    8: ['creategreaterundead', 'firestorm', 'holyaura', 'summoncreature8'],
-    9: ['elementalswarm', 'gate', 'implosion', 'summoncreature9'],
+    0: ['cureminorwounds', 'inflictminorwounds', 'light', 'resistance', 'virtue'],
+    1: ['bane', 'bless', 'curelightwounds', 'divinefavor', 'doom', 'endureelements', 'entropicshield', 'inflictlightwounds', 'magicweapon', 'protectionfromalignment', 'removefear', 'sanctuary', 'scare', 'shieldoffaith', 'summoncreature1'],
+    2: ['aid', 'bullsstrength', 'curemoderatewounds', 'darknessspell', 'eaglessplendor', 'endurance', 'findtraps', 'foxescunning', 'holdperson', 'inflictmoderatewounds', 'lesserdispel', 'lesserrestoration', 'negenergyray', 'owlswisdom', 'removeparalysis', 'resistelements', 'silence', 'soundburst', 'stonebones', 'summoncreature2', 'ultravision'],
+    3: ['animatedead', 'bestowcurse', 'blindnessdeafness', 'clarity', 'contagion', 'continualflame', 'cureseriouswounds', 'darkfire', 'dispelmagic', 'glyphofwarding', 'inflictseriouswounds', 'invisibilitypurge', 'magiccircle', 'magicvestment', 'negativeenergyprotection', 'prayer', 'protectionfromelements', 'removeblindnessdeafness', 'removecurse', 'removedisease', 'searinglight', 'summoncreature3'],
+    4: ['curecriticalwounds', 'deathward', 'dismissal', 'divinepower', 'freedomofmovement', 'hammerofthegods', 'inflictcriticalwounds', 'greatermagicweapon', 'neutralizepoison', 'poisonspell', 'restoration', 'summoncreature4'],
+    5: ['battletide', 'circleofdoom', 'flamestrike', 'healingcircle', 'monstrousregeneration', 'raisedead', 'slay', 'spellresistance', 'summoncreature5', 'truesight'],
+    6: ['banishment', 'bladebarrier', 'controlundead', 'createundead', 'dispelmagicgreater', 'greatersanctuary', 'harm', 'heal', 'planarally', 'summoncreature6', 'undeathtodeath'],
+    7: ['destruction', 'greaterrestoration', 'regenerate', 'resurrection', 'summoncreature7', 'wordoffaith'],
+    8: ['auravsalignment', 'earthquake', 'creategreaterundead', 'firestorm', 'massheal', 'summoncreature8', 'sunbeam'],
+    9: ['energydrain', 'gate', 'implosion', 'stormofvengeance', 'summoncreature9', 'undeathseternalfoe'],
   },
-
   druid: {
-    0: ['cureminorwounds', 'detectundead', 'light', 'virtue', 'flare'],
-    1: ['camouflage', 'curelightwounds', 'endureelements', 'entangle', 'faeriefire', 'magicfang',
-        'summoncreature1', 'removefear'],
-    2: ['barkskin', 'flamestrike', 'holdanimal', 'resistenergy', 'soundburst', 'spikegrowth',
-        'fogcloud', 'gustofwind', 'summoncreature2', 'curemoderatewounds'],
-    3: ['contagion', 'callLightning', 'cureseriouswounds', 'greatermagicfang', 'poisonspell',
-        'summoncreature3', 'removedisease', 'neutralizepoison'],
-    4: ['creepingdoom', 'flamestrike', 'freedomofmovement', 'restorationlesser', 'summoncreature4', 'giantvermin'],
-    5: ['awaken', 'balefulpolymorph', 'commune', 'insectplague', 'wallofstonespell', 'summoncreature5'],
-    6: ['creategreaterundead', 'fleshtostone', 'dispelmagicgreater', 'stoneskin', 'summoncreature6', 'drown'],
-    7: ['creepingdoom', 'firestorm', 'heal', 'summoncreature7'],
-    8: ['earthquake', 'sunburst', 'whirlwindspell', 'summoncreature8'],
-    9: ['elementalswarm', 'shambler', 'stormofvengeance', 'summoncreature9'],
+    0: ['cureminorwounds', 'flare', 'light', 'resistance', 'virtue'],
+    1: ['camouflage', 'curelightwounds', 'endureelements', 'entangle', 'grease', 'magicfang', 'sleep', 'summoncreature1', 'ultravision'],
+    2: ['barkskin', 'bloodfrenzy', 'bullsstrength', 'charmpersonoranimal', 'flamelash', 'holdanimal', 'lesserdispel', 'lesserrestoration', 'onewiththeland', 'resistelements', 'summoncreature2'],
+    3: ['callLightning', 'contagion', 'curemoderatewounds', 'dominateanimal', 'greatermagicfang', 'healingsting', 'infestationofmaggots', 'neutralizepoison', 'poisonspell', 'protectionfromelements', 'quillfire', 'removedisease', 'spikegrowth', 'summoncreature3'],
+    4: ['cureseriouswounds', 'dispelmagic', 'flamestrike', 'freedomofmovement', 'holdmonster', 'masscamouflage', 'stoneskin', 'summoncreature4'],
+    5: ['awaken', 'curecriticalwounds', 'deathward', 'icestorm', 'inferno', 'monstrousregeneration', 'owlsinsight', 'slay', 'spellresistance', 'summoncreature5', 'walloffire', 'vinemine'],
+    6: ['crumble', 'drown', 'energybuffer', 'dispelmagicgreater', 'greaterstoneskin', 'healingcircle', 'regenerate', 'stonehold', 'summoncreature6'],
+    7: ['auraofvitality', 'creepingdoom', 'firestorm', 'harm', 'heal', 'summoncreature7', 'truesight'],
+    8: ['bombardment', 'fingerofdeath', 'naturesbalance', 'premonition', 'summoncreature8', 'sunbeam', 'sunburst'],
+    9: ['earthquake', 'elementalswarm', 'massheal', 'shapechange', 'stormofvengeance', 'summoncreature9'],
   },
-
-  // Per the wiki's Bard page (spells with no entry in SPELLS yet are omitted).
   bard: {
     0: ['cureminorwounds', 'daze', 'flare', 'light', 'resistance'],
-    1: ['amplify', 'charmperson', 'curelightwounds', 'expeditiousretreat', 'grease', 'identify', 'magearmor',
-        'protectionfromalignment', 'sleep', 'summoncreature1'],
-    2: ['blindnessdeafness', 'bullsstrength', 'catsgrace', 'clarity', 'curemoderatewounds', 'darknessspell',
-        'eaglessplendor', 'foxescunning', 'ghostlyvisage', 'holdperson', 'invisibilityspell', 'owlswisdom',
-        'see_invisible', 'silence', 'soundburst', 'summoncreature2'],
-    3: ['bestowcurse', 'clairaudienceclairvoyance', 'confusion', 'cureseriouswounds', 'dispelmagic', 'displacement',
-        'fearspell', 'gustofwind', 'hastespell', 'invisibilitysphere', 'keenedge', 'magiccircle', 'removecurse',
-        'removedisease', 'slow', 'summoncreature3'],
-    4: ['curecriticalwounds', 'dismissal', 'dominateperson', 'holdmonster', 'improvedinvisibility',
-        'neutralizepoison', 'summoncreature4'],
-    5: ['dispelmagicgreater', 'mindfog', 'summoncreature5'],
-    6: ['masshaste', 'summoncreature6'],
+    1: ['amplify', 'balagarnsironhorn', 'charmperson', 'curelightwounds', 'expeditiousretreat', 'grease', 'identify', 'lesserdispel', 'magearmor', 'magicweapon', 'protectionfromalignment', 'scare', 'sleep', 'summoncreature1'],
+    2: ['blindnessdeafness', 'bullsstrength', 'catsgrace', 'clarity', 'cloudofbewilderment', 'curemoderatewounds', 'darknessspell', 'eaglessplendor', 'foxescunning', 'ghostlyvisage', 'holdperson', 'invisibilityspell', 'owlswisdom', 'see_invisible', 'silence', 'soundburst', 'summoncreature2', 'tashashideouslaughter', 'ultravision'],
+    3: ['bestowcurse', 'charmmonster', 'clairaudienceclairvoyance', 'confusion', 'cureseriouswounds', 'dispelmagic', 'displacement', 'fearspell', 'findtraps', 'greatermagicweapon', 'gustofwind', 'hastespell', 'invisibilitysphere', 'keenedge', 'magiccircle', 'removecurse', 'removedisease', 'slow', 'summoncreature3', 'woundingwhispers'],
+    4: ['curecriticalwounds', 'dismissal', 'dominateperson', 'holdmonster', 'improvedinvisibility', 'legendlore', 'neutralizepoison', 'summoncreature4', 'warcry'],
+    5: ['etherealvisage', 'dispelmagicgreater', 'healingcircle', 'mindfog', 'summoncreature5'],
+    6: ['dirge', 'energybuffer', 'icestorm', 'masshaste', 'summoncreature6'],
   },
-
   paladin: {
-    1: ['bless', 'curelightwounds', 'divinefavor', 'endureelements', 'magicvestment', 'removefear'],
-    2: ['auraofglory', 'resistenergy', 'deathward', 'holyaura', 'restorationlesser'],
-    3: ['auraofvitality', 'cureseriouswounds', 'dispelmagic', 'discernlies'],
-    4: ['holysword', 'freedomofmovement', 'deathward'],
+    1: ['bless', 'blessweapon', 'curelightwounds', 'deafeningclang', 'divinefavor', 'endureelements', 'magicweapon', 'protectionfromalignment', 'resistance', 'virtue'],
+    2: ['aid', 'auraofglory', 'bullsstrength', 'eaglessplendor', 'removeparalysis', 'resistelements'],
+    3: ['curemoderatewounds', 'dispelmagic', 'greatermagicweapon', 'magiccircle', 'prayer', 'removeblindnessdeafness'],
+    4: ['cureseriouswounds', 'deathward', 'freedomofmovement', 'holysword', 'neutralizepoison'],
   },
-
   ranger: {
-    1: ['endureelements', 'entangle', 'magicfang', 'curelightwounds', 'summoncreature1'],
-    2: ['barkskin', 'holdanimal', 'resistenergy', 'curemoderatewounds', 'summoncreature2'],
-    3: ['greatermagicfang', 'cureseriouswounds', 'neutralizepoison', 'summoncreature3'],
-    4: ['freedomofmovement', 'creepingdoom', 'summoncreature4'],
+    1: ['camouflage', 'curelightwounds', 'entangle', 'grease', 'magicfang', 'resistelements', 'summoncreature1', 'ultravision'],
+    2: ['catsgrace', 'holdanimal', 'onewiththeland', 'protectionfromelements', 'sleep', 'summoncreature2'],
+    3: ['aid', 'bladethirst', 'curemoderatewounds', 'invisibilitypurge', 'greatermagicfang', 'neutralizepoison', 'removedisease', 'summoncreature3'],
+    4: ['cureseriouswounds', 'freedomofmovement', 'masscamouflage', 'polymorphself', 'summoncreature4'],
   },
 }
