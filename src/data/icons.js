@@ -339,6 +339,42 @@ export const SPELL_ICONS = {
 
   // Divination/Abjuration/Necromancy odds and ends
   augury: '🪙', auravsalignment: '🧭', blightspell: '🥀',
+
+  // Cantrips through 2nd level (added with the wiki spell-list sync)
+  rayoffrost: '🧊', horizikaulsboom: '💥', icedagger: '🗡️', ironguts: '🥃', magicweapon: '🗡️',
+  rayofenfeeblement: '📉', scare: '😨', shelgarnspersistentblade: '🗡️', entropicshield: '🔰',
+  sanctuary: '⛪', shieldoffaith: '🙏', deafeningclang: '🔔', balagarnsironhorn: '📯',
+  cloudofbewilderment: '😵‍💫', combust: '🔥', deatharmor: '💀', gedleeselectricloop: '⚡',
+  lesserdispel: '🧹', stonebones: '🦴', tashashideouslaughter: '🤣', ultravision: '👁️',
+  web: '🕸️', bloodfrenzy: '🩸', charmpersonoranimal: '🐾', flamelash: '🔥', onewiththeland: '🌲',
+  lesserrestoration: '💫',
+
+  // 3rd–4th
+  findtraps: '🪤', greatermagicweapon: '⚔️', mestilsacidbreath: '🧪', negativeenergyburst: '🌑',
+  protectionfromelements: '🌡️', scintillatingsphere: '⚡', stinkingcloud: '🤢', bladethirst: '🩸',
+  darkfire: '🔥', healingsting: '🦂', infestationofmaggots: '🪱', woundingwhispers: '🗣️',
+  negativeenergyprotection: '🛡️', quillfire: '🦔', searinglight: '☀️', charmmonster: '💘',
+  enervation: '🫥', icestorm: '🌨️', lesserspellbreach: '🔨', phantasmalkiller: '👻',
+  polymorphself: '🦎', shadowconjuration: '🌓', walloffire: '🔥', masscamouflage: '🍃',
+  warcry: '📣', hammerofthegods: '🔨',
+
+  // 5th–6th
+  balllightning: '🔮', cloudkill: '☠️', energybuffer: '🔋', firebrand: '🔥', greatershadowconjuration: '🌑',
+  lessermindblank: '🧠', lesserplanarbinding: '⛓️', mestilsacidsheath: '🧪', circleofdoom: '⭕',
+  healingcircle: '💚', monstrousregeneration: '🩹', raisedead: '🪦', inferno: '🌋', owlsinsight: '🦉',
+  vinemine: '🌿', battletide: '⚔️', circleofdeath: '💀', etherealvisage: '👤', greaterspellbreach: '💢',
+  greaterstoneskin: '🗿', isaacsgreatermissilestorm: '☄️', legendlore: '📜', planarbinding: '⛓️',
+  shades: '👥', stonetoflesh: '🧍', truesight: '👁️‍🗨️', undeathtodeath: '✝️', bladebarrier: '🌀',
+  planarally: '😇', stonehold: '✊', crumble: '🪨', dirge: '🎶',
+
+  // 7th–9th
+  controlundead: '🧟', greatthunderclap: '🌩️', mordenkainenssword: '⚔️', powerwordstun: '💫',
+  prismaticspray: '🌈', protectionfromspells: '🛡️', shadowshield: '🌘', spellmantle: '🔵',
+  wordoffaith: '📖', resurrection: '🌅', auraofvitality: '💪', blackstaff: '🖤', greaterplanarbinding: '⛓️',
+  greatersanctuary: '🏛️', massblindnessdeafness: '🙈', masscharm: '💞', mindblank: '🤐',
+  premonition: '🔭', massheal: '💖', sunbeam: '🌞', bombardment: '🪨', naturesbalance: '⚖️',
+  dominatemonster: '🫡', meteorswarm: '🌠', mordenkainensdisjunction: '🚫', powerwordkill: '☠️',
+  shapechange: '🐲', timestop: '⏳', wailofthebanshee: '😱', weird: '🌀', undeathseternalfoe: '⚰️',
 }
 
 // ── Class feature icons ──────────────────────────────────────────────────
