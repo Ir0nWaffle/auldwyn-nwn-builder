@@ -108,8 +108,6 @@ export function classBonusFeatsAt(classKey, classLevel) {
 //
 // Missing from these pools: a handful of named wiki feats with no equivalent
 // in feats.js/epicFeats.js yet — omitted rather than guessed at:
-//   - Champion of Torm: Called Shot, Disarm, Improved Disarm, Improved
-//     Expertise, Improved Parry, Improved Power Attack
 //   - Blackguard: Epic Fiendish Servant (modeled as autoGranted, never
 //     player-picked, so it wouldn't show even if listed here)
 // Shadowdancer's Epic Shadowlord is likewise modeled as autoGranted (the
@@ -132,8 +130,8 @@ export const CLASS_BONUS_FEAT_POOL = {
   ],
   // Champion of Torm's bonus feat starts at class level 2, well before epic.
   championoftorm: [
-    'ambidexterity', 'armorprofheavy', 'blindfight', 'cleave', 'deflectarrows', 'dodge', 'exoticwpnprof',
-    'expertise', 'greatcleave', 'improvedcritical', 'improvedknockdown', 'improvedtwowfighting',
+    'ambidexterity', 'armorprofheavy', 'blindfight', 'calledshot', 'cleave', 'deflectarrows', 'disarm', 'dodge',
+    'exoticwpnprof', 'expertise', 'improveddisarm', 'improvedexpertise', 'improvedparry', 'improvedpowerattack', 'greatcleave', 'improvedcritical', 'improvedknockdown', 'improvedtwowfighting',
     'improvedunarmedstrike', 'knockdown', 'mobility', 'pointblankshot', 'powerattack', 'rapidshot',
     'springattack', 'stunningfist', 'twowfighting', 'weaponfinesse', 'weaponfocus', 'whirlwindattack',
   ],

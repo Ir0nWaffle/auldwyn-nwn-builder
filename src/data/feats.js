@@ -358,6 +358,19 @@ const BASE_FEATS = {
   craftwand: { name: 'Craft Wand', type: 'general', description: 'Create wands of known spells of 4th level or lower (costs gold and XP).', prereqs: { casterLevel: 5 }, levelClasses: CASTER_LEVEL_CLASSES },
   divinemight: { name: 'Divine Might', type: 'general', description: 'Spend a turn attempt to add your Charisma bonus to weapon damage for rounds equal to that bonus.', prereqs: { classFeatures: { turnundead: 'Turn Undead' }, cha: 13, str: 13, feats: ['powerattack'] }, levelClasses: ['blackguard', 'paladin', 'cleric'] },
   divineshield: { name: 'Divine Shield', type: 'general', description: 'Spend a turn attempt to add your Charisma bonus to Armor Class (dodge) for rounds equal to that bonus.', prereqs: { classFeatures: { turnundead: 'Turn Undead' }, cha: 13, str: 13, feats: ['powerattack'] }, levelClasses: ['blackguard', 'paladin', 'cleric'] },
+  // ── Combat / mounted / misc general feats (added from the wiki's feat pages) ──
+  calledshot: { name: 'Called Shot', type: 'general', description: 'Aim at an opponent’s arms or legs at -4 to hit, slowing movement or weakening attacks if it lands.', prereqs: { bab: 1 } },
+  disarm: { name: 'Disarm', type: 'general', description: 'Attempt to knock a weapon from an opponent’s hands in melee (-6 to hit, provokes an attack of opportunity).', prereqs: { int: 13 } },
+  improveddisarm: { name: 'Improved Disarm', type: 'general', description: 'Disarm without provoking attacks of opportunity and at only -4 to hit.', prereqs: { int: 13, feats: ['disarm'] } },
+  improvedexpertise: { name: 'Improved Expertise', type: 'general', description: 'Defensive combat mode: +10 AC at -10 to attack rolls.', prereqs: { int: 13, feats: ['expertise'] } },
+  improvedparry: { name: 'Improved Parry', type: 'general', description: '+4 bonus to your Parry skill checks.', prereqs: { int: 13 } },
+  improvedpowerattack: { name: 'Improved Power Attack', type: 'general', description: 'Trade -10 to attack for +10 damage.', prereqs: { str: 13, feats: ['powerattack'] } },
+  dirtyfighting: { name: 'Dirty Fighting', type: 'general', description: 'Give up your other attacks for the round to deal an extra 1d4 damage.', prereqs: { bab: 2 } },
+  mountedcombat: { name: 'Mounted Combat', type: 'general', description: 'While mounted, a Ride check each round boosts your AC (+1 per 5 over 10).', prereqs: { skills: { ride: 1 } } },
+  mountedarchery: { name: 'Mounted Archery', type: 'general', description: 'Reduces the penalty for firing a bow while mounted from -4 to -2.', prereqs: { skills: { ride: 1 }, feats: ['mountedcombat'] } },
+  zenarchery: { name: 'Zen Archery', type: 'general', description: 'Use your Wisdom modifier instead of Dexterity on ranged attacks, if higher.', prereqs: { bab: 3, wis: 13 } },
+  circlekick: { name: 'Circle Kick', type: 'general', description: 'After hitting with an unarmed attack, make one free attack against another nearby enemy each round.', prereqs: { bab: 3, dex: 15, feats: ['improvedunarmedstrike'] } },
+  thug: { name: 'Thug', type: 'general', description: '+2 bonus on initiative and Persuade checks.', prereqs: {} },
   // ── Rogue special bonus feats (10th, 13th, 16th, 19th) ──────────────────────
   cripplingstrike: {
     name: 'Crippling Strike',
