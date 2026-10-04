@@ -1,5 +1,6 @@
 import { CLASSES, SERVER_SETTINGS } from '../data/classes.js'
 import { FEATS, baseFeatKey, featDisplayName } from '../data/feats.js'
+import { CASTING_ABILITY } from '../data/spellSlots.js'
 
 export { baseFeatKey, featDisplayName }
 import { SKILLS, maxClassRanks, maxCrossClassRanks } from '../data/skills.js'
@@ -256,6 +257,15 @@ export function checkFeatPrereqs(featKey, character) {
 
   if (prereqs.spellcasting && !hasSpellcasting(classLevels))
     reasons.push('Requires spellcasting levels')
+
+  // N+ levels in a single spellcasting class (or shifter), e.g. Brew Potion
+  if (prereqs.casterLevel) {
+    const best = Math.max(0, ...classLevels
+      .filter(cl => CASTING_ABILITY[cl.classKey] || cl.classKey === 'shifter')
+      .map(cl => cl.levels))
+    if (best < prereqs.casterLevel)
+      reasons.push(`Spellcaster level ${prereqs.casterLevel} required (have ${best})`)
+  }
 
   if (prereqs.cast9th && !canCast9thLevelSpells(classLevels))
     reasons.push('Requires the ability to cast 9th-level spells')

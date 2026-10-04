@@ -9,6 +9,8 @@ import { EPIC_FEATS } from './epicFeats.js'
 // picking feats at character level 1, hidden from the feat list afterward
 // epic: only offered to epic characters (level 21+); see epicFeats.js
 // stackable: N — feat may be taken up to N times
+// levelClasses: [classKey,...] — only offered while taking a level in one of these classes
+// casterLevel: N (prereq) — N+ levels in a spellcasting class (or shifter)
 // needsChoice: 'favoredEnemyType' — taking this feat requires picking a value
 // from a list (see FAVORED_ENEMY_TYPES below); the choice is baked into the
 // stored feat key as `${baseKey}__${choiceKey}` (see baseFeatKey/featChoiceValue/
@@ -44,6 +46,9 @@ export const FAVORED_ENEMY_TYPES = [
   { key: 'undead', label: 'Undead' },
   { key: 'vermin', label: 'Vermin' },
 ]
+
+// Classes whose levels can take item-creation feats (a spellbook class, or shifter)
+const CASTER_LEVEL_CLASSES = ['wizard', 'sorcerer', 'bard', 'cleric', 'druid', 'paladin', 'ranger', 'shifter']
 
 const CHOICE_KEY_SEP = '__'
 
@@ -340,6 +345,19 @@ const BASE_FEATS = {
     description: 'Choose a creature type as a favored enemy: bonus damage plus Spot, Listen, and Taunt checks against it, increasing every 5 ranger levels. May be taken once per ranger bonus-feat level (1st, 5th, 10th, 15th, 20th) for a different creature type each time.',
     prereqs: { classLevels: { ranger: 1 } },
   },
+  // ── Caster feats (added from the wiki's class pages) ──
+  arcanedefenseabj: { name: 'Arcane Defense (Abjuration)', type: 'spellcasting', description: '+2 bonus to saving throws against Abjuration spells.', prereqs: { feats: ['spellfocusabj'] } },
+  arcanedefensecon: { name: 'Arcane Defense (Conjuration)', type: 'spellcasting', description: '+2 bonus to saving throws against Conjuration spells.', prereqs: { feats: ['spellfocuscon'] } },
+  arcanedefensediv: { name: 'Arcane Defense (Divination)', type: 'spellcasting', description: '+2 bonus to saving throws against Divination spells.', prereqs: { feats: ['spellfocusdiv'] } },
+  arcanedefenseenc: { name: 'Arcane Defense (Enchantment)', type: 'spellcasting', description: '+2 bonus to saving throws against Enchantment spells.', prereqs: { feats: ['spellfocusenc'] } },
+  arcanedefenseevo: { name: 'Arcane Defense (Evocation)', type: 'spellcasting', description: '+2 bonus to saving throws against Evocation spells.', prereqs: { feats: ['spellfocusevo'] } },
+  arcanedefensenec: { name: 'Arcane Defense (Necromancy)', type: 'spellcasting', description: '+2 bonus to saving throws against Necromancy spells.', prereqs: { feats: ['spellfocusnec'] } },
+  arcanedefensetrans: { name: 'Arcane Defense (Transmutation)', type: 'spellcasting', description: '+2 bonus to saving throws against Transmutation spells.', prereqs: { feats: ['spellfocustrans'] } },
+  arcanedefenseill: { name: 'Arcane Defense (Illusion)', type: 'spellcasting', description: '+2 bonus to saving throws against Illusion spells.', prereqs: { feats: ['spellfocusill'] } },
+  brewpotion: { name: 'Brew Potion', type: 'general', description: 'Create potions of known single-target spells of 3rd level or lower (costs gold and XP).', prereqs: { casterLevel: 3 }, levelClasses: CASTER_LEVEL_CLASSES },
+  craftwand: { name: 'Craft Wand', type: 'general', description: 'Create wands of known spells of 4th level or lower (costs gold and XP).', prereqs: { casterLevel: 5 }, levelClasses: CASTER_LEVEL_CLASSES },
+  divinemight: { name: 'Divine Might', type: 'general', description: 'Spend a turn attempt to add your Charisma bonus to weapon damage for rounds equal to that bonus.', prereqs: { classFeatures: { turnundead: 'Turn Undead' }, cha: 13, str: 13, feats: ['powerattack'] }, levelClasses: ['blackguard', 'paladin', 'cleric'] },
+  divineshield: { name: 'Divine Shield', type: 'general', description: 'Spend a turn attempt to add your Charisma bonus to Armor Class (dodge) for rounds equal to that bonus.', prereqs: { classFeatures: { turnundead: 'Turn Undead' }, cha: 13, str: 13, feats: ['powerattack'] }, levelClasses: ['blackguard', 'paladin', 'cleric'] },
   // ── Rogue special bonus feats (10th, 13th, 16th, 19th) ──────────────────────
   cripplingstrike: {
     name: 'Crippling Strike',

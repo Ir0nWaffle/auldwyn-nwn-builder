@@ -519,6 +519,8 @@ export default function LevelPlanStep({ onNext, onBack }) {
       const timesTaken = allPlanned.filter(f => baseFeatKey(f) === key).length
       if (timesTaken >= (feat.stackable ?? 1)) return false
       if (feat.autoGranted) return false
+      // Some feats can only be picked while taking a level in particular classes
+      if (feat.levelClasses && !feat.levelClasses.includes(lv.classKey)) return false
       if (feat.firstLevelOnly && i !== 0) return false
       if (featSearch && !feat.name.toLowerCase().includes(featSearch.toLowerCase())) return false
       // Once every remaining slot is needed to cover a class's restricted

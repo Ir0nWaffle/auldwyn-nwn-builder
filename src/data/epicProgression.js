@@ -108,8 +108,6 @@ export function classBonusFeatsAt(classKey, classLevel) {
 //
 // Missing from these pools: a handful of named wiki feats with no equivalent
 // in feats.js/epicFeats.js yet — omitted rather than guessed at:
-//   - Wizard/Sorcerer: Arcane Defense (needs a per-school variant, like Spell
-//     Focus), Brew Potion, Craft Wand
 //   - Champion of Torm: Called Shot, Disarm, Improved Disarm, Improved
 //     Expertise, Improved Parry, Improved Power Attack
 //   - Blackguard: Epic Fiendish Servant (modeled as autoGranted, never
@@ -124,6 +122,7 @@ export const CLASS_BONUS_FEAT_POOL = {
   ],
   rogue: ['cripplingstrike', 'defensiveroll', 'improvedevasion', 'opportunist', 'skillmastery', 'slipperymind'],
   wizard: [
+    'brewpotion', 'craftwand', 'arcanedefenseabj', 'arcanedefensecon', 'arcanedefensediv', 'arcanedefenseenc', 'arcanedefenseevo', 'arcanedefensenec', 'arcanedefensetrans', 'arcanedefenseill',
     'combatcasting', 'empowerspell', 'extendspell', 'maximizespell', 'quickenspell', 'silentspell', 'stillspell',
     'spellfocusabj', 'spellfocuscon', 'spellfocusdiv', 'spellfocusenc', 'spellfocusevo', 'spellfocusnec',
     'spellfocustrans', 'spellfocusill',
@@ -201,6 +200,7 @@ export const EPIC_CLASS_BONUS_FEAT_POOL = {
     'improvedcombatcasting',
   ],
   bard: [
+    'arcanedefenseabj', 'arcanedefensecon', 'arcanedefensediv', 'arcanedefenseenc', 'arcanedefenseevo', 'arcanedefensenec', 'arcanedefensetrans', 'arcanedefenseill',
     'cursesong', 'epicskillfocus', 'epicspellfocus', 'epicwill', 'extramusic', 'greatcharisma', 'greatdexterity',
     'greaterspellfocusabj', 'greaterspellfocuscon', 'greaterspellfocusdiv', 'greaterspellfocusenc',
     'greaterspellfocusevo', 'greaterspellfocusnec', 'greaterspellfocustrans', 'greaterspellfocusill',
