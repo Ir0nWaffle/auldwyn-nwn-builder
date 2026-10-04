@@ -536,16 +536,21 @@ export const SPELL_LISTS = {
     9: ['elementalswarm', 'shambler', 'stormofvengeance', 'summoncreature9'],
   },
 
+  // Per the wiki's Bard page (spells with no entry in SPELLS yet are omitted).
   bard: {
-    0: ['amplify', 'daze', 'flare', 'light', 'resistance'],
-    1: ['charmperson', 'curelightwounds', 'expeditiousretreat', 'identify', 'sleep', 'magicmissile',
-        'summoncreature1', 'truestrike'],
-    2: ['clarity', 'catsgrace', 'invisibilityspell', 'holdperson', 'mirrorimage', 'darknessspell',
-        'eaglessplendor', 'summoncreature2'],
-    3: ['clairaudienceclairvoyance', 'dispelmagic', 'displacement', 'hastespell', 'suggestion', 'summoncreature3'],
-    4: ['dominateanimal', 'freedomofmovement', 'improvedinvisibility', 'summoncreature4'],
-    5: ['mindfog', 'summoncreature5', 'greatercatsgrace'],
-    6: ['dispelmagicgreater', 'masshaste', 'summoncreature6'],
+    0: ['cureminorwounds', 'daze', 'flare', 'light', 'resistance'],
+    1: ['amplify', 'charmperson', 'curelightwounds', 'expeditiousretreat', 'grease', 'identify', 'magearmor',
+        'protectionfromalignment', 'sleep', 'summoncreature1'],
+    2: ['blindnessdeafness', 'bullsstrength', 'catsgrace', 'clarity', 'curemoderatewounds', 'darknessspell',
+        'eaglessplendor', 'foxescunning', 'ghostlyvisage', 'holdperson', 'invisibilityspell', 'owlswisdom',
+        'see_invisible', 'silence', 'soundburst', 'summoncreature2'],
+    3: ['bestowcurse', 'clairaudienceclairvoyance', 'confusion', 'cureseriouswounds', 'dispelmagic', 'displacement',
+        'fearspell', 'gustofwind', 'hastespell', 'invisibilitysphere', 'keenedge', 'magiccircle', 'removecurse',
+        'removedisease', 'slow', 'summoncreature3'],
+    4: ['curecriticalwounds', 'dismissal', 'dominateperson', 'holdmonster', 'improvedinvisibility',
+        'neutralizepoison', 'summoncreature4'],
+    5: ['dispelmagicgreater', 'mindfog', 'summoncreature5'],
+    6: ['masshaste', 'summoncreature6'],
   },
 
   paladin: {

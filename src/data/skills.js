@@ -18,7 +18,6 @@ export const SKILLS = {
   craftarmor:     { name: 'Craft Armor',     ability: 'int', armorCheckPenalty: false },
   craftweapon:    { name: 'Craft Weapon',    ability: 'int', armorCheckPenalty: false },
   crafttrap:      { name: 'Craft Trap',      ability: 'int', armorCheckPenalty: false },
-  diplomacy:      { name: 'Diplomacy',       ability: 'cha', armorCheckPenalty: false },
   disable:        { name: 'Disable Trap',    ability: 'int', armorCheckPenalty: false },
   discipline:     { name: 'Discipline',      ability: 'str', armorCheckPenalty: false },
   heal:           { name: 'Heal',            ability: 'wis', armorCheckPenalty: false },

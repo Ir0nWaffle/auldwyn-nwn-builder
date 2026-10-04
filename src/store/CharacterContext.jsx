@@ -67,7 +67,9 @@ function hydrate(saved) {
     levels: Array.isArray(saved.levels)
       ? saved.levels.map(lv => ({
           classKey: lv.classKey,
-          skills: { ...(lv.skills ?? {}) },
+          // Drop ranks in skills that no longer exist (e.g. the removed
+          // non-NWN "Diplomacy" skill) so old saves/share links still load.
+          skills: Object.fromEntries(Object.entries(lv.skills ?? {}).filter(([k]) => k in SKILLS)),
           feats: Array.isArray(lv.feats) ? lv.feats : [],
           spells: Array.isArray(lv.spells) ? lv.spells : [],
           spellSwaps: Array.isArray(lv.spellSwaps) ? lv.spellSwaps : [],

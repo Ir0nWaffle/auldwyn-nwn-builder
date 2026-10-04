@@ -52,7 +52,6 @@ export const SKILL_ICONS = {
   craftarmor: '🧵',
   craftweapon: '⚒️',
   crafttrap: '🧰',
-  diplomacy: '🤝',
   disable: '🧨',
   discipline: '💪',
   heal: '✚',
